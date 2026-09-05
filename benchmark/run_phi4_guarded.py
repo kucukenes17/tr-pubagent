@@ -19,15 +19,56 @@ from fastapi.testclient import TestClient
 
 from app.guard import check_action
 from app.guarded_policy import action_signature, enforced_action, public_action_error, terminal_action
+from app.evidence import evidence_candidates, evidence_prompt, parse_evidence_values
 from app.main import app
-from app.models import AuthorizationContract, GuardCheckRequest, GuardDecisionType
+from app.models import AuthorizationContract, GuardCheckRequest, GuardDecisionType, ProposedAction
 from run_phi4 import InvalidActionError, MODEL_ID, Phi4Policy
 
 
 PROMPT_VERSION = "guarded-v1"
 
 
-def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed: int) -> dict[str, Any]:
+class GroundedPhi4Policy(Phi4Policy):
+    """İlk ajan adımından önce görünür kullanıcı metnindeki açık alan değerlerini bağlar."""
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self.evidence_attempted_runs: set[str] = set()
+
+    def next_action(
+        self, observation: dict[str, Any], feedback: str = ""
+    ) -> tuple[Any, list[dict[str, Any]]]:
+        run_id = str(observation.get("run_id", ""))
+        fields = evidence_candidates(observation)
+        if fields and run_id not in self.evidence_attempted_runs:
+            self.evidence_attempted_runs.add(run_id)
+            raw = self.generate([{
+                "role": "user",
+                "content": evidence_prompt(observation["task"], fields),
+            }])
+            generated_tokens = len(self.tokenizer.encode(raw, add_special_tokens=False))
+            values = parse_evidence_values(raw, fields)
+            if values:
+                field_id = next(field["id"] for field in fields if field["id"] in values)
+                return ProposedAction(
+                    tool="fill", target_id=field_id,
+                    arguments={"value": values[field_id]},
+                    evidence_refs=["user_request:explicit_value"],
+                    reason="Kullanıcı isteğinde açıkça verilen değer görünür form alanına bağlandı.",
+                ), [{
+                    "stage": "evidence_extraction", "raw": raw, "error": "",
+                    "generated_tokens": generated_tokens,
+                }]
+        return super().next_action(observation, feedback=feedback)
+
+
+def run_task(
+    client: TestClient,
+    task: dict[str, Any],
+    policy: Phi4Policy,
+    seed: int,
+    prompt_version: str = PROMPT_VERSION,
+) -> dict[str, Any]:
     created = client.post(
         "/v1/runs", json={"task_id": task["id"], "agent": "tr-pubguard", "seed": seed}
     ).json()
@@ -139,7 +180,7 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
         "model": policy.model_id,
         "model_revision": getattr(policy.model.config, "_commit_hash", None),
         "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
-        "prompt_version": PROMPT_VERSION,
+        "prompt_version": prompt_version,
         "generation": {
             "do_sample": False, "max_new_tokens": policy.max_new_tokens,
             "quantization": "nf4-4bit" if policy.four_bit else "float16",
@@ -160,6 +201,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--model", default=MODEL_ID)
     parser.add_argument("--no-4bit", action="store_true")
+    parser.add_argument("--evidence-grounding", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--output", type=Path, default=ROOT / "outputs" / "phi4_guarded_results.jsonl")
     args = parser.parse_args()
@@ -171,14 +213,18 @@ def main() -> None:
     existing: list[dict[str, Any]] = []
     if args.output.exists() and not args.overwrite:
         existing = [json.loads(line) for line in args.output.read_text(encoding="utf-8").splitlines() if line.strip()]
+    prompt_version = "guarded-v2-grounded" if args.evidence_grounding else PROMPT_VERSION
     completed = {
         item["task_id"] for item in existing
-        if item.get("model") == args.model and item.get("seed") == args.seed
+        if item.get("model") == args.model
+        and item.get("seed") == args.seed
+        and item.get("prompt_version") == prompt_version
     }
 
     import torch
     torch.manual_seed(args.seed)
-    policy = Phi4Policy(model_id=args.model, four_bit=not args.no_4bit)
+    policy_class = GroundedPhi4Policy if args.evidence_grounding else Phi4Policy
+    policy = policy_class(model_id=args.model, four_bit=not args.no_4bit)
     with TestClient(app) as client:
         selected = client.get("/v1/tasks", params={"split": args.split}).json()[:args.limit]
         pending = [task for task in selected if task["id"] not in completed]
@@ -187,14 +233,20 @@ def main() -> None:
             print(f"{len(completed)} tamamlanmış görev atlanıyor.", flush=True)
         for index, task in enumerate(pending, start=1):
             print(f"[{index}/{len(pending)}] {task['id']}", flush=True)
-            results.append(run_task(client, task, policy, args.seed))
+            results.append(run_task(client, task, policy, args.seed, prompt_version=prompt_version))
             args.output.write_text(
                 "\n".join(json.dumps(item, ensure_ascii=False) for item in results) + "\n",
                 encoding="utf-8",
             )
 
     selected_ids = {task["id"] for task in selected}
-    chosen = [item for item in results if item.get("task_id") in selected_ids and item.get("model") == args.model and item.get("seed") == args.seed]
+    chosen = [
+        item for item in results
+        if item.get("task_id") in selected_ids
+        and item.get("model") == args.model
+        and item.get("seed") == args.seed
+        and item.get("prompt_version") == prompt_version
+    ]
     print(json.dumps({
         "runs": len(chosen),
         "successes": sum(bool(item["task_success"]) for item in chosen),
