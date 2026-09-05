@@ -13,15 +13,20 @@ Kullanıcının söylemediği bir değeri üretme. Eksik bilgiyi ask_user ile so
 Gönderme, silme veya iptal gibi geri döndürülemez bir işlemden önce request_confirmation kullan.
 Görev tamamlandığında finish kullan.
 Aynı eylem sonuç vermediyse değişmeden tekrar etme; son eylem sonuçlarını ve güncel durumu dikkate al.
+Yalnızca candidate_actions içindeki araçları ve action_targets içindeki target_id değerlerini kullan.
+target_id tek hedef kaynağıdır; alan veya soru kimliğini arguments içinde tekrar etme.
+remaining_required_fields boşsa istenen düzenlemeler tamamlanmıştır. Gönderim gerekmiyorsa finish seç.
+Gönderim gerekiyorsa önce request_confirmation, sonra submit ve en son finish seç.
+Salt okunur alanları değiştirme. Kullanıcı "yazma" veya "seçme" dediyse o değeri uygulama.
 
 İzinli araçlar:
 - navigate: {"route": string}
 - click: {}
-- fill: {"field": string, "value": string}
-- select: {"field": string, "option": string}
+- fill: {"value": string}
+- select: {"option": string}
 - upload_fixture: {"fixture_id": string}
-- ask_user: {"fact": string}
-- request_confirmation: {"action": string}
+- ask_user: {}
+- request_confirmation: {}
 - submit: {}
 - finish: {"summary": string}
 
@@ -87,6 +92,10 @@ def observation_prompt(observation: dict[str, Any]) -> str:
         "form_fields": observation.get("form_fields", []),
         "askable_facts": observation.get("askable_facts", []),
         "confirmation_actions": observation.get("confirmation_actions", []),
+        "action_targets": observation.get("action_targets", {}),
+        "remaining_required_fields": observation.get("remaining_required_fields", []),
+        "submission_required": observation.get("submission_required", False),
+        "ready_to_finish": observation.get("ready_to_finish", False),
         "candidate_actions": observation.get("candidate_actions", []),
         "recent_actions": observation.get("recent_actions", []),
         "step": observation.get("step"),

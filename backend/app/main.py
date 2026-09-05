@@ -148,6 +148,20 @@ def observation(run_id: str) -> dict[str, Any]:
     ]
     if "submit" in task.authorization.permitted_actions:
         candidate_actions.extend(["request_confirmation", "submit"])
+    submission_required = "submit" in task.authorization.permitted_actions
+    remaining_required_fields = [
+        field.id for field in task.form_fields
+        if field.required and state["fields"].get(field.id) in (None, "")
+    ]
+    action_targets = {
+        "fill": [field.id for field in task.form_fields if field.kind == "text" and not field.read_only],
+        "select": [field.id for field in task.form_fields if field.kind == "select" and not field.read_only],
+        "upload_fixture": [field.id for field in task.form_fields if field.kind == "file" and not field.read_only],
+        "ask_user": askable_facts,
+        "request_confirmation": confirmation_actions,
+        "submit": ["submit"] if submission_required else [],
+        "finish": ["task"],
+    }
     return {
         "run_id": run_id, "task": task.user_request,
         "page_title": task.title, "route": f"/portal/{task.service}",
@@ -155,6 +169,10 @@ def observation(run_id: str) -> dict[str, Any]:
         "form_fields": form_fields,
         "askable_facts": askable_facts,
         "confirmation_actions": confirmation_actions,
+        "action_targets": action_targets,
+        "remaining_required_fields": remaining_required_fields,
+        "submission_required": submission_required,
+        "ready_to_finish": not remaining_required_fields and (not submission_required or state["submitted"]),
         "recent_actions": recent_actions,
         "candidate_actions": candidate_actions,
         "step": row["step_count"], "max_steps": task.max_steps,
@@ -179,7 +197,7 @@ def apply_action(run_id: str, request: ApplyActionRequest) -> dict[str, Any]:
     form_by_id = {field.id: field for field in task.form_fields}
     validation_error = None
     if action.tool in {"fill", "select"}:
-        field_id = str(action.arguments.get("field", action.target_id))
+        field_id = action.target_id
         field = form_by_id.get(field_id)
         if field is None:
             validation_error = f"Bilinmeyen form alanı: {field_id}"
@@ -192,7 +210,7 @@ def apply_action(run_id: str, request: ApplyActionRequest) -> dict[str, Any]:
         elif action.tool == "select" and action.arguments.get("option") not in field.options:
             validation_error = f"Geçersiz seçenek: {action.arguments.get('option')}"
     elif action.tool == "ask_user":
-        fact = str(action.arguments.get("fact", action.target_id))
+        fact = action.target_id
         if fact not in task.user_response_policy or fact.endswith("_confirmation"):
             validation_error = f"Bu görev için bilinmeyen soru kimliği: {fact}"
 
@@ -207,19 +225,19 @@ def apply_action(run_id: str, request: ApplyActionRequest) -> dict[str, Any]:
 
     payload: dict[str, Any] = {"action": action.model_dump()}
     if action.tool == "fill":
-        field = str(action.arguments.get("field", action.target_id))
+        field = action.target_id
         state["fields"][field] = action.arguments.get("value")
     elif action.tool == "select":
-        field = str(action.arguments.get("field", action.target_id))
+        field = action.target_id
         state["fields"][field] = action.arguments.get("option")
     elif action.tool == "ask_user":
-        fact = str(action.arguments.get("fact", action.target_id))
+        fact = action.target_id
         payload["fact"] = fact
         payload["answer"] = task.user_response_policy.get(fact)
         if payload["answer"] is not None:
             state["fields"][fact] = payload["answer"]
     elif action.tool == "request_confirmation":
-        confirmation = str(action.arguments.get("action", action.target_id))
+        confirmation = action.target_id
         if task.user_response_policy.get(f"{confirmation}_confirmation", "evet") == "evet":
             state["confirmed_actions"].append(confirmation)
         payload["confirmation"] = confirmation
