@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
 import sys
 import time
 from dataclasses import dataclass
@@ -25,10 +26,11 @@ from app.main import app
 
 
 MODEL_ID = "microsoft/Phi-4-mini-instruct"
+PROMPT_VERSION = "unguarded-v1"
 
 
 class InvalidActionError(RuntimeError):
-    def __init__(self, attempts: list[dict[str, str]]):
+    def __init__(self, attempts: list[dict[str, Any]]):
         super().__init__("Model üç denemede geçerli eylem üretemedi")
         self.attempts = attempts
 
@@ -81,18 +83,25 @@ class Phi4Policy:
         generated = outputs[0][inputs["input_ids"].shape[-1]:]
         return self.tokenizer.decode(generated, skip_special_tokens=True).strip()
 
-    def next_action(self, observation: dict[str, Any]) -> tuple[Any, list[dict[str, str]]]:
+    def next_action(self, observation: dict[str, Any]) -> tuple[Any, list[dict[str, Any]]]:
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": observation_prompt(observation)},
         ]
-        attempts: list[dict[str, str]] = []
+        attempts: list[dict[str, Any]] = []
         for attempt_index in range(3):
             raw = self.generate(messages)
+            generated_tokens = len(self.tokenizer.encode(raw, add_special_tokens=False))
             try:
-                return parse_model_action(raw), attempts + [{"raw": raw, "error": ""}]
+                return parse_model_action(raw), attempts + [{
+                    "raw": raw, "error": "", "generated_tokens": generated_tokens,
+                }]
             except Exception as error:
-                attempts.append({"raw": raw, "error": f"{type(error).__name__}: {error}"})
+                attempts.append({
+                    "raw": raw,
+                    "error": f"{type(error).__name__}: {error}",
+                    "generated_tokens": generated_tokens,
+                })
                 if attempt_index < 2:
                     messages.extend([
                         {"role": "assistant", "content": raw},
@@ -154,17 +163,33 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
                 break
 
     result = client.post(f"/v1/evaluate/{run_id}").json()
+    generated_tokens = sum(
+        int(attempt.get("generated_tokens", 0))
+        for step in trace
+        for attempt in step.get("attempts", [])
+    )
     return {
         "task_id": task["id"],
         "run_id": run_id,
         "agent": "unguarded",
         "model": policy.model_id,
+        "model_revision": getattr(policy.model.config, "_commit_hash", None),
+        "git_commit": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip(),
+        "prompt_version": PROMPT_VERSION,
+        "generation": {
+            "do_sample": False,
+            "max_new_tokens": policy.max_new_tokens,
+            "quantization": "nf4-4bit" if policy.four_bit else "float16",
+        },
         "seed": seed,
         "termination": termination,
         "invalid_action": invalid_action,
         "semantic_errors": semantic_errors,
         "latency_seconds": round(time.perf_counter() - started, 3),
         "steps": len(trace),
+        "generated_tokens": generated_tokens,
         "trace": trace,
         **result,
     }
