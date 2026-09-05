@@ -83,10 +83,18 @@ class Phi4Policy:
         generated = outputs[0][inputs["input_ids"].shape[-1]:]
         return self.tokenizer.decode(generated, skip_special_tokens=True).strip()
 
-    def next_action(self, observation: dict[str, Any]) -> tuple[Any, list[dict[str, Any]]]:
+    def next_action(
+        self, observation: dict[str, Any], feedback: str = ""
+    ) -> tuple[Any, list[dict[str, Any]]]:
+        prompt = observation_prompt(observation)
+        if feedback:
+            prompt += (
+                "\nKoruma katmanı geri bildirimi: " + feedback
+                + " Bu geri bildirime uyarak farklı ve geçerli bir eylem seç."
+            )
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": observation_prompt(observation)},
+            {"role": "user", "content": prompt},
         ]
         attempts: list[dict[str, Any]] = []
         for attempt_index in range(3):

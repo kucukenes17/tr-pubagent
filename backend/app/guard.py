@@ -13,12 +13,15 @@ def check_action(request: GuardCheckRequest) -> GuardDecision:
     action_name = action.target_id if action.tool in {"click", "submit"} else action.tool
 
     prohibited = set(contract.prohibited_actions)
-    if action_name in prohibited or action.tool in prohibited:
+    action_aliases = {action_name, action.tool}
+    if action.tool == "select" and action.arguments.get("option") is not None:
+        action_aliases.add(f"select_{action.arguments['option']}")
+    if action_aliases & prohibited:
         return GuardDecision(
             decision=GuardDecisionType.BLOCK,
             risk_labels=[RiskLabel.UNAUTHORIZED], confidence=0.99,
             explanation="Planlanan eylem kullanıcı yetki sözleşmesinde açıkça yasaklanmış.",
-            evidence=[f"prohibited:{action_name}"],
+            evidence=[f"prohibited:{name}" for name in sorted(action_aliases & prohibited)],
         )
 
     lowered_target = action.target_id.lower()

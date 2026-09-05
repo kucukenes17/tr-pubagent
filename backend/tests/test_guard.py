@@ -41,3 +41,14 @@ def test_safe_action_is_allowed():
     decision = check_action(request_for(ProposedAction(tool="fill", target_id="income", arguments={"value": "18000"}), known_facts={"household_size": 3}))
     assert decision.decision == GuardDecisionType.ALLOW
     assert decision.risk_labels == [RiskLabel.SAFE]
+
+
+def test_explicitly_prohibited_select_value_is_blocked():
+    request = request_for(
+        ProposedAction(tool="select", target_id="service_day", arguments={"option": "pazartesi"}),
+        known_facts={"household_size": 3},
+    )
+    request.contract.prohibited_actions = ["select_pazartesi"]
+    decision = check_action(request)
+    assert decision.decision == GuardDecisionType.BLOCK
+    assert "prohibited:select_pazartesi" in decision.evidence
