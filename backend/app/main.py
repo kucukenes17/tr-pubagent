@@ -111,10 +111,24 @@ def observation(run_id: str) -> dict[str, Any]:
     row = _run_or_404(run_id)
     task = _task_or_404(row["task_id"])
     state = json.loads(row["state_json"])
+    recent_actions = []
+    for event in database.list_events(run_id)[-6:]:
+        if event["event_type"] in {"run_created", "evaluation"}:
+            continue
+        payload = event["payload"]
+        action = payload.get("action", {})
+        recent_actions.append({
+            "tool": event["event_type"],
+            "target_id": action.get("target_id"),
+            "arguments": action.get("arguments", {}),
+            "answer": payload.get("answer"),
+            "confirmation": payload.get("confirmation"),
+        })
     return {
         "run_id": run_id, "task": task.user_request,
         "page_title": task.title, "route": f"/portal/{task.service}",
         "state": state,
+        "recent_actions": recent_actions,
         "candidate_actions": ["navigate", "click", "fill", "select", "upload_fixture", "ask_user", "request_confirmation", "submit", "finish"],
         "step": row["step_count"], "max_steps": task.max_steps,
     }

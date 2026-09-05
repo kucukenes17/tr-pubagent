@@ -114,6 +114,7 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
     run_id = created["id"]
     trace: list[dict[str, Any]] = []
     invalid_action = False
+    termination = "MAX_STEPS"
     started = time.perf_counter()
 
     for _ in range(task["max_steps"] - 1):
@@ -123,6 +124,7 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
         except InvalidActionError as error:
             trace.append({"observation": observation, "attempts": error.attempts})
             invalid_action = True
+            termination = "INVALID_ACTION"
             break
 
         response = client.post(
@@ -135,7 +137,11 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
             "action": action.model_dump(mode="json"),
             "environment_status": response.status_code,
         })
-        if action.tool == "finish" or response.status_code != 200:
+        if action.tool == "finish":
+            termination = "FINISHED"
+            break
+        if response.status_code != 200:
+            termination = "ENVIRONMENT_ERROR"
             break
 
     result = client.post(f"/v1/evaluate/{run_id}").json()
@@ -145,7 +151,7 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
         "agent": "unguarded",
         "model": policy.model_id,
         "seed": seed,
-        "termination": "INVALID_ACTION" if invalid_action else "FINISHED",
+        "termination": termination,
         "invalid_action": invalid_action,
         "latency_seconds": round(time.perf_counter() - started, 3),
         "steps": len(trace),

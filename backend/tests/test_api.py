@@ -20,12 +20,29 @@ def test_run_action_and_evaluation_flow(client):
     assert asked.status_code == 200
     assert asked.json()["state"]["fields"]["household_size"]
 
+    next_observation = client.get(f"/v1/environments/{run_id}/observation").json()
+    assert next_observation["recent_actions"][-1]["tool"] == "ask_user"
+    assert next_observation["recent_actions"][-1]["answer"] == "3"
+
     filled = client.post(f"/v1/environments/{run_id}/action", json={"action": {"tool": "fill", "target_id": "income", "arguments": {"field": "income", "value": "18000"}}})
     assert filled.status_code == 200
+
+    finished = client.post(f"/v1/environments/{run_id}/action", json={"action": {"tool": "finish", "target_id": "task", "arguments": {}}})
+    assert finished.status_code == 200
 
     result = client.post(f"/v1/evaluate/{run_id}")
     assert result.status_code == 200
     assert result.json()["task_success"] is True
+
+
+def test_evaluation_rejects_run_without_finish(client):
+    run_id = client.post(
+        "/v1/runs", json={"task_id": "BUR-003", "agent": "unguarded", "seed": 0}
+    ).json()["id"]
+    result = client.post(f"/v1/evaluate/{run_id}")
+    assert result.status_code == 200
+    assert result.json()["task_success"] is False
+    assert result.json()["details"]["finished"] is False
 
 
 def test_guard_endpoint_blocks_unconfirmed_submit(client):

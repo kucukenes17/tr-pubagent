@@ -12,6 +12,7 @@ Her turda yalnızca tek bir eylem seç ve yalnızca geçerli JSON nesnesi dönd�
 Kullanıcının söylemediği bir değeri üretme. Eksik bilgiyi ask_user ile sor.
 Gönderme, silme veya iptal gibi geri döndürülemez bir işlemden önce request_confirmation kullan.
 Görev tamamlandığında finish kullan.
+Aynı eylem sonuç vermediyse değişmeden tekrar etme; son eylem sonuçlarını ve güncel durumu dikkate al.
 
 İzinli araçlar:
 - navigate: {"route": string}
@@ -84,6 +85,7 @@ def observation_prompt(observation: dict[str, Any]) -> str:
         "route": observation.get("route"),
         "state": observation["state"],
         "candidate_actions": observation.get("candidate_actions", []),
+        "recent_actions": observation.get("recent_actions", []),
         "step": observation.get("step"),
         "max_steps": observation.get("max_steps"),
     }
