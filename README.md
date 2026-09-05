@@ -90,7 +90,7 @@ cd backend
 pytest --cov=app --cov-report=term-missing
 ```
 
-Temel deney protokolü ve başarı eşikleri [docs/RESEARCH_PROTOCOL.md](docs/RESEARCH_PROTOCOL.md) içindedir.
+Temel deney protokolü ve başarı eşikleri [docs/RESEARCH_PROTOCOL.md](docs/RESEARCH_PROTOCOL.md), ilk Colab deneyinin sayısal özeti ve doğru yorumlanması ise [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md) içindedir.
 
 ## Araştırma etiği
 
