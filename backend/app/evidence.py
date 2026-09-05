@@ -55,6 +55,8 @@ def parse_evidence_values(
         return {}
 
     allowed = {field["id"]: field for field in fields}
+    if set(payload) >= {"id", "value"} and payload.get("id") in allowed:
+        payload = {str(payload["id"]): payload["value"]}
     values: dict[str, str] = {}
     for field_id, value in payload.items():
         if field_id not in allowed or not isinstance(value, (str, int, float)):

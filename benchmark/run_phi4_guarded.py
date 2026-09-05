@@ -33,28 +33,34 @@ class GroundedPhi4Policy(Phi4Policy):
 
     def __post_init__(self) -> None:
         super().__post_init__()
-        self.evidence_attempted_runs: set[str] = set()
-        self.evidence_diagnostics: dict[str, dict[str, Any]] = {}
+        self.evidence_attempted_states: set[str] = set()
+        self.evidence_diagnostics: dict[str, list[dict[str, Any]]] = {}
 
     def next_action(
         self, observation: dict[str, Any], feedback: str = ""
     ) -> tuple[Any, list[dict[str, Any]]]:
         run_id = str(observation.get("run_id", ""))
         fields = evidence_candidates(observation)
-        if fields and run_id not in self.evidence_attempted_runs:
-            self.evidence_attempted_runs.add(run_id)
+        attempt_key = json.dumps({
+            "run_id": run_id,
+            "fields": [field["id"] for field in fields],
+            "known_fields": observation.get("state", {}).get("fields", {}),
+        }, ensure_ascii=False, sort_keys=True)
+        if fields and attempt_key not in self.evidence_attempted_states:
+            self.evidence_attempted_states.add(attempt_key)
             raw = self.generate([{
                 "role": "user",
                 "content": evidence_prompt(observation["task"], fields),
             }])
             generated_tokens = len(self.tokenizer.encode(raw, add_special_tokens=False))
             values = parse_evidence_values(raw, fields)
-            self.evidence_diagnostics[run_id] = {
+            diagnostic = {
                 "candidates": fields,
                 "raw": raw,
                 "parsed_values": values,
                 "generated_tokens": generated_tokens,
             }
+            self.evidence_diagnostics.setdefault(run_id, []).append(diagnostic)
             if values:
                 field_id = next(field["id"] for field in fields if field["id"] in values)
                 return ProposedAction(
@@ -178,14 +184,15 @@ def run_task(
             break
 
     result = client.post(f"/v1/evaluate/{run_id}").json()
-    evidence_diagnostic = getattr(policy, "evidence_diagnostics", {}).get(run_id)
+    evidence_diagnostic = getattr(policy, "evidence_diagnostics", {}).get(run_id, [])
     generated_tokens = sum(
         int(attempt.get("generated_tokens", 0))
         for step in trace for attempt in step.get("attempts", [])
         if attempt.get("stage") != "evidence_extraction"
     )
-    if evidence_diagnostic:
-        generated_tokens += int(evidence_diagnostic.get("generated_tokens", 0))
+    generated_tokens += sum(
+        int(item.get("generated_tokens", 0)) for item in evidence_diagnostic
+    )
     return {
         "task_id": task["id"], "run_id": run_id, "agent": "tr-pubguard",
         "model": policy.model_id,
@@ -226,7 +233,7 @@ def main() -> None:
     existing: list[dict[str, Any]] = []
     if args.output.exists() and not args.overwrite:
         existing = [json.loads(line) for line in args.output.read_text(encoding="utf-8").splitlines() if line.strip()]
-    prompt_version = "guarded-v2-grounded" if args.evidence_grounding else PROMPT_VERSION
+    prompt_version = "guarded-v2.1-grounded" if args.evidence_grounding else PROMPT_VERSION
     completed = {
         item["task_id"] for item in existing
         if item.get("model") == args.model

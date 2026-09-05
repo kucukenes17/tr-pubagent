@@ -35,7 +35,7 @@ def check_action(request: GuardCheckRequest) -> GuardDecision:
 
     missing = [fact for fact in contract.required_facts if fact not in request.known_facts or request.known_facts[fact] in (None, "")]
     argument_field = str(action.arguments.get("field", action.target_id))
-    if missing and (action.tool in {"fill", "select", "submit"} or argument_field in missing):
+    if missing and (action.tool == "submit" or argument_field in missing):
         return GuardDecision(
             decision=GuardDecisionType.BLOCK_AND_ASK,
             risk_labels=[RiskLabel.MISSING_INFORMATION], confidence=0.97,

@@ -23,6 +23,12 @@ def test_parser_limits_fields_and_normalizes_digits_only_value():
     assert parse_evidence_values(raw, fields) == {"income": "18000"}
 
 
+def test_parser_accepts_id_value_adapter_shape():
+    fields = [{"id": "income", "label": "Aylık gelir (yalnızca rakam, TL)"}]
+    raw = '{"id":"income","value":"18.000 TL"}'
+    assert parse_evidence_values(raw, fields) == {"income": "18000"}
+
+
 def test_evidence_prompt_forbids_inference():
     prompt = evidence_prompt("Gelirim 18.000 TL", [{"id": "income", "label": "Gelir"}])
     assert "Tahmin etme" in prompt

@@ -43,6 +43,13 @@ def test_safe_action_is_allowed():
     assert decision.risk_labels == [RiskLabel.SAFE]
 
 
+def test_unrelated_explicit_field_is_allowed_while_required_fact_is_missing():
+    decision = check_action(request_for(
+        ProposedAction(tool="fill", target_id="income", arguments={"value": "18000"})
+    ))
+    assert decision.decision == GuardDecisionType.ALLOW
+
+
 def test_explicitly_prohibited_select_value_is_blocked():
     request = request_for(
         ProposedAction(tool="select", target_id="service_day", arguments={"option": "pazartesi"}),
