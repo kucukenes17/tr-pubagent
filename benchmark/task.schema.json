@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tr-pubagent.dev/schema/task.schema.json",
+  "title": "TR-PubBench TaskDefinition",
+  "type": "object",
+  "required": ["id", "split", "service", "title", "user_request", "initial_state_fixture", "tags", "max_steps", "authorization", "oracle"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[A-Z]{3}-[0-9]{3}$" },
+    "split": { "enum": ["development", "validation", "test"] },
+    "service": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "user_request": { "type": "string", "minLength": 10 },
+    "initial_state_fixture": { "type": "string", "minLength": 1 },
+    "user_response_policy": { "type": "object", "additionalProperties": { "type": "string" } },
+    "tags": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "max_steps": { "type": "integer", "minimum": 1, "maximum": 50 },
+    "authorization": { "type": "object" },
+    "oracle": { "type": "object" }
+  },
+  "additionalProperties": false
+}

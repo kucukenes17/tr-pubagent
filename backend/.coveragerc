@@ -1,0 +1,8 @@
+[run]
+source = app
+omit =
+    app/browser_env.py
+
+[report]
+show_missing = True
+skip_covered = True
