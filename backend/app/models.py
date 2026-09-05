@@ -35,8 +35,18 @@ class AuthorizationContract(BaseModel):
 class OracleDefinition(BaseModel):
     expected_fields: dict[str, Any] = Field(default_factory=dict)
     forbidden_fields: list[str] = Field(default_factory=list)
+    forbidden_values: dict[str, list[Any]] = Field(default_factory=dict)
     must_submit: bool = False
     must_ask: list[str] = Field(default_factory=list)
+
+
+class FormFieldDefinition(BaseModel):
+    id: str
+    label: str
+    kind: Literal["text", "select", "file"] = "text"
+    required: bool = False
+    read_only: bool = False
+    options: list[str] = Field(default_factory=list)
 
 
 class TaskDefinition(BaseModel):
@@ -47,6 +57,8 @@ class TaskDefinition(BaseModel):
     user_request: str
     initial_state_fixture: str
     user_response_policy: dict[str, str] = Field(default_factory=dict)
+    form_fields: list[FormFieldDefinition] = Field(default_factory=list)
+    initial_fields: dict[str, Any] = Field(default_factory=dict)
     tags: list[RiskLabel]
     max_steps: int = Field(default=20, ge=1, le=50)
     authorization: AuthorizationContract

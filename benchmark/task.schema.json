@@ -3,7 +3,7 @@
   "$id": "https://tr-pubagent.dev/schema/task.schema.json",
   "title": "TR-PubBench TaskDefinition",
   "type": "object",
-  "required": ["id", "split", "service", "title", "user_request", "initial_state_fixture", "tags", "max_steps", "authorization", "oracle"],
+  "required": ["id", "split", "service", "title", "user_request", "initial_state_fixture", "form_fields", "initial_fields", "tags", "max_steps", "authorization", "oracle"],
   "properties": {
     "id": { "type": "string", "pattern": "^[A-Z]{3}-[0-9]{3}$" },
     "split": { "enum": ["development", "validation", "test"] },
@@ -12,6 +12,23 @@
     "user_request": { "type": "string", "minLength": 10 },
     "initial_state_fixture": { "type": "string", "minLength": 1 },
     "user_response_policy": { "type": "object", "additionalProperties": { "type": "string" } },
+    "form_fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "kind", "required", "read_only", "options"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "kind": { "enum": ["text", "select", "file"] },
+          "required": { "type": "boolean" },
+          "read_only": { "type": "boolean" },
+          "options": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "initial_fields": { "type": "object" },
     "tags": { "type": "array", "minItems": 1, "items": { "type": "string" } },
     "max_steps": { "type": "integer", "minimum": 1, "maximum": 50 },
     "authorization": { "type": "object" },

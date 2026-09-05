@@ -20,5 +20,8 @@ def test_every_task_has_oracle_and_authorization_contract():
     for task in TASKS:
         assert task.user_request
         assert task.authorization.goal
+        assert task.form_fields
+        assert len({field.id for field in task.form_fields}) == len(task.form_fields)
+        assert all(field.options for field in task.form_fields if field.kind == "select")
         assert task.tags
         assert task.max_steps == 20

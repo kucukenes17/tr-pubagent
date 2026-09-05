@@ -76,7 +76,7 @@ def create_run(request: CreateRunRequest) -> RunRecord:
     task = _task_or_404(request.task_id)
     run_id = uuid.uuid4().hex
     state = {
-        "fields": {}, "submitted": False, "state_reset": False,
+        "fields": dict(task.initial_fields), "submitted": False, "state_reset": False,
         "confirmed_actions": [], "fixture": task.initial_state_fixture,
     }
     database.create_run(run_id, task.id, request.agent, request.seed, state)
@@ -123,13 +123,40 @@ def observation(run_id: str) -> dict[str, Any]:
             "arguments": action.get("arguments", {}),
             "answer": payload.get("answer"),
             "confirmation": payload.get("confirmation"),
+            "error": payload.get("error"),
         })
+    form_fields = [
+        {**field.model_dump(mode="json"), "value": state["fields"].get(field.id)}
+        for field in task.form_fields
+    ]
+    candidate_actions = ["finish"]
+    if any(field.kind == "text" and not field.read_only for field in task.form_fields):
+        candidate_actions.append("fill")
+    if any(field.kind == "select" for field in task.form_fields):
+        candidate_actions.append("select")
+    if any(field.kind == "file" for field in task.form_fields):
+        candidate_actions.append("upload_fixture")
+    askable_facts = [
+        fact for fact in task.user_response_policy
+        if not fact.endswith("_confirmation")
+    ]
+    if askable_facts:
+        candidate_actions.append("ask_user")
+    confirmation_actions = [
+        gate for gate in task.authorization.confirmation_gates
+        if gate in task.authorization.permitted_actions
+    ]
+    if "submit" in task.authorization.permitted_actions:
+        candidate_actions.extend(["request_confirmation", "submit"])
     return {
         "run_id": run_id, "task": task.user_request,
         "page_title": task.title, "route": f"/portal/{task.service}",
         "state": state,
+        "form_fields": form_fields,
+        "askable_facts": askable_facts,
+        "confirmation_actions": confirmation_actions,
         "recent_actions": recent_actions,
-        "candidate_actions": ["navigate", "click", "fill", "select", "upload_fixture", "ask_user", "request_confirmation", "submit", "finish"],
+        "candidate_actions": candidate_actions,
         "step": row["step_count"], "max_steps": task.max_steps,
     }
 
@@ -148,6 +175,35 @@ def apply_action(run_id: str, request: ApplyActionRequest) -> dict[str, Any]:
     if guard and guard.decision != GuardDecisionType.ALLOW:
         database.append_event(run_id, "guard_block", {"action": action.model_dump(), "decision": guard.model_dump(mode="json")}, state)
         return {"applied": False, "state": state, "guard": guard}
+
+    form_by_id = {field.id: field for field in task.form_fields}
+    validation_error = None
+    if action.tool in {"fill", "select"}:
+        field_id = str(action.arguments.get("field", action.target_id))
+        field = form_by_id.get(field_id)
+        if field is None:
+            validation_error = f"Bilinmeyen form alanı: {field_id}"
+        elif action.tool == "fill" and field.kind != "text":
+            validation_error = f"{field_id} alanı fill aracını desteklemiyor"
+        elif field.read_only:
+            validation_error = f"{field_id} alanı salt okunur"
+        elif action.tool == "select" and field.kind != "select":
+            validation_error = f"{field_id} alanı select aracını desteklemiyor"
+        elif action.tool == "select" and action.arguments.get("option") not in field.options:
+            validation_error = f"Geçersiz seçenek: {action.arguments.get('option')}"
+    elif action.tool == "ask_user":
+        fact = str(action.arguments.get("fact", action.target_id))
+        if fact not in task.user_response_policy or fact.endswith("_confirmation"):
+            validation_error = f"Bu görev için bilinmeyen soru kimliği: {fact}"
+
+    if validation_error:
+        step = database.append_event(
+            run_id,
+            "invalid_action",
+            {"action": action.model_dump(), "error": validation_error},
+            state,
+        )
+        return {"applied": False, "step": step, "state": state, "error": validation_error}
 
     payload: dict[str, Any] = {"action": action.model_dump()}
     if action.tool == "fill":

@@ -114,6 +114,7 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
     run_id = created["id"]
     trace: list[dict[str, Any]] = []
     invalid_action = False
+    semantic_errors = 0
     termination = "MAX_STEPS"
     started = time.perf_counter()
 
@@ -131,11 +132,13 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
             f"/v1/environments/{run_id}/action",
             json={"action": action.model_dump(mode="json")},
         )
+        environment_result = response.json() if response.status_code == 200 else {"error": response.text}
         trace.append({
             "observation": observation,
             "attempts": attempts,
             "action": action.model_dump(mode="json"),
             "environment_status": response.status_code,
+            "environment_result": environment_result,
         })
         if action.tool == "finish":
             termination = "FINISHED"
@@ -143,6 +146,12 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
         if response.status_code != 200:
             termination = "ENVIRONMENT_ERROR"
             break
+        if not environment_result.get("applied", True) and environment_result.get("error"):
+            semantic_errors += 1
+            if semantic_errors >= 3:
+                invalid_action = True
+                termination = "INVALID_ACTION"
+                break
 
     result = client.post(f"/v1/evaluate/{run_id}").json()
     return {
@@ -153,6 +162,7 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
         "seed": seed,
         "termination": termination,
         "invalid_action": invalid_action,
+        "semantic_errors": semantic_errors,
         "latency_seconds": round(time.perf_counter() - started, 3),
         "steps": len(trace),
         "trace": trace,
