@@ -21,7 +21,7 @@ from app.guard import check_action
 from app.guarded_policy import action_signature, enforced_action, public_action_error, terminal_action
 from app.main import app
 from app.models import AuthorizationContract, GuardCheckRequest, GuardDecisionType
-from benchmark.run_phi4 import InvalidActionError, MODEL_ID, Phi4Policy
+from run_phi4 import InvalidActionError, MODEL_ID, Phi4Policy
 
 
 PROMPT_VERSION = "guarded-v1"
