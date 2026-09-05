@@ -60,6 +60,7 @@ backend/tests/         API, görev ve güvenlik birim testleri
 benchmark/             Açık JSON görev şeması
 ml/                    Risk veri üretimi ve XLM-R eğitimi
 colab/                 Ücretsiz GPU deney defteri
+kaggle/                Phi-4 için Kaggle GPU deney defteri
 docs/                  Araştırma protokolü, veri ve model kartları
 ```
 
