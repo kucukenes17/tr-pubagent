@@ -1,5 +1,6 @@
 transformers==4.53.2
 datasets==4.0.0
 accelerate==1.9.0
+bitsandbytes==0.46.1
 scikit-learn==1.7.1
 evaluate==0.4.5
