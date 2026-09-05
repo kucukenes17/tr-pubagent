@@ -34,6 +34,7 @@ class GroundedPhi4Policy(Phi4Policy):
     def __post_init__(self) -> None:
         super().__post_init__()
         self.evidence_attempted_runs: set[str] = set()
+        self.evidence_diagnostics: dict[str, dict[str, Any]] = {}
 
     def next_action(
         self, observation: dict[str, Any], feedback: str = ""
@@ -48,6 +49,12 @@ class GroundedPhi4Policy(Phi4Policy):
             }])
             generated_tokens = len(self.tokenizer.encode(raw, add_special_tokens=False))
             values = parse_evidence_values(raw, fields)
+            self.evidence_diagnostics[run_id] = {
+                "candidates": fields,
+                "raw": raw,
+                "parsed_values": values,
+                "generated_tokens": generated_tokens,
+            }
             if values:
                 field_id = next(field["id"] for field in fields if field["id"] in values)
                 return ProposedAction(
@@ -171,10 +178,14 @@ def run_task(
             break
 
     result = client.post(f"/v1/evaluate/{run_id}").json()
+    evidence_diagnostic = getattr(policy, "evidence_diagnostics", {}).get(run_id)
     generated_tokens = sum(
         int(attempt.get("generated_tokens", 0))
         for step in trace for attempt in step.get("attempts", [])
+        if attempt.get("stage") != "evidence_extraction"
     )
+    if evidence_diagnostic:
+        generated_tokens += int(evidence_diagnostic.get("generated_tokens", 0))
     return {
         "task_id": task["id"], "run_id": run_id, "agent": "tr-pubguard",
         "model": policy.model_id,
@@ -190,6 +201,7 @@ def run_task(
         "guard_enforcements": guard_enforcements,
         "latency_seconds": round(time.perf_counter() - started, 3),
         "steps": len(trace), "generated_tokens": generated_tokens, "trace": trace,
+        "evidence_extraction": evidence_diagnostic,
         **result,
     }
 
@@ -202,6 +214,7 @@ def main() -> None:
     parser.add_argument("--model", default=MODEL_ID)
     parser.add_argument("--no-4bit", action="store_true")
     parser.add_argument("--evidence-grounding", action="store_true")
+    parser.add_argument("--task-ids", nargs="*", default=[])
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--output", type=Path, default=ROOT / "outputs" / "phi4_guarded_results.jsonl")
     args = parser.parse_args()
@@ -226,7 +239,15 @@ def main() -> None:
     policy_class = GroundedPhi4Policy if args.evidence_grounding else Phi4Policy
     policy = policy_class(model_id=args.model, four_bit=not args.no_4bit)
     with TestClient(app) as client:
-        selected = client.get("/v1/tasks", params={"split": args.split}).json()[:args.limit]
+        split_tasks = client.get("/v1/tasks", params={"split": args.split}).json()
+        if args.task_ids:
+            requested = set(args.task_ids)
+            selected = [task for task in split_tasks if task["id"] in requested]
+            missing_ids = requested - {task["id"] for task in selected}
+            if missing_ids:
+                parser.error(f"Split içinde bulunamayan task id: {sorted(missing_ids)}")
+        else:
+            selected = split_tasks[:args.limit]
         pending = [task for task in selected if task["id"] not in completed]
         results = existing
         if completed:
