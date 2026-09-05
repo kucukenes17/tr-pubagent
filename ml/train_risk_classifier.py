@@ -43,6 +43,7 @@ def main() -> None:
                 truncation=True, max_length=256,
             ) | {"labels": [label2id[label] for label in batch["label"]]},
             batched=True,
+            remove_columns=dataset.column_names,
         )
 
     dataset = DatasetDict({split: to_dataset(split) for split in ("train", "validation", "test")})
