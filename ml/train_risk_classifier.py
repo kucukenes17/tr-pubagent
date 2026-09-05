@@ -59,6 +59,7 @@ def main() -> None:
         num_train_epochs=args.epochs, weight_decay=0.01,
         eval_strategy="epoch", save_strategy="epoch", load_best_model_at_end=True,
         metric_for_best_model="macro_f1", greater_is_better=True,
+        save_only_model=True, save_total_limit=1,
         report_to="none", seed=42, fp16=True,
     )
     trainer = Trainer(model=model, args=training, train_dataset=dataset["train"], eval_dataset=dataset["validation"], processing_class=tokenizer, data_collator=DataCollatorWithPadding(tokenizer), compute_metrics=metrics, callbacks=[EarlyStoppingCallback(early_stopping_patience=2)])
