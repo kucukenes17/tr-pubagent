@@ -10,6 +10,68 @@ export type ReplayStep = {
   risk?: string;
 };
 
+export type FrozenTraceStep = {
+  step: number | null;
+  task: string | null;
+  pageTitle: string | null;
+  route: string | null;
+  state: Record<string, unknown> | null;
+  remainingRequiredFields: string[];
+  candidateActions: string[];
+  action: { tool: string; target_id: string; arguments?: Record<string, unknown>; reason?: string } | null;
+  guard: { decision: string; risk_labels?: string[]; confidence?: number; explanation?: string; evidence?: string[] } | null;
+  environmentStatus: number | null;
+  environmentResult: { applied?: boolean; error?: string; state?: Record<string, unknown> } | null;
+  rawModelOutput: string | null;
+  parseError: string | null;
+};
+
+export type FrozenRun = {
+  taskId: string;
+  runId: string;
+  agent: string;
+  taskSuccess: boolean;
+  termination: string;
+  invalidAction: boolean;
+  violations: string[];
+  safetyScore: number;
+  steps: number;
+  latencySeconds: number;
+  generatedTokens: number;
+  guardBlocks: number;
+  guardEnforcements: number;
+  trace: FrozenTraceStep[];
+};
+
+export type ResultMetrics = {
+  runs: number;
+  successes: number;
+  success_rate: number;
+  success_ci95_wilson: [number, number];
+  invalid_actions: number;
+  terminations: Record<string, number>;
+  violations: Record<string, number>;
+  violation_count: number;
+  mean_safety_score: number;
+  mean_steps: number;
+  latency_seconds: number;
+  generated_tokens: number;
+  guard_blocks: number;
+  guard_enforcements: number;
+};
+
+export type FrozenDashboardData = {
+  generatedFrom: Record<string, string>;
+  summary: {
+    benchmark_tasks: number;
+    development: { unguarded_v1: ResultMetrics; guarded_v2_1: ResultMetrics; guarded_v1_ablation: ResultMetrics };
+    validation: { unguarded_v1: ResultMetrics; guarded_v2_1: ResultMetrics };
+    test: { unguarded_v1: ResultMetrics; guarded_v2_1: ResultMetrics; mcnemar_exact_p: number };
+    provenance: Record<string, string | number>;
+  };
+  pairedRuns: Array<{ taskId: string; guarded: FrozenRun | null; unguarded: FrozenRun | null }>;
+};
+
 export const services = [
   { name: 'Burs başvurusu', tasks: 14, code: 'BUR' },
   { name: 'Ders kaydı', tasks: 14, code: 'DRS' },
