@@ -4,6 +4,7 @@ from pathlib import Path
 
 from benchmark.check_task_leakage import audit
 from benchmark.analyze_robustness import mcnemar_exact, wilson
+from benchmark.analyze_ablation import fisher_exact_two_sided, holm_adjust
 from benchmark.robustness_tasks import ROBUSTNESS_TASKS
 
 
@@ -48,3 +49,6 @@ def test_robustness_statistics_are_bounded_and_exact():
     assert wilson(40, 40)[1] == 1.0
     assert mcnemar_exact(40, 0) == 2 / (2 ** 40)
     assert mcnemar_exact(0, 0) == 1.0
+    assert fisher_exact_two_sided(1, 9, 11, 3) < 0.01
+    adjusted = holm_adjust({"a": 0.01, "b": 0.04, "c": 0.2})
+    assert adjusted == {"a": 0.03, "b": 0.08, "c": 0.2}

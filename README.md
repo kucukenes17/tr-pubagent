@@ -13,6 +13,7 @@ TR PubAgent, Türkçe kamu hizmeti benzeri çok adımlı web görevlerinde yapay
 - **Koşu tekrarı:** Gözlem → eylem → guard kararını adım adım gösteren araştırma paneli.
 - **OOD sağlamlık paketi:** Ana şablonlardan bağımsız yazılmış 24 görev, sızıntı denetimi ve üç-seed GPU koşucusu.
 - **ML paketi:** 3.000 sentetik eylem-risk örneği ve XLM-R eğitim betiği.
+- **Ablation altyapısı:** Rule-only, XLM-R ML-only ve Hybrid Guard için ortak OOD koşucu ve Holm düzeltmeli analiz.
 - **Sıfır maliyet akışı:** Scripted kontrol ile yerel geliştirme; Phi-4/XLM-R için Kaggle veya Colab.
 
 ## Dondurulmuş Phi-4 sonucu
@@ -25,6 +26,26 @@ TR PubAgent, Türkçe kamu hizmeti benzeri çok adımlı web görevlerinde yapay
 Guarded v2.1 validation görülmeden önce `guarded-v2.1-frozen@91f2fb1` olarak donduruldu. Testteki eşleştirilmiş başarı farkı için exact McNemar `p=1,82×10⁻¹²`; Guarded başarı oranının Wilson %95 güven aralığı `%91,24–%100` ölçüldü. Üretilen token sayısı Unguarded'a göre `%92,7` azaldı.
 
 Bu sonuç yalnızca programatik ve şablon ilişkili TR-PubBench sentetik test split'i için geçerlidir; gerçek kamu portallarında yüzde yüz başarı iddiası değildir. Ayrıntılar, protokol sapmaları ve sınırlılıklar [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md) içindedir.
+
+## Mimari
+
+```mermaid
+flowchart LR
+  U[Kullanıcı talimatı] --> A[Phi-4 araç eylemi]
+  O[Portal gözlemi] --> A
+  A --> C{Araç ve hedef sözleşmesi}
+  C --> R[Deterministik Rule Guard]
+  C --> M[Deneysel XLM-R ML Guard]
+  R --> H[Hybrid karar birleştirici]
+  M --> H
+  H -->|ALLOW| E[Sentetik portal ortamı]
+  H -->|BLOCK / ASK / CONFIRM| A
+  E --> D[(SQLite durum ve olay izi)]
+  D --> V[Deterministik değerlendirici]
+  V --> J[JSONL sonuç + dashboard replay]
+```
+
+Dondurulmuş Guarded v2.1 sonucu `Rule Guard + kanıt bağlama + güvenli yürütme kontrolcüsü` yoluna aittir. XLM-R/Hybrid yolu v2.2 ablation için deneyseldir ve ana final skora dahil değildir.
 
 ## Hızlı başlangıç
 
@@ -107,6 +128,8 @@ python benchmark/generate_frozen_report.py
 Temel deney protokolü ve gerçekleşen sapmalar [docs/RESEARCH_PROTOCOL.md](docs/RESEARCH_PROTOCOL.md), dondurulmuş sonuçlar [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md), ham izler ve kanonik özet [results/frozen](results/frozen), CV ve mülakat anlatımı ise [docs/PORTFOLIO.md](docs/PORTFOLIO.md) içindedir.
 
 İnsan yazımı genelleme deneyi [docs/ROBUSTNESS_PROTOCOL.md](docs/ROBUSTNESS_PROTOCOL.md) içinde ön kayıtlıdır. 12 haftalık planın güncel kontrol tablosu [docs/PLAN_STATUS.md](docs/PLAN_STATUS.md) içindedir.
+
+English overview: [README.en.md](README.en.md). TÜBİTAK taslak metni ve video akışı sırasıyla [docs/TUBITAK_2209A_DRAFT.md](docs/TUBITAK_2209A_DRAFT.md) ve [docs/DEMO_VIDEO_SCRIPT.md](docs/DEMO_VIDEO_SCRIPT.md) içindedir.
 
 ## Araştırma etiği
 

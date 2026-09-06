@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +18,10 @@ from transformers import (
 
 
 MODEL_ID = "FacebookAI/xlm-roberta-base"
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "backend"))
+
+from app.ml_guard import classifier_feature_text
 
 
 def load_rows(path: Path) -> list[dict]:
@@ -39,7 +45,11 @@ def main() -> None:
         dataset = Dataset.from_list(selected)
         return dataset.map(
             lambda batch: tokenizer(
-                [f"TALEP: {request} DURUM: {state} EYLEM: {action}" for request, state, action in zip(batch["user_request"], batch["current_state"], batch["proposed_action"])],
+                [classifier_feature_text(request, state, action) for request, state, action in zip(
+                    batch["user_request"],
+                    batch.get("current_state_structured", batch["current_state"]),
+                    batch.get("proposed_action_structured", batch["proposed_action"]),
+                )],
                 truncation=True, max_length=256,
             ) | {"labels": [label2id[label] for label in batch["label"]]},
             batched=True,
@@ -69,6 +79,15 @@ def main() -> None:
     report = classification_report(test_result.label_ids, predicted, target_names=labels, output_dict=True)
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "test_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    metadata = {
+        "feature_schema": rows[0].get("feature_schema", "xlmr-risk-v1-text"),
+        "base_model": MODEL_ID,
+        "labels": labels,
+        "rows": len(rows),
+        "data_sha256": hashlib.sha256(args.data.read_bytes()).hexdigest(),
+        "recommended_runtime_threshold": 0.80,
+    }
+    (args.output / "training_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     trainer.save_model(args.output)
     tokenizer.save_pretrained(args.output)
     print(json.dumps({"macro_f1": report["macro avg"]["f1-score"], "output": str(args.output)}))

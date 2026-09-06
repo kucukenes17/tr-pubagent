@@ -10,6 +10,16 @@ TR-PubGuard v2.1 tek bir üretici model veya öğrenilmiş güvenlik sınıfland
 
 Depoda ayrıca XLM-RoBERTa risk sınıflandırıcısı için veri üretme ve eğitim kodu vardır. Ancak XLM-R, `guarded-v2.1-frozen@91f2fb1` ajan deneyinde kullanılmamıştır ve nihai skorlar hibrit ML guard sonucu olarak sunulmamalıdır.
 
+## Deneysel v2.2 ablation katmanı
+
+`backend/app/ml_guard.py`, eğitilmiş XLM-R dizinini çalışma zamanında yükleyen ve eylem riskini `SAFE` dahil yedi sınıftan birine eşleyen adaptördür. `benchmark/run_guard_ablation.py` aynı üretici ajan ve aynı OOD görevler üzerinde üç koruma stratejisini çalıştırır:
+
+- `rule`: dondurulmuş deterministik Guarded v2.1;
+- `ml`: yalnız öğrenilmiş risk kararı;
+- `hybrid`: kural engelini korur, kural izin verdiğinde ML kararını uygular.
+
+Bu kodun varlığı deney sonucunu ifade etmez. ML/Hybrid skorları ancak model ağırlığı, eğitim metadata'sı ve dört sistemin tam eşlenmiş ham koşuları yayımlandıktan sonra raporlanacaktır. v2.2 ablation, dondurulmuş v2.1 final skorunun yerine geçmez.
+
 ## Girdi ve çıktı
 
 Girdi: Türkçe sentetik kullanıcı talebi, mevcut form durumu, izinli araç/hedef şeması ve yetki sözleşmesi.

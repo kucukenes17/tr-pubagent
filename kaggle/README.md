@@ -34,3 +34,28 @@ Ana sonuçlardan bağımsız 24 görev × 2 sistem × 3 seed koşusu:
 ```
 
 Kesilen oturumda aynı `run_robustness` hücresi yeniden çalıştırılabilir; bitmiş görev/seed çiftleri tekrar üretilmez.
+
+Önce v2 çalışma zamanı formatıyla XLM-R modelini üretin:
+
+```python
+!python -m ml.generate_risk_dataset --output /kaggle/working/tr-pubagent-results/risk_dataset_v2.jsonl
+!python -m ml.train_risk_classifier \
+  --data /kaggle/working/tr-pubagent-results/risk_dataset_v2.jsonl \
+  --output /kaggle/working/tr-pubagent-results/xlmr-risk-v2
+```
+
+XLM-R modeli hazır olduğunda H3 ablation:
+
+```python
+!python -m benchmark.run_guard_ablation \
+  --systems ml hybrid \
+  --seeds 0 17 42 \
+  --ml-model-path /kaggle/working/tr-pubagent-results/xlmr-risk-v2 \
+  --output-dir /kaggle/working/tr-pubagent-results/robustness
+!python -m benchmark.analyze_ablation \
+  --unguarded /kaggle/working/tr-pubagent-results/robustness/phi4_unguarded_ood_v1.jsonl \
+  --rule /kaggle/working/tr-pubagent-results/robustness/phi4_guarded_ood_v2_1.jsonl \
+  --ml /kaggle/working/tr-pubagent-results/robustness/phi4_ml_guard_ood_v2_2.jsonl \
+  --hybrid /kaggle/working/tr-pubagent-results/robustness/phi4_hybrid_guard_ood_v2_2.jsonl \
+  --output /kaggle/working/tr-pubagent-results/robustness/guard_ablation_summary.json
+```

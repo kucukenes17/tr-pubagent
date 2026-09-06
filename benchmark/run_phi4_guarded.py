@@ -19,6 +19,7 @@ from fastapi.testclient import TestClient
 
 from app.guard import check_action
 from app.guarded_policy import action_signature, enforced_action, public_action_error, terminal_action
+from app.ml_guard import RiskClassifier, hybrid_decision, prediction_to_decision
 from app.evidence import evidence_candidates, evidence_prompt, parse_evidence_values
 from app.main import app
 from app.models import AuthorizationContract, GuardCheckRequest, GuardDecisionType, ProposedAction
@@ -85,9 +86,13 @@ def run_task(
     policy: Phi4Policy,
     seed: int,
     prompt_version: str = PROMPT_VERSION,
+    guard_strategy: str = "rule",
+    risk_classifier: RiskClassifier | None = None,
+    ml_threshold: float = 0.80,
+    agent_name: str = "tr-pubguard",
 ) -> dict[str, Any]:
     created = client.post(
-        "/v1/runs", json={"task_id": task["id"], "agent": "tr-pubguard", "seed": seed}
+        "/v1/runs", json={"task_id": task["id"], "agent": agent_name, "seed": seed}
     ).json()
     run_id = created["id"]
     contract = AuthorizationContract.model_validate(task["authorization"])
@@ -127,11 +132,23 @@ def run_task(
             continue
 
         state = observation.get("state", {})
-        decision = check_action(GuardCheckRequest(
+        rule_decision = check_action(GuardCheckRequest(
             user_request=task["user_request"], action=proposed, contract=contract,
             known_facts=state.get("fields", {}),
             confirmed_actions=state.get("confirmed_actions", []),
         ))
+        if guard_strategy == "rule":
+            decision = rule_decision
+        else:
+            if risk_classifier is None:
+                raise RuntimeError(f"{guard_strategy} stratejisi için risk sınıflandırıcısı gerekli")
+            prediction = risk_classifier.predict(task["user_request"], state, proposed)
+            learned_decision = prediction_to_decision(
+                prediction, action=proposed, required_facts=contract.required_facts,
+                known_facts=state.get("fields", {}), confirmation_gates=contract.confirmation_gates,
+                threshold=ml_threshold,
+            )
+            decision = learned_decision if guard_strategy == "ml" else hybrid_decision(rule_decision, learned_decision)
         action = proposed
         if decision.decision != GuardDecisionType.ALLOW:
             guard_blocks += 1
@@ -198,13 +215,16 @@ def run_task(
         int(item.get("generated_tokens", 0)) for item in evidence_diagnostic
     )
     return {
-        "task_id": task["id"], "run_id": run_id, "agent": "tr-pubguard",
+        "task_id": task["id"], "run_id": run_id, "agent": agent_name,
         "model": policy.model_id,
         "model_revision": getattr(policy.model.config, "_commit_hash", None),
         "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "prompt_version": prompt_version,
         "algorithm_version": (
-            FROZEN_V2_ALGORITHM if prompt_version == "guarded-v2.1-grounded"
+            FROZEN_V2_ALGORITHM
+            if prompt_version == "guarded-v2.1-grounded" and guard_strategy == "rule"
+            else f"guarded-v2.2-{guard_strategy}-ablation"
+            if guard_strategy != "rule"
             else "guarded-v1@418eafc"
         ),
         "generation": {
@@ -217,6 +237,8 @@ def run_task(
         "latency_seconds": round(time.perf_counter() - started, 3),
         "steps": len(trace), "generated_tokens": generated_tokens, "trace": trace,
         "evidence_extraction": evidence_diagnostic,
+        "guard_strategy": guard_strategy,
+        "ml_threshold": ml_threshold if guard_strategy != "rule" else None,
         **result,
     }
 

@@ -11,13 +11,13 @@ Son güncelleme: 7 Eylül 2026
 | Gerçek veriye bağlı dashboard | Tamamlandı | Grafikler ve 40 görevlik JSONL replay explorer |
 | İnsan yazımı OOD sağlamlık paketi | Altyapı tamamlandı | 24 görev, sızıntı denetimi, çok-seed runner; Kaggle koşusu bekliyor |
 | Çok-seed sağlamlık sonucu | Bekliyor | 144 GPU koşusu ve `analyze_robustness.py` |
-| ML Guard / Hybrid Guard ablation | Bekliyor | XLM-R artefaktının geri alınması ve dört sistem karşılaştırması |
+| ML Guard / Hybrid Guard ablation | Altyapı tamamlandı | Çalışma zamanı adaptörü, Rule/ML/Hybrid runner ve Holm düzeltmeli analiz hazır; XLM-R artefaktı/koşu bekliyor |
 | İkinci üretici model | Bekliyor | GPU kotasına göre 24 OOD görevde ek model |
 | Altı ayrı portal yüzeyi | Kısmi | Backend altı hizmeti kapsıyor; frontend burs demosu ağırlıklı |
 | Temiz makine Docker doğrulaması | Bekliyor | Docker Desktop bulunan ayrı ortamda smoke test |
-| İngilizce README ve mimari görsel | Bekliyor | Yayın paketi |
-| Demo videosu | Bekliyor | 3–5 dakika, dashboard + replay |
-| TÜBİTAK 2209-A taslağı | Bekliyor | Amaç, yöntem, iş-zaman, risk ve yaygın etki |
+| İngilizce README ve mimari görsel | Tamamlandı | İngilizce özet ve Mermaid mimarisi repoda |
+| Demo videosu | Senaryo tamamlandı | 4 dakikalık çekim metni hazır; ekran kaydı bekliyor |
+| TÜBİTAK 2209-A taslağı | Taslak tamamlandı | Kimlik, danışman, bütçe, tarih ve güncel kaynakça alanları başvuru öncesi doldurulacak |
 | Resmî v1.0.0 release | Bekliyor | OOD sonucu ve yayın belgelerinden sonra |
 
 ## Sıradaki karar kapıları
