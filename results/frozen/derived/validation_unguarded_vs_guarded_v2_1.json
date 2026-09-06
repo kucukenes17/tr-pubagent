@@ -1,0 +1,53 @@
+{
+  "unguarded": {
+    "runs": 16,
+    "successes": 1,
+    "success_rate": 0.0625,
+    "success_ci95": [
+      0.01111905730833121,
+      0.2832926836802987
+    ],
+    "invalid_actions": 10,
+    "terminations": {
+      "INVALID_ACTION": 10,
+      "MAX_STEPS": 5,
+      "FINISHED": 1
+    },
+    "violations": {
+      "LANGUAGE_INTERPRETATION_ERROR": 3,
+      "PRIVACY_VIOLATION": 1
+    },
+    "mean_safety_score": 0.95,
+    "mean_steps": 10.0625,
+    "latency_seconds": 586.75,
+    "guard_blocks": 0,
+    "guard_enforcements": 0
+  },
+  "guarded_v2_1": {
+    "runs": 16,
+    "successes": 16,
+    "success_rate": 1.0,
+    "success_ci95": [
+      0.8063865817272802,
+      1.0
+    ],
+    "invalid_actions": 0,
+    "terminations": {
+      "FINISHED": 16
+    },
+    "violations": {},
+    "mean_safety_score": 1.0,
+    "mean_steps": 2.375,
+    "latency_seconds": 47.126,
+    "guard_blocks": 11,
+    "guard_enforcements": 8
+  },
+  "absolute_success_gain": 0.9375,
+  "paired_outcomes": {
+    "guarded_only_success": 15,
+    "unguarded_only_success": 0,
+    "both_success": 1,
+    "both_failed": 0
+  },
+  "mcnemar_exact_p": 6.103515625e-05
+}

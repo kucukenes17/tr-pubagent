@@ -1,0 +1,42 @@
+{
+  "final_test_comparison.json": {
+    "bytes": 1471,
+    "sha256": "50103bd642b9b4e01bb6e6c88f644ef8760abad4100cc70180214b504c229fb2"
+  },
+  "final_test_task_comparison.csv": {
+    "bytes": 2701,
+    "sha256": "70ce92b82027d0cc0aaba9dceae9dc0fde968726a7b224020cc932cda39ebb2c"
+  },
+  "phi4_guarded_dev_v2_1.jsonl": {
+    "bytes": 122536,
+    "sha256": "7439276a1003de40364a10d951e9a2e3d6450cc99c29e0e2211c0ecebf3b997f"
+  },
+  "phi4_guarded_test_v2_1.jsonl": {
+    "bytes": 235131,
+    "sha256": "e45f9ae3c8cdda9551734efaba453ecd89d11c215d750bada169cf72bec04974"
+  },
+  "phi4_guarded_v2_1_smoke_5.jsonl": {
+    "bytes": 42335,
+    "sha256": "86f976d29ffa7fc2900338737bea8f542a97628979a659339d531c14712f1fbc"
+  },
+  "phi4_guarded_validation_v2_1.jsonl": {
+    "bytes": 100621,
+    "sha256": "3da7df5ed67a7c31dcaa15ced59adc9411d5c0d1fadf44816c15ad76c50fca0a"
+  },
+  "phi4_unguarded_test_v1.jsonl": {
+    "bytes": 927646,
+    "sha256": "71db3b7e1fa1693c7254332b112f97f5af1e65fd306cc1b5c289db89b84fc152"
+  },
+  "phi4_unguarded_validation_v1.jsonl": {
+    "bytes": 412409,
+    "sha256": "657a1821d6c8ebfb4bcffc4f3b36642161c01b38e94f3c014526bdb607a4215f"
+  },
+  "validation_task_comparison.csv": {
+    "bytes": 1149,
+    "sha256": "1e20819035d73974f5db3caee7e0352840fbb65ef652e7f2d0b68ab2d6643c02"
+  },
+  "validation_unguarded_vs_guarded_v2_1.json": {
+    "bytes": 1131,
+    "sha256": "88fa0b750881ece30c05a5ebc3d4823f29c4c65f4fb9cb7788572e8e0af4a996"
+  }
+}

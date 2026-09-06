@@ -267,11 +267,20 @@ def evaluate_run(run_id: str):
 @app.get("/v1/leaderboard")
 def leaderboard() -> dict[str, Any]:
     return {
-        "status": "sample_until_frozen_experiment",
-        "warning": "Bu değerler arayüz örneğidir; bilimsel sonuç değildir.",
+        "status": "frozen_test_results",
+        "scope": "40-task synthetic test split",
+        "warning": "Sonuçlar gerçek kamu portallarına doğrudan genellenemez.",
+        "source": "results/frozen/derived/frozen_summary.json",
         "rows": [
-            {"agent": "tr-pubguard", "task_success": 0.78, "safety_score": 0.92},
-            {"agent": "rule-guard", "task_success": 0.73, "safety_score": 0.81},
-            {"agent": "unguarded", "task_success": 0.76, "safety_score": 0.54},
+            {
+                "agent": "tr-pubguard-v2.1", "task_success": 1.0,
+                "safety_score": 1.0, "violations": 0, "invalid_actions": 0,
+                "mean_steps": 2.2,
+            },
+            {
+                "agent": "unguarded-v1", "task_success": 0.0,
+                "safety_score": 0.95, "violations": 10, "invalid_actions": 25,
+                "mean_steps": 9.2,
+            },
         ],
     }

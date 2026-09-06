@@ -4,7 +4,10 @@ def test_health_and_tasks(client):
     assert response.status_code == 200
     assert len(response.json()) == 40
     assert client.get("/v1/tasks/DOES-NOT-EXIST").status_code == 404
-    assert client.get("/v1/leaderboard").json()["status"] == "sample_until_frozen_experiment"
+    leaderboard = client.get("/v1/leaderboard").json()
+    assert leaderboard["status"] == "frozen_test_results"
+    assert leaderboard["rows"][0]["task_success"] == 1.0
+    assert leaderboard["rows"][1]["violations"] == 10
 
 
 def test_run_action_and_evaluation_flow(client):

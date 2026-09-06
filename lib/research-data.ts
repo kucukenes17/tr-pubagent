@@ -21,15 +21,14 @@ export const services = [
 
 export const metrics = [
   { label: 'Görev', value: '80', detail: '6 hizmet ailesi' },
-  { label: 'Ana koşu', value: '240', detail: '3 ajan yapılandırması' },
-  { label: 'Kritik risk', value: '7', detail: 'deterministik etiket' },
-  { label: 'API maliyeti', value: '$0', detail: 'Colab + açık modeller' },
+  { label: 'Final test', value: '40', detail: 'ayrılmış sentetik görev' },
+  { label: 'Başarı farkı', value: '+100 pp', detail: '0/40 → 40/40' },
+  { label: 'Gerçek kişi verisi', value: '0', detail: 'tamamen sentetik' },
 ] as const;
 
 export const leaderboard = [
-  { model: 'TR-PubGuard', success: 78, safety: 92 },
-  { model: 'Rule Guard', success: 73, safety: 81 },
-  { model: 'Unguarded', success: 76, safety: 54 },
+  { model: 'TR-PubGuard v2.1', success: 100, violations: 0, meanSteps: 2.2 },
+  { model: 'Unguarded v1', success: 0, violations: 10, meanSteps: 9.2 },
 ] as const;
 
 export const replaySteps: ReplayStep[] = [

@@ -1,5 +1,7 @@
 # TR PubAgent araştırma protokolü v0.1
 
+> Durum: Deney tamamlandı. Guarded v2.1, validation değerlendirmesinden önce `guarded-v2.1-frozen@91f2fb1` olarak donduruldu; nihai test `84458af` değerlendirme harness'ıyla çalıştırıldı. Aşağıdaki ön kayıt korunmuş, gerçekleşen sapmalar belgenin sonunda açıklanmıştır.
+
 ## Araştırma sorusu
 
 Yetki sözleşmesi, deterministik güvenlik kuralları ve öğrenilmiş risk sınıflandırıcısından oluşan TR-PubGuard; korumasız Türkçe web ajanına göre yetkisiz ve geri döndürülemez hataları azaltırken görev başarısını koruyabilir mi?
@@ -55,3 +57,13 @@ Birincil: görev başarısı, kritik güvenlik ihlali, yetkisiz eylem, onaysız 
 - Maksimum 20 adım sonrası koşu başarısız sonlandırılır.
 - Bütün test görevleri sonuç tablosunda yer alır.
 - İnsan katılımcı kullanılmaz; görev geçerliliğindeki bu sınırlılık raporda belirtilir.
+
+## Gerçekleşen kapsam ve protokol sapmaları
+
+- Tamamlanan ana ajan karşılaştırması Unguarded v1 ile Guarded v2.1 arasındadır. Ayrı Rule Guard, ML Guard ve hibrit XLM-R ablation'ları tamamlanmadığı için H3 test edilmedi.
+- Development'ta 20, validation'da 16 ve testte 40 eşleştirilmiş görev çalıştırıldı. Dört development görevi yalnızca scripted altyapı kontrolünde kaldı.
+- Çıkarım tek seed (`0`) ve tek üretici modelle yapıldı; planlanan üç-seed sağlamlık koşusu tamamlanmadı.
+- Başarı oranlarında ön kayıttaki bootstrap yerine küçük örneklemlerde sınırları koruyan Wilson %95 güven aralığı kullanıldı.
+- Eşleştirilmiş ana karşılaştırmada exact McNemar testi uygulandı. Ayrı çoklu sistem karşılaştırmaları yapılmadığı için Holm düzeltmesi gerekmedi.
+- Scripted kontrol politikası 19/24 başarı verdi; basitleştirilmiş politika nedeniyle bilimsel üst sınır olarak yorumlanmadı.
+- Bütün sapmalar ve negatif geliştirme sonuçları [EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md) içinde raporlandı.

@@ -8,13 +8,22 @@ TR PubAgent, Türkçe kamu hizmeti benzeri çok adımlı web görevlerinde yapay
 
 - **TR-PubBench:** Altı hizmet ailesinden programatik ve deterministik olarak üretilen 80 Türkçe görev.
 - **Sentetik portal:** Burs başvurusu üzerinde çalışan, erişilebilir ve etkileşimli ilk hizmet yüzeyi.
-- **TR-PubGuard:** Yetki sözleşmesi, sabit güvenlik kuralları ve risk modeli adaptörü.
+- **TR-PubGuard v2.1:** Yetki sözleşmesi, kanıt bağlama, sabit güvenlik kuralları ve güvenli yürütme kontrolcüsü.
 - **Deterministik değerlendirici:** Son ekran görüntüsü yerine veri tabanı durumunu puanlar.
 - **Koşu tekrarı:** Gözlem → eylem → guard kararını adım adım gösteren araştırma paneli.
 - **ML paketi:** 3.000 sentetik eylem-risk örneği ve XLM-R eğitim betiği.
-- **Sıfır maliyet akışı:** Scripted Oracle ile yerel geliştirme; Phi-4/XLM-R için Colab.
+- **Sıfır maliyet akışı:** Scripted kontrol ile yerel geliştirme; Phi-4/XLM-R için Kaggle veya Colab.
 
-Arayüzde görünen örnek liderlik tablosu bilimsel sonuç değildir. Gerçek skorlar yalnızca dondurulmuş deney protokolü çalıştırıldıktan sonra yayımlanmalıdır.
+## Dondurulmuş Phi-4 sonucu
+
+| Sistem | 40 görevlik sentetik test başarısı | Geçersiz eylem | Gözlenen ihlal | Ort. adım |
+| --- | ---: | ---: | ---: | ---: |
+| Unguarded v1 | 0/40 (%0) | 25 | 10 | 9,20 |
+| TR-PubGuard v2.1 | 40/40 (%100) | 0 | 0 | 2,20 |
+
+Guarded v2.1 validation görülmeden önce `guarded-v2.1-frozen@91f2fb1` olarak donduruldu. Testteki eşleştirilmiş başarı farkı için exact McNemar `p=1,82×10⁻¹²`; Guarded başarı oranının Wilson %95 güven aralığı `%91,24–%100` ölçüldü. Üretilen token sayısı Unguarded'a göre `%92,7` azaldı.
+
+Bu sonuç yalnızca programatik ve şablon ilişkili TR-PubBench sentetik test split'i için geçerlidir; gerçek kamu portallarında yüzde yüz başarı iddiası değildir. Ayrıntılar, protokol sapmaları ve sınırlılıklar [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md) içindedir.
 
 ## Hızlı başlangıç
 
@@ -89,9 +98,12 @@ npm run build
 
 cd backend
 pytest --cov=app --cov-report=term-missing
+
+cd ..
+python benchmark/generate_frozen_report.py
 ```
 
-Temel deney protokolü ve başarı eşikleri [docs/RESEARCH_PROTOCOL.md](docs/RESEARCH_PROTOCOL.md), ilk Colab deneyinin sayısal özeti ve doğru yorumlanması ise [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md) içindedir.
+Temel deney protokolü ve gerçekleşen sapmalar [docs/RESEARCH_PROTOCOL.md](docs/RESEARCH_PROTOCOL.md), dondurulmuş sonuçlar [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md), ham izler ve kanonik özet [results/frozen](results/frozen), CV ve mülakat anlatımı ise [docs/PORTFOLIO.md](docs/PORTFOLIO.md) içindedir.
 
 ## Araştırma etiği
 

@@ -1,0 +1,297 @@
+{
+  "schema_version": "1.0",
+  "benchmark_tasks": 80,
+  "scripted_baseline": {
+    "runs": 24,
+    "successes": 19,
+    "success_rate": 0.7916666666666666,
+    "success_ci95_wilson": [
+      0.5952915551476452,
+      0.9075531089521192
+    ],
+    "invalid_actions": 0,
+    "terminations": {
+      "UNKNOWN": 24
+    },
+    "violations": {},
+    "violation_count": 0,
+    "mean_safety_score": 1.0,
+    "mean_steps": 0.0,
+    "latency_seconds": 0.0,
+    "generated_tokens": 0,
+    "guard_blocks": 0,
+    "guard_enforcements": 0,
+    "git_commits": {
+      "None": 24
+    },
+    "model_revisions": {
+      "None": 24
+    },
+    "prompt_versions": {
+      "None": 24
+    }
+  },
+  "development": {
+    "unguarded_v1": {
+      "runs": 20,
+      "successes": 2,
+      "success_rate": 0.1,
+      "success_ci95_wilson": [
+        0.027865893984153206,
+        0.30103820641179335
+      ],
+      "invalid_actions": 9,
+      "terminations": {
+        "FINISHED": 2,
+        "INVALID_ACTION": 9,
+        "MAX_STEPS": 9
+      },
+      "violations": {
+        "LANGUAGE_INTERPRETATION_ERROR": 4,
+        "PRIVACY_VIOLATION": 2
+      },
+      "violation_count": 6,
+      "mean_safety_score": 0.9400000000000001,
+      "mean_steps": 10.5,
+      "latency_seconds": 706.987,
+      "generated_tokens": 10760,
+      "guard_blocks": 0,
+      "guard_enforcements": 0,
+      "git_commits": {
+        "80ef8edb8749993c654c379856725350c0b4b9cc": 20
+      },
+      "model_revisions": {
+        "cfbefacb99257ffa30c83adab238a50856ac3083": 20
+      },
+      "prompt_versions": {
+        "unguarded-v1": 20
+      }
+    },
+    "guarded_v2_1": {
+      "runs": 20,
+      "successes": 20,
+      "success_rate": 1.0,
+      "success_ci95_wilson": [
+        0.8388698745050667,
+        1.0
+      ],
+      "invalid_actions": 0,
+      "terminations": {
+        "FINISHED": 20
+      },
+      "violations": {},
+      "violation_count": 0,
+      "mean_safety_score": 1.0,
+      "mean_steps": 2.3,
+      "latency_seconds": 62.231,
+      "generated_tokens": 938,
+      "guard_blocks": 13,
+      "guard_enforcements": 9,
+      "git_commits": {
+        "91f2fb1c4e7416c94e1f4ee453f7bc257f8f9ea8": 20
+      },
+      "model_revisions": {
+        "cfbefacb99257ffa30c83adab238a50856ac3083": 20
+      },
+      "prompt_versions": {
+        "guarded-v2.1-grounded": 20
+      }
+    },
+    "absolute_success_gain": 0.9,
+    "paired_outcomes": {
+      "guarded_only_success": 18,
+      "unguarded_only_success": 0,
+      "both_success": 2,
+      "both_failed": 0
+    },
+    "mcnemar_exact_p": 7.62939453125e-06,
+    "guarded_v1_ablation": {
+      "runs": 20,
+      "successes": 15,
+      "success_rate": 0.75,
+      "success_ci95_wilson": [
+        0.5312949900419365,
+        0.888139947210597
+      ],
+      "invalid_actions": 0,
+      "terminations": {
+        "FINISHED": 15,
+        "MAX_STEPS": 5
+      },
+      "violations": {},
+      "violation_count": 0,
+      "mean_safety_score": 1.0,
+      "mean_steps": 6.3,
+      "latency_seconds": 448.25600000000003,
+      "generated_tokens": 6996,
+      "guard_blocks": 90,
+      "guard_enforcements": 9,
+      "git_commits": {
+        "418eafc7c09f207ff5870abb0095b3d91749fbb9": 20
+      },
+      "model_revisions": {
+        "cfbefacb99257ffa30c83adab238a50856ac3083": 20
+      },
+      "prompt_versions": {
+        "guarded-v1": 20
+      }
+    }
+  },
+  "validation": {
+    "unguarded_v1": {
+      "runs": 16,
+      "successes": 1,
+      "success_rate": 0.0625,
+      "success_ci95_wilson": [
+        0.01111905730833121,
+        0.2832926836802987
+      ],
+      "invalid_actions": 10,
+      "terminations": {
+        "FINISHED": 1,
+        "INVALID_ACTION": 10,
+        "MAX_STEPS": 5
+      },
+      "violations": {
+        "LANGUAGE_INTERPRETATION_ERROR": 3,
+        "PRIVACY_VIOLATION": 1
+      },
+      "violation_count": 4,
+      "mean_safety_score": 0.95,
+      "mean_steps": 10.0625,
+      "latency_seconds": 586.75,
+      "generated_tokens": 8760,
+      "guard_blocks": 0,
+      "guard_enforcements": 0,
+      "git_commits": {
+        "91f2fb1c4e7416c94e1f4ee453f7bc257f8f9ea8": 16
+      },
+      "model_revisions": {
+        "cfbefacb99257ffa30c83adab238a50856ac3083": 16
+      },
+      "prompt_versions": {
+        "unguarded-v1": 16
+      }
+    },
+    "guarded_v2_1": {
+      "runs": 16,
+      "successes": 16,
+      "success_rate": 1.0,
+      "success_ci95_wilson": [
+        0.8063865817272802,
+        1.0
+      ],
+      "invalid_actions": 0,
+      "terminations": {
+        "FINISHED": 16
+      },
+      "violations": {},
+      "violation_count": 0,
+      "mean_safety_score": 1.0,
+      "mean_steps": 2.375,
+      "latency_seconds": 47.126,
+      "generated_tokens": 692,
+      "guard_blocks": 11,
+      "guard_enforcements": 8,
+      "git_commits": {
+        "91f2fb1c4e7416c94e1f4ee453f7bc257f8f9ea8": 16
+      },
+      "model_revisions": {
+        "cfbefacb99257ffa30c83adab238a50856ac3083": 16
+      },
+      "prompt_versions": {
+        "guarded-v2.1-grounded": 16
+      }
+    },
+    "absolute_success_gain": 0.9375,
+    "paired_outcomes": {
+      "guarded_only_success": 15,
+      "unguarded_only_success": 0,
+      "both_success": 1,
+      "both_failed": 0
+    },
+    "mcnemar_exact_p": 6.103515625e-05
+  },
+  "test": {
+    "unguarded_v1": {
+      "runs": 40,
+      "successes": 0,
+      "success_rate": 0.0,
+      "success_ci95_wilson": [
+        0.0,
+        0.08762453925039232
+      ],
+      "invalid_actions": 25,
+      "terminations": {
+        "INVALID_ACTION": 25,
+        "MAX_STEPS": 15
+      },
+      "violations": {
+        "LANGUAGE_INTERPRETATION_ERROR": 6,
+        "PRIVACY_VIOLATION": 4
+      },
+      "violation_count": 10,
+      "mean_safety_score": 0.95,
+      "mean_steps": 9.2,
+      "latency_seconds": 1228.094,
+      "generated_tokens": 18358,
+      "guard_blocks": 0,
+      "guard_enforcements": 0,
+      "git_commits": {
+        "84458af50f480994ede34744bc5f8e32440469de": 40
+      },
+      "model_revisions": {
+        "cfbefacb99257ffa30c83adab238a50856ac3083": 40
+      },
+      "prompt_versions": {
+        "unguarded-v1": 40
+      }
+    },
+    "guarded_v2_1": {
+      "runs": 40,
+      "successes": 40,
+      "success_rate": 1.0,
+      "success_ci95_wilson": [
+        0.9123754607496077,
+        1.0
+      ],
+      "invalid_actions": 0,
+      "terminations": {
+        "FINISHED": 40
+      },
+      "violations": {},
+      "violation_count": 0,
+      "mean_safety_score": 1.0,
+      "mean_steps": 2.2,
+      "latency_seconds": 89.569,
+      "generated_tokens": 1341,
+      "guard_blocks": 24,
+      "guard_enforcements": 18,
+      "git_commits": {
+        "84458af50f480994ede34744bc5f8e32440469de": 40
+      },
+      "model_revisions": {
+        "cfbefacb99257ffa30c83adab238a50856ac3083": 40
+      },
+      "prompt_versions": {
+        "guarded-v2.1-grounded": 40
+      }
+    },
+    "absolute_success_gain": 1.0,
+    "paired_outcomes": {
+      "guarded_only_success": 40,
+      "unguarded_only_success": 0,
+      "both_success": 0,
+      "both_failed": 0
+    },
+    "mcnemar_exact_p": 1.8189894035458565e-12
+  },
+  "provenance": {
+    "model": "microsoft/Phi-4-mini-instruct",
+    "quantization": "NF4 4-bit",
+    "seed": 0,
+    "unguarded_algorithm": "unguarded-v1@80ef8ed",
+    "guarded_algorithm": "guarded-v2.1-frozen@91f2fb1",
+    "evaluation_harness": "84458af"
+  }
+}

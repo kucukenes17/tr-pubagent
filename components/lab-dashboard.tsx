@@ -17,7 +17,7 @@ export function LabDashboard() {
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <Badge className="bg-blue-600 text-white">Türkçe web ajanı benchmarkı</Badge>
               <Badge variant="outline">Sentetik veri</Badge>
-              <Badge variant="outline">Deterministik ölçüm</Badge>
+              <Badge variant="outline">Dondurulmuş final test</Badge>
             </div>
             <h1 className="max-w-4xl text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-slate-950 md:text-6xl">
               Ajanın işi bitirmesi yetmez. <span className="text-blue-600">Yetkisini aşmaması gerekir.</span>
@@ -60,19 +60,19 @@ export function LabDashboard() {
 
           <Card className="overflow-hidden border-slate-800 bg-slate-950 text-white shadow-xl shadow-blue-950/10">
             <CardHeader className="border-b border-white/10">
-              <p className="mono-label text-cyan-300">Kayıtlı pilot sonuç</p>
+              <p className="mono-label text-cyan-300">Dondurulmuş test sonucu</p>
               <CardTitle className="mt-1 text-2xl">Güvenlik / başarı dengesi</CardTitle>
-              <p className="text-sm leading-6 text-slate-400">Gösterilen değerler arayüz geliştirmesi için örnek veridir; bilimsel sonuç değildir.</p>
+              <p className="text-sm leading-6 text-slate-400">Phi-4-mini-instruct, 40 ayrılmış sentetik görev, seed 0. Sonuç gerçek kamu portallarına doğrudan genellenemez.</p>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="grid grid-cols-[1.2fr_.8fr_.8fr] border-b border-white/10 px-5 py-3 text-xs font-medium text-slate-400"><span>Yöntem</span><span>Başarı</span><span>Güvenlik</span></div>
+              <div className="grid grid-cols-[1.25fr_.75fr_.65fr_.65fr] border-b border-white/10 px-5 py-3 text-xs font-medium text-slate-400"><span>Yöntem</span><span>Başarı</span><span>İhlal</span><span>Adım</span></div>
               {leaderboard.map((row, index) => (
-                <div className="grid grid-cols-[1.2fr_.8fr_.8fr] items-center border-b border-white/10 px-5 py-4 last:border-0" key={row.model}>
+                <div className="grid grid-cols-[1.25fr_.75fr_.65fr_.65fr] items-center border-b border-white/10 px-5 py-4 last:border-0" key={row.model}>
                   <div className="flex items-center gap-2">{index === 0 ? <ShieldCheck className="size-4 text-cyan-300" /> : <FlaskConical className="size-4 text-slate-500" />}<span className="font-medium">{row.model}</span></div>
-                  <span className="font-mono text-lg">%{row.success}</span><span className={index === 0 ? 'font-mono text-lg text-cyan-300' : 'font-mono text-lg'}>%{row.safety}</span>
+                  <span className="font-mono text-lg">%{row.success}</span><span className={index === 0 ? 'font-mono text-lg text-cyan-300' : 'font-mono text-lg'}>{row.violations}</span><span className="font-mono text-lg">{row.meanSteps}</span>
                 </div>
               ))}
-              <div className="m-5 rounded-xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm leading-6 text-amber-100"><div className="mb-1 flex items-center gap-2 font-semibold"><ShieldAlert className="size-4" /> Başarı tek başına yeterli değil</div>Korumasız ajan görevi daha kısa tamamlayabilir; fakat kullanıcıdan gelmeyen bilgiyi üretirse güvenli kabul edilmez.</div>
+              <div className="m-5 rounded-xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm leading-6 text-amber-100"><div className="mb-1 flex items-center gap-2 font-semibold"><ShieldAlert className="size-4" /> Tek metrik yeterli değil</div>Unguarded ajanın ortalama güvenlik puanı %95 görünmesine rağmen test başarısı 0/40 ve gözlenen ihlal sayısı 10’du. Başarı, ihlal ve sonlanma birlikte raporlanmalıdır.</div>
             </CardContent>
           </Card>
         </div>
