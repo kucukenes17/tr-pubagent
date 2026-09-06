@@ -15,6 +15,12 @@ Guarded v2.1 was frozen before validation as `guarded-v2.1-frozen@91f2fb1`. The 
 
 These numbers apply only to the frozen, programmatically generated synthetic split. They do not imply perfect performance on real public-service websites.
 
+## Human-authored OOD result
+
+After the algorithm was frozen under the `robustness-protocol-v1` tag, 24 new tasks were run with three seeds. Across 72 paired runs, Unguarded succeeded in 6/72 (8.3%) and Guarded v2.1 in 66/72 (91.7%). The task-clustered bootstrap 95% interval for the success gain was +66.7 to +95.8 percentage points and exact McNemar was `p=1.73×10⁻¹⁸`. Invalid actions fell from 45 to 0 and observed violations from 12 to 0.
+
+All six guarded failures clustered in two tasks across every seed: numeric evidence extraction and grounding a negative day preference into a select action. The frozen result is retained; any correction will be evaluated separately as a post-hoc v2.2 system.
+
 ## What is included
 
 - TR-PubBench: 80 deterministic Turkish tasks across six service families.
@@ -54,6 +60,6 @@ python -m benchmark.check_task_leakage --strict
 
 ## Research status
 
-The main 80-task experiment and frozen result are complete. The OOD and four-system Rule/ML/Hybrid runners are pre-registered and ready for GPU execution; no unobserved result is claimed. See [the current plan](docs/PLAN_STATUS.md), [experiment report](docs/EXPERIMENT_RESULTS.md), and [OOD protocol](docs/ROBUSTNESS_PROTOCOL.md).
+The main 80-task experiment and the 144-run human-authored OOD comparison are complete. Rule/ML/Hybrid runners are ready, while the XLM-R artifact and second-provider experiment remain pending; no unobserved result is claimed. See [the current plan](docs/PLAN_STATUS.md), [experiment report](docs/EXPERIMENT_RESULTS.md), and [OOD protocol](docs/ROBUSTNESS_PROTOCOL.md).
 
 Code is Apache-2.0. Dataset and result licensing remains subject to the repository's final data-license audit.

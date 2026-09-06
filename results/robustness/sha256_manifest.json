@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "experiment": "TR-PubAgent human-authored OOD robustness v1",
+  "files": [
+    {
+      "file": "phi4_guarded_ood_v2_1.jsonl",
+      "bytes": 577443,
+      "sha256": "368e8fccfaf3c6e68bd49abf71e1d0d14cf078ba766219d2fad6df794960a040"
+    },
+    {
+      "file": "phi4_unguarded_ood_v1.jsonl",
+      "bytes": 1455987,
+      "sha256": "6965828f3fa5df78ae2bacaaea3e5673f52061051b7e07123ca5e859c5527d82"
+    },
+    {
+      "file": "robustness_summary.json",
+      "bytes": 1508,
+      "sha256": "f9fcef5c5de3ff7f337ea6d0be55d3053ed6ca07d4a2424d593e769545e04092"
+    },
+    {
+      "file": "robustness_task_comparison.csv",
+      "bytes": 7292,
+      "sha256": "45892393c926e421dd6d34e4beafe1e456f2b480e039b278bfebaae348017270"
+    }
+  ]
+}

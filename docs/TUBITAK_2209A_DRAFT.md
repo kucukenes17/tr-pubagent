@@ -78,7 +78,7 @@ Beklenen çıktı yalnız yüksek başarı skoru değildir. Hangi hata sınıfla
 
 ## Mevcut ön sonuç
 
-Dondurulmuş 40 sentetik test görevinde Unguarded 0/40, Guarded v2.1 40/40 başarı göstermiş; gözlenen ihlal 10'dan 0'a inmiştir. Exact McNemar `p=1,82×10⁻¹²` bulunmuştur. Bu güçlü fakat tek model ve şablon ilişkili sonuç, OOD deneyinin gerekçesidir; gerçek dünya performansı olarak sunulmaz.
+Dondurulmuş 40 sentetik test görevinde Unguarded 0/40, Guarded v2.1 40/40 başarı göstermiş; gözlenen ihlal 10'dan 0'a inmiştir. Ardından sonuç görülmeden dondurulan 24 görevlik insan yazımı OOD protokolünde üç seed ve 72 eşlenmiş koşu tamamlanmıştır. Unguarded 6/72 (%8,3), Guarded v2.1 66/72 (%91,7) başarı göstermiş; geçersiz eylemler 45'ten 0'a ve gözlenen ihlaller 12'den 0'a inmiştir. Görev-kümeli bootstrap %95 başarı-farkı aralığı +66,7–+95,8 yüzde puanı, exact McNemar `p=1,73×10⁻¹⁸` bulunmuştur. Çalışma hâlâ tek model ve sentetik portal ortamıyla sınırlıdır; gerçek dünya performansı olarak sunulmaz.
 
 ## Etik, açık bilim ve veri yönetimi
 

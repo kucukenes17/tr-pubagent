@@ -9,8 +9,8 @@ Son güncelleme: 7 Eylül 2026
 | Phi-4 Unguarded / Guarded ana deney | Tamamlandı | `results/frozen` ham izleri ve kanonik özet |
 | İstatistiksel final değerlendirme | Tamamlandı | 40 eşlenmiş test, exact McNemar |
 | Gerçek veriye bağlı dashboard | Tamamlandı | Grafikler ve 40 görevlik JSONL replay explorer |
-| İnsan yazımı OOD sağlamlık paketi | Altyapı tamamlandı | 24 görev, sızıntı denetimi, çok-seed runner; Kaggle koşusu bekliyor |
-| Çok-seed sağlamlık sonucu | Bekliyor | 144 GPU koşusu ve `analyze_robustness.py` |
+| İnsan yazımı OOD sağlamlık paketi | Tamamlandı | 24 görev, sızıntı denetimi ve dondurulmuş protokol |
+| Çok-seed sağlamlık sonucu | Tamamlandı | 144 GPU koşusu: Guarded %91,7, Unguarded %8,3; exact McNemar p=1,73×10⁻¹⁸ |
 | ML Guard / Hybrid Guard ablation | Altyapı tamamlandı | Çalışma zamanı adaptörü, Rule/ML/Hybrid runner ve Holm düzeltmeli analiz hazır; XLM-R artefaktı/koşu bekliyor |
 | İkinci üretici model | Bekliyor | GPU kotasına göre 24 OOD görevde ek model |
 | Altı ayrı portal yüzeyi | Kısmi | Backend altı hizmeti kapsıyor; frontend burs demosu ağırlıklı |
@@ -22,7 +22,7 @@ Son güncelleme: 7 Eylül 2026
 
 ## Sıradaki karar kapıları
 
-1. OOD robustness koşularını Kaggle'da tamamla ve ham ZIP'i arşivle.
-2. Sonuç makulse dashboard'a ikinci “OOD Sağlamlık” bölümü ekle; başarısızsa hata taksonomisini yayınla.
-3. XLM-R artefaktı bulunursa ML/Hybrid ablation'a geç; bulunamazsa veri ve modeli yeniden üret.
+1. OOD'de bulunan iki sistematik sınırı v2.2 post-hoc deneyinde ayrı etiketle ve yeniden değerlendir.
+2. XLM-R artefaktı bulunursa ML/Hybrid ablation'a geç; bulunamazsa veri ve modeli yeniden üret.
+3. İkinci üretici model ile 24 OOD görevi çalıştır.
 4. Yayın belgelerini ve videoyu tamamlayıp `v1.0.0` sürümünü çıkar.

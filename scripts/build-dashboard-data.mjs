@@ -57,23 +57,33 @@ function compactRun(run) {
   };
 }
 
-const [summary, guardedRuns, unguardedRuns] = await Promise.all([
+const [summary, guardedRuns, unguardedRuns, robustnessSummary, guardedOodRuns] = await Promise.all([
   readJson(resolve(derived, 'frozen_summary.json')),
   readJsonl(resolve(raw, 'phi4_guarded_test_v2_1.jsonl')),
   readJsonl(resolve(raw, 'phi4_unguarded_test_v1.jsonl')),
+  readJson(resolve(root, 'results/robustness/robustness_summary.json')),
+  readJsonl(resolve(root, 'results/robustness/phi4_guarded_ood_v2_1.jsonl')),
 ]);
 
 const guardedByTask = new Map(guardedRuns.map((run) => [run.task_id, compactRun(run)]));
 const unguardedByTask = new Map(unguardedRuns.map((run) => [run.task_id, compactRun(run)]));
 const taskIds = [...new Set([...guardedByTask.keys(), ...unguardedByTask.keys()])].sort((a, b) => a.localeCompare(b));
+const robustnessFailures = guardedOodRuns
+  .filter((run) => !run.task_success && run.seed === 0)
+  .map(compactRun);
 
 const payload = {
   generatedFrom: {
     summary: 'results/frozen/derived/frozen_summary.json',
     guarded: 'results/frozen/raw/phi4_guarded_test_v2_1.jsonl',
     unguarded: 'results/frozen/raw/phi4_unguarded_test_v1.jsonl',
+    robustness: 'results/robustness/robustness_summary.json',
   },
   summary,
+  robustness: {
+    summary: robustnessSummary,
+    representativeFailures: robustnessFailures,
+  },
   pairedRuns: taskIds.map((taskId) => ({
     taskId,
     guarded: guardedByTask.get(taskId) ?? null,

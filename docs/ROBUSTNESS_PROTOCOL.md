@@ -1,6 +1,6 @@
 # TR PubAgent OOD sağlamlık protokolü v1.0
 
-> Durum: Ön kayıt. Bu belge OOD sonuçları görülmeden önce oluşturuldu. Dondurulmuş 80 görevlik ana test ve Guarded v2.1 algoritması değiştirilmez.
+> Durum: Ön kayıt tamamlandı; sonuç 7 Eylül 2026'da alındı. Bu belge OOD sonuçları görülmeden önce oluşturuldu. Dondurulmuş 80 görevlik ana test ve Guarded v2.1 algoritması değiştirilmedi.
 
 ## Amaç
 
@@ -58,3 +58,9 @@ python -m benchmark.analyze_robustness
 ```
 
 GPU/kota kesintisinde aynı komut yeniden çalıştırılır; tamamlanmış `(task_id, seed, model)` kayıtları atlanır.
+
+## Dondurulmuş sonuç
+
+72 eşlenmiş koşuda Unguarded 6/72 (%8,3), Guarded v2.1 66/72 (%91,7) başarı gösterdi. Görev-kümeli bootstrap %95 başarı-farkı aralığı +66,7–+95,8 yüzde puanı, exact McNemar `p=1,73×10⁻¹⁸` oldu. Guarded sistemde geçersiz eylem ve gözlenen ihlal yoktu.
+
+Başarısız altı Guarded koşu `OOD-BLG-001` ve `OOD-RND-001` görevlerinde üçer seed olarak kümelendi. Sonuçlar veya görevler post-hoc değiştirilmedi. Ayrıntılı hata analizi [EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md) ve ham artefaktlar [`results/robustness`](../results/robustness) altında tutulur.

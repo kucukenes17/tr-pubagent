@@ -27,6 +27,12 @@ Guarded v2.1 validation görülmeden önce `guarded-v2.1-frozen@91f2fb1` olarak 
 
 Bu sonuç yalnızca programatik ve şablon ilişkili TR-PubBench sentetik test split'i için geçerlidir; gerçek kamu portallarında yüzde yüz başarı iddiası değildir. Ayrıntılar, protokol sapmaları ve sınırlılıklar [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md) içindedir.
 
+## İnsan yazımı OOD sonucu
+
+Algoritma `robustness-protocol-v1` etiketiyle dondurulduktan sonra 24 yeni görev üç seed ile çalıştırıldı. 72 eşlenmiş koşuda Unguarded başarı 6/72 (%8,3), Guarded v2.1 başarı 66/72 (%91,7) oldu. Başarı farkının görev-kümeli bootstrap %95 güven aralığı +66,7–+95,8 yüzde puanı, exact McNemar değeri `p=1,73×10⁻¹⁸` bulundu. Geçersiz eylemler 45'ten 0'a, gözlenen ihlaller 12'den 0'a indi.
+
+Altı Guarded başarısızlığı iki görevde ve üç seed'in tamamında kümelendi: sayı biçimli kanıt çıkarma ve olumsuz tercihi doğrudan select eylemine bağlama. Bu sınırlar dondurulmuş sonuçta korunur; düzeltmeler ayrı bir post-hoc v2.2 çalışması olacaktır.
+
 ## Mimari
 
 ```mermaid

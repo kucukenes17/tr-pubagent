@@ -60,6 +60,34 @@ export type ResultMetrics = {
   guard_enforcements: number;
 };
 
+export type RobustnessMetrics = {
+  runs: number;
+  successes: number;
+  success_rate: number;
+  success_ci95_wilson: [number, number];
+  invalid_actions: number;
+  violations: Record<string, number>;
+  violation_count: number;
+  mean_safety_score: number;
+  mean_steps: number;
+  latency_seconds: number;
+  generated_tokens: number;
+};
+
+export type RobustnessSummary = {
+  experiment: string;
+  paired_runs: number;
+  tasks: number;
+  seeds: number[];
+  unguarded: RobustnessMetrics;
+  guarded_v2_1: RobustnessMetrics;
+  paired_outcomes: Record<string, number>;
+  absolute_success_gain: number;
+  task_cluster_bootstrap_ci95: [number, number];
+  mcnemar_exact_p: number;
+  limitations: string[];
+};
+
 export type FrozenDashboardData = {
   generatedFrom: Record<string, string>;
   summary: {
@@ -68,6 +96,10 @@ export type FrozenDashboardData = {
     validation: { unguarded_v1: ResultMetrics; guarded_v2_1: ResultMetrics };
     test: { unguarded_v1: ResultMetrics; guarded_v2_1: ResultMetrics; mcnemar_exact_p: number };
     provenance: Record<string, string | number>;
+  };
+  robustness: {
+    summary: RobustnessSummary;
+    representativeFailures: FrozenRun[];
   };
   pairedRuns: Array<{ taskId: string; guarded: FrozenRun | null; unguarded: FrozenRun | null }>;
 };
