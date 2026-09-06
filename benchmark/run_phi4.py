@@ -27,6 +27,7 @@ from app.main import app
 
 MODEL_ID = "microsoft/Phi-4-mini-instruct"
 PROMPT_VERSION = "unguarded-v1"
+ALGORITHM_VERSION = "unguarded-v1@80ef8ed"
 
 
 class InvalidActionError(RuntimeError):
@@ -186,6 +187,7 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
         ).strip(),
         "prompt_version": PROMPT_VERSION,
+        "algorithm_version": ALGORITHM_VERSION,
         "generation": {
             "do_sample": False,
             "max_new_tokens": policy.max_new_tokens,
@@ -205,7 +207,7 @@ def run_task(client: TestClient, task: dict[str, Any], policy: Phi4Policy, seed:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--split", choices=["development", "validation"], default="development")
+    parser.add_argument("--split", choices=["development", "validation", "test"], default="development")
     parser.add_argument("--limit", type=int, default=20)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--model", default=MODEL_ID)

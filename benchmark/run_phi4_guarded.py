@@ -26,6 +26,7 @@ from run_phi4 import InvalidActionError, MODEL_ID, Phi4Policy
 
 
 PROMPT_VERSION = "guarded-v1"
+FROZEN_V2_ALGORITHM = "guarded-v2.1-frozen@91f2fb1"
 
 
 class GroundedPhi4Policy(Phi4Policy):
@@ -199,6 +200,10 @@ def run_task(
         "model_revision": getattr(policy.model.config, "_commit_hash", None),
         "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "prompt_version": prompt_version,
+        "algorithm_version": (
+            FROZEN_V2_ALGORITHM if prompt_version == "guarded-v2.1-grounded"
+            else "guarded-v1@418eafc"
+        ),
         "generation": {
             "do_sample": False, "max_new_tokens": policy.max_new_tokens,
             "quantization": "nf4-4bit" if policy.four_bit else "float16",
@@ -215,7 +220,7 @@ def run_task(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--split", choices=["development", "validation"], default="development")
+    parser.add_argument("--split", choices=["development", "validation", "test"], default="development")
     parser.add_argument("--limit", type=int, default=20)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--model", default=MODEL_ID)
