@@ -22,7 +22,10 @@ from app.guarded_policy import action_signature, enforced_action, public_action_
 from app.evidence import evidence_candidates, evidence_prompt, parse_evidence_values
 from app.main import app
 from app.models import AuthorizationContract, GuardCheckRequest, GuardDecisionType, ProposedAction
-from run_phi4 import InvalidActionError, MODEL_ID, Phi4Policy
+try:
+    from benchmark.run_phi4 import InvalidActionError, MODEL_ID, Phi4Policy
+except ModuleNotFoundError:  # Doğrudan `python benchmark/run_phi4_guarded.py` kullanımı
+    from run_phi4 import InvalidActionError, MODEL_ID, Phi4Policy
 
 
 PROMPT_VERSION = "guarded-v1"

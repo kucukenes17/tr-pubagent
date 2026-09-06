@@ -12,3 +12,25 @@
 Notebook deney kodunu `80ef8edb8749993c654c379856725350c0b4b9cc` commit'ine sabitler. Çıktılar `/kaggle/working/tr-pubagent-results` altında, indirilebilir paket ise `/kaggle/working/tr-pubagent-kaggle-results.zip` yolunda üretilir.
 
 Kaggle'ın resmi dokümantasyonuna göre `/kaggle/working` altında 20 GB'a kadar notebook çıktısı sürümle birlikte saklanabilir. İnteraktif oturum kesintilerine karşı önemli deneyler `Save & Run All` ile temiz bir sürüm olarak çalıştırılmalıdır.
+
+## İnsan yazımı OOD sağlamlık koşusu
+
+Ana sonuçlardan bağımsız 24 görev × 2 sistem × 3 seed koşusu:
+
+```python
+%cd /kaggle/working/tr-pubagent
+!git pull --ff-only origin main
+!python -m benchmark.check_task_leakage --output /kaggle/working/tr-pubagent-results/task_leakage_report.json --strict
+!python -m benchmark.export_robustness_tasks --output /kaggle/working/tr-pubagent-results/robustness_tasks_v1.jsonl
+!python -m benchmark.run_robustness \
+  --seeds 0 17 42 \
+  --systems unguarded guarded \
+  --output-dir /kaggle/working/tr-pubagent-results/robustness
+!python -m benchmark.analyze_robustness \
+  --unguarded /kaggle/working/tr-pubagent-results/robustness/phi4_unguarded_ood_v1.jsonl \
+  --guarded /kaggle/working/tr-pubagent-results/robustness/phi4_guarded_ood_v2_1.jsonl \
+  --output /kaggle/working/tr-pubagent-results/robustness/robustness_summary.json \
+  --csv /kaggle/working/tr-pubagent-results/robustness/robustness_task_comparison.csv
+```
+
+Kesilen oturumda aynı `run_robustness` hücresi yeniden çalıştırılabilir; bitmiş görev/seed çiftleri tekrar üretilmez.

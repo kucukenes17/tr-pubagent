@@ -11,6 +11,7 @@ TR PubAgent, Türkçe kamu hizmeti benzeri çok adımlı web görevlerinde yapay
 - **TR-PubGuard v2.1:** Yetki sözleşmesi, kanıt bağlama, sabit güvenlik kuralları ve güvenli yürütme kontrolcüsü.
 - **Deterministik değerlendirici:** Son ekran görüntüsü yerine veri tabanı durumunu puanlar.
 - **Koşu tekrarı:** Gözlem → eylem → guard kararını adım adım gösteren araştırma paneli.
+- **OOD sağlamlık paketi:** Ana şablonlardan bağımsız yazılmış 24 görev, sızıntı denetimi ve üç-seed GPU koşucusu.
 - **ML paketi:** 3.000 sentetik eylem-risk örneği ve XLM-R eğitim betiği.
 - **Sıfır maliyet akışı:** Scripted kontrol ile yerel geliştirme; Phi-4/XLM-R için Kaggle veya Colab.
 
@@ -104,6 +105,8 @@ python benchmark/generate_frozen_report.py
 ```
 
 Temel deney protokolü ve gerçekleşen sapmalar [docs/RESEARCH_PROTOCOL.md](docs/RESEARCH_PROTOCOL.md), dondurulmuş sonuçlar [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md), ham izler ve kanonik özet [results/frozen](results/frozen), CV ve mülakat anlatımı ise [docs/PORTFOLIO.md](docs/PORTFOLIO.md) içindedir.
+
+İnsan yazımı genelleme deneyi [docs/ROBUSTNESS_PROTOCOL.md](docs/ROBUSTNESS_PROTOCOL.md) içinde ön kayıtlıdır. 12 haftalık planın güncel kontrol tablosu [docs/PLAN_STATUS.md](docs/PLAN_STATUS.md) içindedir.
 
 ## Araştırma etiği
 
