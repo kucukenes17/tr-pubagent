@@ -875,3 +875,323 @@
     margin-right: auto;
   }
 }
+/* Compact wordmark, quiet navigation and measured data motion. */
+.site-header {
+  background: #f3f5f6;
+  border-bottom: 0;
+}
+.header-inner {
+  min-height: 100px;
+}
+.site-brand {
+  gap: 0;
+}
+.site-brand strong {
+  font-size: 27px;
+  font-weight: 650;
+  letter-spacing: -1.5px;
+  line-height: 1;
+}
+.brand-prefix {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 18px;
+  color: #647581;
+  font-weight: 450;
+  letter-spacing: -1px;
+  margin-right: 5px;
+}
+.site-brand small {
+  font-size: 12px;
+  letter-spacing: 0.015em;
+  margin-top: 7px;
+  color: #657780;
+}
+.header-inner nav {
+  align-self: center;
+  background: #e7ecef;
+  border: 1px solid #dde4e8;
+  padding: 5px;
+  border-radius: 14px;
+  gap: 3px;
+}
+.header-inner nav a {
+  padding: 10px 15px;
+  border: 0;
+  border-radius: 9px;
+  min-height: 40px;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+.header-inner nav a[aria-current] {
+  background: #fff;
+  box-shadow: 0 1px 3px #152d3912;
+  color: #142b39;
+}
+.header-agent {
+  background: #172e3a;
+  color: #fff;
+  border: 1px solid #172e3a;
+  padding: 12px 16px;
+  border-radius: 10px;
+  transition:
+    transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 160ms ease;
+}
+.header-agent svg {
+  transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.research-heading {
+  padding: 22px 0 28px;
+  margin-bottom: 0;
+  align-items: end;
+}
+.research-heading h1 {
+  font-size: clamp(32px, 3.5vw, 48px);
+  line-height: 1.13;
+  letter-spacing: -2px;
+  margin: 18px 0 16px;
+}
+.research-heading h1 span {
+  color: #647680;
+  font-weight: 450;
+}
+.research-heading p {
+  max-width: 730px;
+}
+.research-heading .eyebrow {
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.research-kicker {
+  color: #172e3a;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+.model-label {
+  color: #536873;
+  font-size: 12px;
+  letter-spacing: 0;
+  padding-left: 14px;
+  border-left: 1px solid #becbd2;
+}
+.research-actions a {
+  min-height: 42px;
+  border-radius: 10px;
+}
+.scope-note {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid #d7dfe3;
+  border-radius: 0;
+  padding: 14px 0;
+  margin-bottom: 20px;
+  color: #536570;
+}
+.experiment {
+  border-radius: 16px;
+  border-color: #dce3e7;
+  box-shadow: 0 3px 12px #172e3a04;
+}
+.experiment-header {
+  padding: 23px 26px 19px;
+  border-bottom: 0;
+}
+.experiment-index {
+  border: 0;
+  padding: 0;
+  font-size: 13px;
+  color: #7b8c96;
+}
+.experiment-header .eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.09em;
+}
+.experiment h2 {
+  font-size: 25px;
+  letter-spacing: -0.9px;
+  margin-top: 8px;
+}
+.experiment-body {
+  padding: 4px 26px 24px;
+}
+.system-line {
+  margin-bottom: 24px;
+}
+.system-line-title {
+  align-items: end;
+  margin-bottom: 12px;
+}
+.system-line-title strong {
+  font-size: 36px;
+  font-weight: 550;
+  letter-spacing: -1.7px;
+  line-height: 1;
+  text-align: right;
+}
+.system-line-title strong small {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0;
+  margin: 6px 0 0;
+}
+.measure-track {
+  height: 17px;
+  border-radius: 5px;
+  background: #edf1f3;
+  overflow: hidden;
+}
+.measure-fill {
+  border-radius: 4px;
+  transform-origin: left center;
+  min-width: 0;
+  background: #08735c;
+}
+.measure-fill.unguarded {
+  background: #9d513b;
+}
+.measure-caption {
+  margin-top: 8px;
+  font-size: 12px;
+}
+.safety-comparison {
+  background: #f7f9fa;
+  padding: 16px 26px;
+}
+.safety-comparison dd {
+  font-size: 25px;
+  letter-spacing: -0.6px;
+}
+.stat-foot {
+  padding: 16px 26px;
+  font-size: 13px;
+  gap: 8px 18px;
+}
+.chart-panel {
+  border-radius: 16px;
+}
+.research-actions a {
+  transition:
+    transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .header-inner nav a:not([aria-current]):hover {
+    background: #dbe3e7;
+    color: #142b39;
+  }
+  .header-agent:hover {
+    background: #284754;
+  }
+  .header-agent:hover svg {
+    transform: translate(2px, -2px);
+  }
+  .research-actions a:hover {
+    transform: translateY(-2px);
+  }
+  .header-agent:active,
+  .research-actions a:active {
+    transform: scale(0.98);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .experiment[data-revealed] .measure-fill {
+    animation: measure-enter 650ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+  .experiment[data-revealed] .system-line:nth-child(2) .measure-fill {
+    animation-delay: 70ms;
+  }
+  .chart-panel[data-revealed] .recharts-bar-rectangle {
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    animation: chart-enter-y 600ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+  .chart-panel[data-revealed]:nth-child(2) .recharts-bar-rectangle {
+    transform-origin: left center;
+    animation-name: measure-enter;
+  }
+  .chart-panel[data-revealed] .recharts-bar-rectangle:nth-child(2) {
+    animation-delay: 40ms;
+  }
+  .chart-panel[data-revealed] .recharts-bar-rectangle:nth-child(3) {
+    animation-delay: 80ms;
+  }
+}
+@keyframes measure-enter {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes chart-enter-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@media (max-width: 1100px) {
+  .research-heading {
+    align-items: start;
+  }
+  .header-inner nav a {
+    padding: 10px 12px;
+  }
+}
+@media (max-width: 760px) {
+  .header-inner {
+    padding: 24px 16px 0;
+    gap: 20px;
+  }
+  .header-inner nav {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0;
+    padding: 4px;
+    border-radius: 12px;
+  }
+  .header-inner nav a {
+    padding: 8px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+  .site-brand strong {
+    font-size: 26px;
+  }
+  .research-heading {
+    padding: 8px 0 20px;
+    gap: 16px;
+  }
+  .research-heading h1 {
+    font-size: 34px;
+    letter-spacing: -1.5px;
+  }
+  .research-heading p {
+    font-size: 16px;
+  }
+  .experiment-header {
+    padding: 22px 20px 18px;
+  }
+  .experiment-body {
+    padding: 2px 20px 22px;
+  }
+  .system-line-title strong {
+    font-size: 31px;
+  }
+  .system-line-title > span {
+    max-width: 140px;
+  }
+  .safety-comparison,
+  .stat-foot {
+    padding: 16px 20px;
+  }
+  .scope-note {
+    padding: 14px 0;
+  }
+  .byoa-section .scope-note {
+    padding: 12px;
+  }
+}

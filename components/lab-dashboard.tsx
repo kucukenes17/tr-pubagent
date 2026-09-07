@@ -1,14 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
   ArrowRight,
   ArrowUpRight,
   Braces,
   Database,
-  FlaskConical,
   Info,
   PlugZap,
   ShieldCheck,
@@ -67,8 +66,10 @@ function SuccessMeasure({
           {guarded ? 'Guarded v2.1' : 'Unguarded v1'}
         </span>
         <strong className={guarded ? 'guarded-text' : 'unguarded-text'}>
-          {run.successes}
-          <small>/ {run.runs}</small>
+          {percent(run.success_rate)}
+          <small>
+            {run.successes} / {run.runs} görev
+          </small>
         </strong>
       </div>
       <div className="measure-track" aria-hidden="true">
@@ -78,8 +79,7 @@ function SuccessMeasure({
         />
       </div>
       <p className="measure-caption">
-        {percent(run.success_rate)} başarı · Wilson %95 GA:{' '}
-        {percent(run.success_ci95_wilson[0])}–
+        Wilson %95 GA: {percent(run.success_ci95_wilson[0])}–
         {percent(run.success_ci95_wilson[1])}
       </p>
     </div>
@@ -166,8 +166,28 @@ function Experiment({
 }
 
 export function LabDashboard() {
+  const surface = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<FrozenDashboardData | null>(null);
   const [error, setError] = useState(false);
+  useEffect(() => {
+    if (!data || !surface.current || !('IntersectionObserver' in window))
+      return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.setAttribute('data-revealed', 'true');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
+    surface.current
+      .querySelectorAll('.experiment, .chart-panel')
+      .forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, [data]);
   useEffect(() => {
     const controller = new AbortController();
     fetch('/data/frozen-dashboard.json', { signal: controller.signal })
@@ -255,14 +275,18 @@ export function LabDashboard() {
   return (
     <main>
       <SiteHeader />
-      <div id="content" className="research-workspace">
+      <div id="content" className="research-workspace" ref={surface}>
         <header className="research-heading">
           <div>
             <div className="eyebrow">
-              <FlaskConical size={16} /> Araştırma / Sonuçlar{' '}
-              <span aria-hidden="true">·</span> Phi-4
+              <span className="research-kicker">Araştırma sonuçları</span>
+              <span className="model-label">Phi-4 / Guard v2.1</span>
             </div>
-            <h1>Ajan başarısı, güvenlik sınırlarıyla birlikte.</h1>
+            <h1>
+              Ajan başarısı.
+              <br />
+              <span>Güvenlik sınırlarıyla birlikte.</span>
+            </h1>
             <p>
               Türkçe kamu hizmeti benzeri görevlerde AI ajanlarını ölçen
               araştırma platformu. Aynı ajan, iki koşul:{' '}

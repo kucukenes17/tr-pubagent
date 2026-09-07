@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 
 const links = [
   ['/', 'Araştırma'],
@@ -20,14 +20,11 @@ export function SiteHeader() {
       </a>
       <div className="header-inner">
         <Link href="/" className="site-brand">
-          <span className="brand-mark">
-            <ShieldCheck aria-hidden="true" size={23} />
-          </span>
           <span>
             <strong>
-              TR-PubAgent<span className="brand-dot">.</span>
+              <span className="brand-prefix">TR/</span>pubagent
             </strong>
-            <small>AJAN GÜVENLİĞİ ARAŞTIRMASI</small>
+            <small>Ajan değerlendirme laboratuvarı</small>
           </span>
         </Link>
         <nav aria-label="Ana navigasyon">
