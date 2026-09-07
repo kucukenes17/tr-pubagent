@@ -410,7 +410,7 @@ export function PortalSimulator() {
           </div>
 
           <aside aria-label="PubGuard karar günlüğü">
-            <Card className="sticky top-5 overflow-hidden border-blue-200 bg-gradient-to-b from-white to-blue-50/80 text-slate-950 shadow-lg shadow-blue-950/5">
+            <Card className="sticky top-5 gap-0 overflow-hidden border-blue-200 bg-gradient-to-b from-white to-blue-50/80 py-0 text-slate-950 shadow-lg shadow-blue-950/5">
               <CardHeader className="border-b border-blue-100 bg-blue-50/70">
                 <div className="flex items-center gap-3">
                   <span className="grid size-10 place-items-center rounded-xl bg-blue-700 text-white shadow-sm shadow-blue-700/20">
