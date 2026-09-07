@@ -76,6 +76,24 @@ class ProposedAction(BaseModel):
     reason: str = ""
 
 
+class ExternalAgentRequest(BaseModel):
+    """TR-PubAgent ile harici ajan arasındaki sürümlenmiş istek zarfı."""
+
+    protocol_version: Literal["tr-pubagent.agent.v1"] = "tr-pubagent.agent.v1"
+    run_id: str
+    task_id: str
+    observation: dict[str, Any]
+    feedback: str = ""
+
+
+class ExternalAgentResponse(BaseModel):
+    """Harici ajanın tek bir araç eylemi döndürdüğü yanıt zarfı."""
+
+    protocol_version: Literal["tr-pubagent.agent.v1"] = "tr-pubagent.agent.v1"
+    action: ProposedAction
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class GuardCheckRequest(BaseModel):
     user_request: str
     action: ProposedAction
@@ -96,7 +114,12 @@ class GuardDecision(BaseModel):
 
 class CreateRunRequest(BaseModel):
     task_id: str
-    agent: Literal["scripted-oracle", "unguarded", "rule-guard", "ml-guard", "tr-pubguard"] = "tr-pubguard"
+    agent: str = Field(
+        default="tr-pubguard",
+        min_length=1,
+        max_length=80,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$",
+    )
     seed: int = 0
 
 

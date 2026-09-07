@@ -12,6 +12,7 @@ Son güncelleme: 7 Eylül 2026
 | İnsan yazımı OOD sağlamlık paketi | Tamamlandı | 24 görev, sızıntı denetimi ve dondurulmuş protokol |
 | Çok-seed sağlamlık sonucu | Tamamlandı | 144 GPU koşusu: Guarded %91,7, Unguarded %8,3; exact McNemar p=1,73×10⁻¹⁸ |
 | ML Guard / Hybrid Guard ablation | Tamamlandı | Üç guarded sistem 66/72; H3 desteklenmedi. XLM-R metadata ve ham izler arşivlendi |
+| Kullanıcı ajan adaptörü / BYOA | Tamamlandı | `tr-pubagent.agent.v1` HTTP sözleşmesi, doğrudan/kural korumalı CLI, örnek ajan ve güvenlik kontrolleri |
 | İkinci üretici model | Bekliyor | GPU kotasına göre 24 OOD görevde ek model |
 | Altı ayrı portal yüzeyi | Kısmi | Backend altı hizmeti kapsıyor; frontend burs demosu ağırlıklı |
 | Temiz makine Docker doğrulaması | Bekliyor | Docker Desktop bulunan ayrı ortamda smoke test |
@@ -24,5 +25,5 @@ Son güncelleme: 7 Eylül 2026
 
 1. OOD'de bulunan iki sistematik sınırı v2.2 post-hoc deneyinde ayrı etiketle ve yeniden değerlendir.
 2. İkinci üretici model ile 24 OOD görevi çalıştır.
-3. Kullanıcı ajan adaptörü/API arayüzünü ürünleştir ve örnek üçüncü taraf ajan ekle.
+3. Altı hizmet için frontend portal yüzeylerini genişlet ve temiz Docker ortamında smoke test yap.
 4. Yayın belgelerini ve videoyu tamamlayıp `v1.0.0` sürümünü çıkar.

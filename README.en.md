@@ -34,6 +34,7 @@ This negative result shows that a perfect synthetic classification score does no
 - Phi-4 unguarded and evidence-grounded guarded agents.
 - Deterministic authorization, privacy, confirmation, and state-preservation checks.
 - Experimental XLM-R ML-only and Hybrid Guard ablation infrastructure.
+- Versioned bring-your-own-agent HTTP protocol and local direct/guarded evaluator.
 - FastAPI + SQLite environment and evaluator.
 - A result-driven dashboard with paired JSONL trace replay.
 - Frozen raw outputs, checksums, protocol deviations, data card, and system card.

@@ -14,6 +14,7 @@ TR PubAgent, Türkçe kamu hizmeti benzeri çok adımlı web görevlerinde yapay
 - **OOD sağlamlık paketi:** Ana şablonlardan bağımsız yazılmış 24 görev, sızıntı denetimi ve üç-seed GPU koşucusu.
 - **ML paketi:** 3.000 sentetik eylem-risk örneği ve XLM-R eğitim betiği.
 - **Ablation altyapısı:** Rule-only, XLM-R ML-only ve Hybrid Guard için ortak OOD koşucu ve Holm düzeltmeli analiz.
+- **Kendi ajanını getir:** Sürümlü HTTP eylem sözleşmesiyle herhangi bir ajanı doğrudan veya TR-PubGuard arkasında değerlendiren yerel koşucu.
 - **Sıfır maliyet akışı:** Scripted kontrol ile yerel geliştirme; Phi-4/XLM-R için Kaggle veya Colab.
 
 ## Dondurulmuş Phi-4 sonucu
@@ -122,6 +123,20 @@ curl -X POST http://localhost:8000/v1/guard/check \
 ```
 
 Beklenen karar: `REQUIRE_CONFIRMATION`.
+
+## Kendi ajanını test et
+
+Ajanınız `tr-pubagent.agent.v1` sözleşmesine uyan bir `POST /act` endpoint'i sunuyorsa aynı benchmark ve değerlendiriciye bağlanabilir:
+
+```bash
+python -m benchmark.run_external_agent \
+  --agent-url http://127.0.0.1:9001/act \
+  --agent-name my-agent-v1 \
+  --split development \
+  --guard none
+```
+
+`--guard rule` aynı ajanı TR-PubGuard korumasıyla çalıştırır. Protokol, örnek ajan, uzak endpoint güvenliği ve JSONL çıktı açıklaması [docs/BRING_YOUR_OWN_AGENT.md](docs/BRING_YOUR_OWN_AGENT.md) içindedir.
 
 ## Test ve doğrulama
 
