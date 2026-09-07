@@ -61,4 +61,5 @@ def test_cross_model_result_paths_cannot_overwrite_phi4_defaults(tmp_path):
     qwen_paths = result_paths(tmp_path, "qwen2_5_7b")
     assert default_paths["unguarded"].name == "phi4_unguarded_ood_v1.jsonl"
     assert qwen_paths["guarded"].name == "qwen2_5_7b_guarded_ood_v2_1.jsonl"
+    assert result_paths(tmp_path, "phi4", "v2.2")["guarded"].name == "phi4_guarded_ood_v2_2.jsonl"
     assert set(default_paths.values()).isdisjoint(qwen_paths.values())

@@ -24,7 +24,7 @@ from fastapi.testclient import TestClient
 from app.main import TASK_BY_ID, app
 from benchmark.robustness_tasks import ROBUSTNESS_TASKS
 from benchmark.run_phi4 import MODEL_ID, Phi4Policy, run_task as run_unguarded_task
-from benchmark.run_phi4_guarded import GroundedPhi4Policy, run_task as run_guarded_task
+from benchmark.run_phi4_guarded import GroundedPhi4Policy, PostHocV22Policy, run_task as run_guarded_task
 
 
 def safe_run_label(value: str) -> str:
@@ -35,11 +35,12 @@ def safe_run_label(value: str) -> str:
     return label
 
 
-def result_paths(output_dir: Path, run_label: str) -> dict[str, Path]:
+def result_paths(output_dir: Path, run_label: str, guarded_version: str = "v2.1") -> dict[str, Path]:
     label = safe_run_label(run_label)
+    version = safe_run_label(guarded_version)
     return {
         "unguarded": output_dir / f"{label}_unguarded_ood_v1.jsonl",
-        "guarded": output_dir / f"{label}_guarded_ood_v2_1.jsonl",
+        "guarded": output_dir / f"{label}_guarded_ood_{version}.jsonl",
     }
 
 
@@ -57,6 +58,7 @@ def save_rows(path: Path, rows: list[dict[str, Any]]) -> None:
 def run_system(
     *, name: str, policy: Phi4Policy, runner: Callable[..., dict[str, Any]], tasks: list[dict[str, Any]],
     seeds: list[int], output: Path, model: str, guarded: bool, experiment_id: str,
+    guarded_prompt_version: str = "guarded-v2.1-grounded",
 ) -> None:
     rows = load_rows(output)
     completed = {(row.get("task_id"), row.get("seed"), row.get("model")) for row in rows}
@@ -74,7 +76,7 @@ def run_system(
                     continue
                 print(f"[{current}/{total}] {name} seed={seed} {task['id']}", flush=True)
                 if guarded:
-                    result = runner(client, task, policy, seed, prompt_version="guarded-v2.1-grounded")
+                    result = runner(client, task, policy, seed, prompt_version=guarded_prompt_version)
                 else:
                     result = runner(client, task, policy, seed)
                 result["evaluation_suite"] = experiment_id
@@ -113,6 +115,7 @@ def main() -> None:
     )
     parser.add_argument("--experiment-id", default="human-authored-ood-v1")
     parser.add_argument("--no-4bit", action="store_true")
+    parser.add_argument("--guarded-version", choices=["v2.1", "v2.2"], default="v2.1")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "outputs" / "robustness")
     args = parser.parse_args()
     if not 1 <= args.limit <= len(ROBUSTNESS_TASKS):
@@ -120,7 +123,7 @@ def main() -> None:
     if len(set(args.seeds)) != len(args.seeds):
         parser.error("--seeds tekrar eden değer içeremez")
     try:
-        paths = result_paths(args.output_dir, args.run_label)
+        paths = result_paths(args.output_dir, args.run_label, args.guarded_version)
     except ValueError as exc:
         parser.error(str(exc))
 
@@ -142,11 +145,14 @@ def main() -> None:
         release_model()
 
     if "guarded" in args.systems:
-        policy = GroundedPhi4Policy(model_id=args.model, four_bit=not args.no_4bit)
+        is_posthoc = args.guarded_version == "v2.2"
+        policy_class = PostHocV22Policy if is_posthoc else GroundedPhi4Policy
+        policy = policy_class(model_id=args.model, four_bit=not args.no_4bit)
         run_system(
-            name="guarded-v2.1", policy=policy, runner=run_guarded_task, tasks=tasks,
+            name=f"guarded-{args.guarded_version}", policy=policy, runner=run_guarded_task, tasks=tasks,
             seeds=args.seeds, output=paths["guarded"], model=args.model,
             guarded=True, experiment_id=args.experiment_id,
+            guarded_prompt_version=("guarded-v2.2-posthoc" if is_posthoc else "guarded-v2.1-grounded"),
         )
         del policy
         release_model()

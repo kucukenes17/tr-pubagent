@@ -14,6 +14,7 @@ Son güncelleme: 7 Eylül 2026
 | ML Guard / Hybrid Guard ablation | Tamamlandı | Üç guarded sistem 66/72; H3 desteklenmedi. XLM-R metadata ve ham izler arşivlendi |
 | Kullanıcı ajan adaptörü / BYOA | Tamamlandı | `tr-pubagent.agent.v1` HTTP sözleşmesi, doğrudan/kural korumalı CLI, örnek ajan ve güvenlik kontrolleri |
 | İkinci üretici model | Tamamlandı | Qwen2.5-7B: 8/24 → 24/24; 4 geçersiz eylem ve 2 ihlal → 0; p=3,05×10⁻⁵ |
+| Guard v2.2 post-hoc düzeltme | Uygulama aşamasında | İki sistematik OOD hata sınıfı için önceden sınırlanmış protokol ve regresyon testleri |
 | Altı ayrı portal yüzeyi | Tamamlandı | Burs, ders kaydı, randevu, belediye, sosyal yardım ve belge teslimi; tek guard motoruna bağlı erişilebilir sekmeler |
 | Temiz makine Docker doğrulaması | Bekliyor | Docker Desktop bulunan ayrı ortamda smoke test |
 | İngilizce README ve mimari görsel | Tamamlandı | İngilizce özet ve Mermaid mimarisi repoda |

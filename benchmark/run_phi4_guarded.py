@@ -23,6 +23,7 @@ from app.ml_guard import RiskClassifier, hybrid_decision, prediction_to_decision
 from app.evidence import evidence_candidates, evidence_prompt, parse_evidence_values
 from app.main import app
 from app.models import AuthorizationContract, GuardCheckRequest, GuardDecisionType, ProposedAction
+from app.posthoc_v22 import posthoc_grounded_action
 try:
     from benchmark.run_phi4 import InvalidActionError, MODEL_ID, Phi4Policy
 except ModuleNotFoundError:  # Doğrudan `python benchmark/run_phi4_guarded.py` kullanımı
@@ -31,6 +32,7 @@ except ModuleNotFoundError:  # Doğrudan `python benchmark/run_phi4_guarded.py` 
 
 PROMPT_VERSION = "guarded-v1"
 FROZEN_V2_ALGORITHM = "guarded-v2.1-frozen@91f2fb1"
+POSTHOC_V22_ALGORITHM = "guarded-v2.2-posthoc"
 
 
 class GroundedPhi4Policy(Phi4Policy):
@@ -77,6 +79,23 @@ class GroundedPhi4Policy(Phi4Policy):
                     "stage": "evidence_extraction", "raw": raw, "error": "",
                     "generated_tokens": generated_tokens,
                 }]
+        return super().next_action(observation, feedback=feedback)
+
+
+class PostHocV22Policy(GroundedPhi4Policy):
+    """Dondurulmuş v2.1'i değiştirmeden iki görünür-kanıt kurtarma kuralını uygular."""
+
+    def next_action(
+        self, observation: dict[str, Any], feedback: str = ""
+    ) -> tuple[Any, list[dict[str, Any]]]:
+        action = posthoc_grounded_action(observation)
+        if action is not None:
+            return action, [{
+                "stage": "posthoc_v2_2_grounding",
+                "raw": json.dumps(action.model_dump(mode="json"), ensure_ascii=False),
+                "error": "",
+                "generated_tokens": 0,
+            }]
         return super().next_action(observation, feedback=feedback)
 
 
@@ -221,6 +240,9 @@ def run_task(
         "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "prompt_version": prompt_version,
         "algorithm_version": (
+            POSTHOC_V22_ALGORITHM
+            if prompt_version == "guarded-v2.2-posthoc" and guard_strategy == "rule"
+            else
             FROZEN_V2_ALGORITHM
             if prompt_version == "guarded-v2.1-grounded" and guard_strategy == "rule"
             else f"guarded-v2.2-{guard_strategy}-ablation"
@@ -251,6 +273,7 @@ def main() -> None:
     parser.add_argument("--model", default=MODEL_ID)
     parser.add_argument("--no-4bit", action="store_true")
     parser.add_argument("--evidence-grounding", action="store_true")
+    parser.add_argument("--posthoc-v2-2", action="store_true")
     parser.add_argument("--task-ids", nargs="*", default=[])
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--output", type=Path, default=ROOT / "outputs" / "phi4_guarded_results.jsonl")
@@ -263,7 +286,11 @@ def main() -> None:
     existing: list[dict[str, Any]] = []
     if args.output.exists() and not args.overwrite:
         existing = [json.loads(line) for line in args.output.read_text(encoding="utf-8").splitlines() if line.strip()]
-    prompt_version = "guarded-v2.1-grounded" if args.evidence_grounding else PROMPT_VERSION
+    prompt_version = (
+        "guarded-v2.2-posthoc" if args.posthoc_v2_2
+        else "guarded-v2.1-grounded" if args.evidence_grounding
+        else PROMPT_VERSION
+    )
     completed = {
         item["task_id"] for item in existing
         if item.get("model") == args.model
@@ -273,7 +300,11 @@ def main() -> None:
 
     import torch
     torch.manual_seed(args.seed)
-    policy_class = GroundedPhi4Policy if args.evidence_grounding else Phi4Policy
+    policy_class = (
+        PostHocV22Policy if args.posthoc_v2_2
+        else GroundedPhi4Policy if args.evidence_grounding
+        else Phi4Policy
+    )
     policy = policy_class(model_id=args.model, four_bit=not args.no_4bit)
     with TestClient(app) as client:
         split_tasks = client.get("/v1/tasks", params={"split": args.split}).json()
