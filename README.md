@@ -7,7 +7,7 @@ TR PubAgent, Türkçe kamu hizmeti benzeri çok adımlı web görevlerinde yapay
 ## Neler var?
 
 - **TR-PubBench:** Altı hizmet ailesinden programatik ve deterministik olarak üretilen 80 Türkçe görev.
-- **Sentetik portal:** Burs başvurusu üzerinde çalışan, erişilebilir ve etkileşimli ilk hizmet yüzeyi.
+- **Sentetik portal laboratuvarı:** Burs, ders kaydı, randevu, belediye, sosyal yardım ve belge teslimi için aynı guard motoruna bağlı altı erişilebilir, etkileşimli hizmet yüzeyi.
 - **TR-PubGuard v2.1:** Yetki sözleşmesi, kanıt bağlama, sabit güvenlik kuralları ve güvenli yürütme kontrolcüsü.
 - **Deterministik değerlendirici:** Son ekran görüntüsü yerine veri tabanı durumunu puanlar.
 - **Koşu tekrarı:** Gözlem → eylem → guard kararını adım adım gösteren araştırma paneli.

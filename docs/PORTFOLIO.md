@@ -14,6 +14,7 @@ Bu metinler dondurulmuş sentetik test sonucuyla sınırlıdır. “Gerçek dün
 
 - Designed an 80-task Turkish benchmark spanning six public-service-like domains and five risk families: missing information, confirmation gates, privacy, language interpretation, and state preservation.
 - Implemented a FastAPI/SQLite agent environment, deterministic state-based evaluator, action traces, authorization contracts, evidence grounding, and a guarded execution controller.
+- Built an interactive portal lab with six public-service-like surfaces sharing the same observable guard decisions and safe execution contract.
 - Ran reproducible NF4 4-bit Phi-4 experiments on Kaggle T4 with frozen Git/model/prompt provenance and published raw JSONL traces plus SHA-256 manifests.
 - Evaluated paired development, validation, and held-out synthetic test splits; final test success increased from 0/40 to 40/40 with no observed guarded violations and 92.7% fewer generated tokens.
 - Confirmed the frozen guard on a second producer model: Qwen2.5-7B improved from 8/24 to 24/24 on the pre-specified OOD suite, with invalid actions falling from 4 to 0 and observed violations from 2 to 0 (exact McNemar p=3.05×10⁻⁵).

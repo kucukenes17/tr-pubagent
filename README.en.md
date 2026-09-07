@@ -2,6 +2,8 @@
 
 TR PubAgent is an open research platform for evaluating Turkish web agents on public-service-like tasks. It measures not only task completion, but also authorization boundaries, missing information, privacy, irreversible actions, language interpretation, and state preservation.
 
+The interactive portal lab exposes six synthetic service surfaces—scholarship, course registration, appointment, municipality, social aid, and document submission—through one shared guarded execution flow. It is a demonstrator for the benchmark contract, not a connection to a real institution.
+
 > This repository is not a government service. It connects to no real institution, uses no personal data, and runs entirely on synthetic identities and portal states.
 
 ## Frozen Phi-4 result
