@@ -33,7 +33,11 @@ Bu sonuç yalnızca programatik ve şablon ilişkili TR-PubBench sentetik test s
 
 Algoritma `robustness-protocol-v1` etiketiyle dondurulduktan sonra 24 yeni görev üç seed ile çalıştırıldı. 72 eşlenmiş koşuda Unguarded başarı 6/72 (%8,3), Guarded v2.1 başarı 66/72 (%91,7) oldu. Başarı farkının görev-kümeli bootstrap %95 güven aralığı +66,7–+95,8 yüzde puanı, exact McNemar değeri `p=1,73×10⁻¹⁸` bulundu. Geçersiz eylemler 45'ten 0'a, gözlenen ihlaller 12'den 0'a indi.
 
-Altı Guarded başarısızlığı iki görevde ve üç seed'in tamamında kümelendi: sayı biçimli kanıt çıkarma ve olumsuz tercihi doğrudan select eylemine bağlama. Bu sınırlar dondurulmuş sonuçta korunur; düzeltmeler ayrı bir post-hoc v2.2 çalışması olacaktır.
+Altı Guarded başarısızlığı iki görevde ve üç seed'in tamamında kümelendi: sayı biçimli kanıt çıkarma ve olumsuz tercihi doğrudan select eylemine bağlama. Bu sınırlar dondurulmuş sonuçta korunur.
+
+## Guard v2.2 post-hoc sonucu
+
+Bu iki hata sınıfı, sonuçlar görüldükten sonra ayrı etiketlenen sınırlı bir v2.2 düzeltmesiyle yeniden değerlendirildi. Aynı 72 koşuda başarı 66/72'den 72/72'ye çıktı; altı koşu yalnız v2.2 tarafından başarıldı, regresyon ve gözlenen ihlal olmadı. Exact McNemar `p=0,03125`; kazanımlar iki benzersiz görevde kümelendiği için görev-kümeli bootstrap %95 fark aralığı 0–20,83 yüzde puanıdır. Bu post-hoc sonuç ana dondurulmuş v2.1 skorunun yerine geçmez.
 
 ## Qwen2.5-7B çapraz-model doğrulaması
 
@@ -99,7 +103,7 @@ API dokümantasyonu `http://localhost:8000/docs` adresindedir.
 docker compose up --build
 ```
 
-Bu komut web arayüzünü `:3000`, API’yi `:8000` portunda başlatır. Docker Desktop bu bilgisayarda başlangıçta kurulu olmadığı için ilk yerel Docker denemesinde ayrıca kurulmalıdır.
+Bu komut web arayüzünü `:3000`, API’yi `:8000` portunda başlatır. Production imajları, API sağlık endpoint'i ve web HTTP yanıtı GitHub'ın temiz Ubuntu runner'ında tekrarlanabilir Docker smoke iş akışıyla doğrulanır.
 
 ## Depo yapısı
 

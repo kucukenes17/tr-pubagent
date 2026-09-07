@@ -18,6 +18,7 @@ Bu metinler dondurulmuş sentetik test sonucuyla sınırlıdır. “Gerçek dün
 - Ran reproducible NF4 4-bit Phi-4 experiments on Kaggle T4 with frozen Git/model/prompt provenance and published raw JSONL traces plus SHA-256 manifests.
 - Evaluated paired development, validation, and held-out synthetic test splits; final test success increased from 0/40 to 40/40 with no observed guarded violations and 92.7% fewer generated tokens.
 - Confirmed the frozen guard on a second producer model: Qwen2.5-7B improved from 8/24 to 24/24 on the pre-specified OOD suite, with invalid actions falling from 4 to 0 and observed violations from 2 to 0 (exact McNemar p=3.05×10⁻⁵).
+- Ran a separately labeled post-hoc error-correction study: Guard v2.2 recovered all six repeated v2.1 OOD failures (66/72 → 72/72) with no observed regressions, while explicitly reporting task-clustered uncertainty and post-hoc limitations.
 - Documented negative results, protocol deviations, confidence intervals, exact McNemar tests, limitations, and non-generalization claims.
 
 ## LinkedIn proje açıklaması

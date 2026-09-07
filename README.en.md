@@ -21,7 +21,11 @@ These numbers apply only to the frozen, programmatically generated synthetic spl
 
 After the algorithm was frozen under the `robustness-protocol-v1` tag, 24 new tasks were run with three seeds. Across 72 paired runs, Unguarded succeeded in 6/72 (8.3%) and Guarded v2.1 in 66/72 (91.7%). The task-clustered bootstrap 95% interval for the success gain was +66.7 to +95.8 percentage points and exact McNemar was `p=1.73×10⁻¹⁸`. Invalid actions fell from 45 to 0 and observed violations from 12 to 0.
 
-All six guarded failures clustered in two tasks across every seed: numeric evidence extraction and grounding a negative day preference into a select action. The frozen result is retained; any correction will be evaluated separately as a post-hoc v2.2 system.
+All six guarded failures clustered in two tasks across every seed: numeric evidence extraction and grounding a negative day preference into a select action. The frozen result is retained.
+
+## Guard v2.2 post-hoc result
+
+After those failures were observed, a separately labeled and narrowly scoped v2.2 correction was evaluated on the same 72 runs. Success increased from 66/72 to 72/72: six runs were v2.2-only successes, with no regressions or observed violations. Exact McNemar was `p=0.03125`; because the gains clustered in two unique tasks, the task-clustered bootstrap 95% interval was 0 to 20.83 percentage points. This post-hoc result does not replace the frozen v2.1 claim.
 
 ## Qwen2.5-7B cross-model confirmation
 
@@ -75,6 +79,6 @@ python -m benchmark.check_task_leakage --strict
 
 ## Research status
 
-The main 80-task experiment, 144-run Phi-4 OOD comparison, Rule/ML/Hybrid ablation, and 48-run Qwen2.5-7B cross-model confirmation are complete. See [the current plan](docs/PLAN_STATUS.md), [experiment report](docs/EXPERIMENT_RESULTS.md), [OOD protocol](docs/ROBUSTNESS_PROTOCOL.md), and [cross-model protocol](docs/CROSS_MODEL_PROTOCOL.md).
+The main 80-task experiment, 144-run Phi-4 OOD comparison, Guard v2.2 post-hoc analysis, Rule/ML/Hybrid ablation, 48-run Qwen2.5-7B cross-model confirmation, and clean-runner Docker smoke test are complete. See [the current plan](docs/PLAN_STATUS.md), [experiment report](docs/EXPERIMENT_RESULTS.md), [OOD protocol](docs/ROBUSTNESS_PROTOCOL.md), and [post-hoc protocol](docs/POSTHOC_V22_PROTOCOL.md).
 
 Code is Apache-2.0. Dataset and result licensing remains subject to the repository's final data-license audit.

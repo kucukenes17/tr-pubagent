@@ -18,7 +18,11 @@ Depoda ayrıca XLM-RoBERTa risk sınıflandırıcısı için veri üretme ve eğ
 - `ml`: yalnız öğrenilmiş risk kararı;
 - `hybrid`: kural engelini korur, kural izin verdiğinde ML kararını uygular.
 
-Bu kodun varlığı deney sonucunu ifade etmez. ML/Hybrid skorları ancak model ağırlığı, eğitim metadata'sı ve dört sistemin tam eşlenmiş ham koşuları yayımlandıktan sonra raporlanacaktır. v2.2 ablation, dondurulmuş v2.1 final skorunun yerine geçmez.
+Tam eşlenmiş ablation sonucunda Rule, ML ve Hybrid sistemlerin üçü de 66/72 başarı verdi; önceden tanımlı Hybrid üstünlüğü hipotezi desteklenmedi. Model ağırlığı, eğitim metadata'sı ve ham izler `results/ml` ile `results/robustness` altında yayımlanır. Bu ablation, dondurulmuş v2.1 final skorunun yerine geçmez.
+
+## Post-hoc Guard v2.2
+
+v2.1 OOD hataları görüldükten sonra, yalnız açık para kanıtı ve olumsuzlanan select tercihi sınıfları için ayrı bir post-hoc v2.2 geliştirildi. Aynı 72 OOD koşusunda başarı 66/72'den 72/72'ye çıktı; altı yalnız-v2.2 başarısı ve sıfır regresyon görüldü. Geçersiz eylem ve gözlenen ihlal sayısı her iki guarded sürümde de sıfırdı. Exact McNemar `p=0,03125`; görev-kümeli bootstrap aralığı kazanımlar iki görevde toplandığı için sıfırı içerir. v2.2, önceden dondurulmuş v2.1 kanıtı gibi sunulmamalıdır.
 
 ## Girdi ve çıktı
 
