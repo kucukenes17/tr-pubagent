@@ -5,7 +5,7 @@ from pathlib import Path
 from benchmark.check_task_leakage import audit
 from benchmark.analyze_robustness import mcnemar_exact, wilson
 from benchmark.analyze_ablation import fisher_exact_two_sided, holm_adjust
-from benchmark.run_robustness import result_paths, safe_run_label
+from benchmark.run_robustness import result_paths, safe_run_label, select_tasks
 from benchmark.robustness_tasks import ROBUSTNESS_TASKS
 
 
@@ -63,3 +63,15 @@ def test_cross_model_result_paths_cannot_overwrite_phi4_defaults(tmp_path):
     assert qwen_paths["guarded"].name == "qwen2_5_7b_guarded_ood_v2_1.jsonl"
     assert result_paths(tmp_path, "phi4", "v2.2")["guarded"].name == "phi4_guarded_ood_v2_2.jsonl"
     assert set(default_paths.values()).isdisjoint(qwen_paths.values())
+
+
+def test_robustness_runner_can_select_posthoc_smoke_tasks():
+    selected = select_tasks(24, ["OOD-BLG-001", "OOD-RND-001"])
+    assert [task.id for task in selected] == ["OOD-RND-001", "OOD-BLG-001"]
+
+    try:
+        select_tasks(24, ["OOD-NOT-FOUND"])
+    except ValueError as error:
+        assert "bulunamayan" in str(error)
+    else:
+        raise AssertionError("Bilinmeyen OOD görev kimliği reddedilmeliydi")

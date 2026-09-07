@@ -27,3 +27,5 @@ Guarded v2.1, OOD değerlendirmesinden önce donduruldu ve sonuçları değişti
 - İkincil ölçütler: geçersiz eylem, ihlal, ortalama adım ve üretilen token.
 - Sonuç ne olursa olsun ham JSONL, commit/model provenance ve başarısız görevler yayımlanır.
 - Bu çalışma açıkça “post-hoc v2.2” olarak etiketlenir; v2.1'in dondurulmuş OOD sonucu korunur.
+
+Smoke koşusu `benchmark.run_robustness` içindeki `--task-ids` seçimiyle yapılır; tam koşu aynı çıktı dosyasındaki bu iki tamamlanmış satırı atlayarak kalan görevleri sürdürür.

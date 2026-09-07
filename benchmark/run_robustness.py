@@ -44,6 +44,17 @@ def result_paths(output_dir: Path, run_label: str, guarded_version: str = "v2.1"
     }
 
 
+def select_tasks(limit: int, task_ids: list[str]) -> list[Any]:
+    if not task_ids:
+        return ROBUSTNESS_TASKS[:limit]
+    requested = set(task_ids)
+    selected = [task for task in ROBUSTNESS_TASKS if task.id in requested]
+    missing = requested - {task.id for task in selected}
+    if missing:
+        raise ValueError(f"OOD kümesinde bulunamayan task id: {sorted(missing)}")
+    return selected
+
+
 def load_rows(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -108,6 +119,7 @@ def main() -> None:
     parser.add_argument("--seeds", nargs="+", type=int, default=[0, 17, 42])
     parser.add_argument("--systems", nargs="+", choices=["unguarded", "guarded"], default=["unguarded", "guarded"])
     parser.add_argument("--limit", type=int, default=24)
+    parser.add_argument("--task-ids", nargs="*", default=[])
     parser.add_argument("--model", default=MODEL_ID)
     parser.add_argument(
         "--run-label", default="phi4",
@@ -127,7 +139,10 @@ def main() -> None:
     except ValueError as exc:
         parser.error(str(exc))
 
-    selected_models = ROBUSTNESS_TASKS[:args.limit]
+    try:
+        selected_models = select_tasks(args.limit, args.task_ids)
+    except ValueError as exc:
+        parser.error(str(exc))
     TASK_BY_ID.update({task.id: task for task in selected_models})
     tasks = [task.model_dump(mode="json") for task in selected_models]
     args.output_dir.mkdir(parents=True, exist_ok=True)
