@@ -16,7 +16,7 @@ Son güncelleme: 7 Eylül 2026
 | İkinci üretici model | Tamamlandı | Qwen2.5-7B: 8/24 → 24/24; 4 geçersiz eylem ve 2 ihlal → 0; p=3,05×10⁻⁵ |
 | Guard v2.2 post-hoc düzeltme | Tamamlandı | 66/72 → 72/72; 6 yalnız-v2.2 başarısı, 0 regresyon, 0 ihlal; exact McNemar p=0,03125 |
 | Altı ayrı portal yüzeyi | Tamamlandı | Burs, ders kaydı, randevu, belediye, sosyal yardım ve belge teslimi; tek guard motoruna bağlı erişilebilir sekmeler |
-| Temiz makine Docker doğrulaması | Bekliyor | Docker Desktop bulunan ayrı ortamda smoke test |
+| Temiz makine Docker doğrulaması | Çalıştırılıyor | GitHub temiz Ubuntu runner'ında API sağlık ve dashboard HTTP smoke testi |
 | İngilizce README ve mimari görsel | Tamamlandı | İngilizce özet ve Mermaid mimarisi repoda |
 | Demo videosu | Senaryo tamamlandı | 4 dakikalık çekim metni hazır; ekran kaydı bekliyor |
 | TÜBİTAK 2209-A taslağı | Taslak tamamlandı | Kimlik, danışman, bütçe, tarih ve güncel kaynakça alanları başvuru öncesi doldurulacak |
