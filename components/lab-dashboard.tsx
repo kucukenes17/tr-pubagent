@@ -447,7 +447,7 @@ export function LabDashboard() {
               <p>Dikey eksen: başarılı görev oranı (%).</p>
               <SystemLegend />
               <div className="chart-box">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <BarChart
                     data={splitChart}
                     margin={{ left: -20, right: 8, top: 8 }}
@@ -520,7 +520,7 @@ export function LabDashboard() {
               </p>
               <SystemLegend />
               <div className="chart-box">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <BarChart
                     data={outcomes}
                     layout="vertical"

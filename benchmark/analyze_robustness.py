@@ -74,6 +74,8 @@ def main() -> None:
     parser.add_argument("--guarded", type=Path, default=base / "phi4_guarded_ood_v2_1.jsonl")
     parser.add_argument("--output", type=Path, default=base / "robustness_summary.json")
     parser.add_argument("--csv", type=Path, default=base / "robustness_task_comparison.csv")
+    parser.add_argument("--experiment", default="TR-PubAgent human-authored OOD robustness v1")
+    parser.add_argument("--producer-model", default=None)
     parser.add_argument("--allow-incomplete", action="store_true")
     args = parser.parse_args()
 
@@ -107,8 +109,13 @@ def main() -> None:
 
     selected_unguarded = [unguarded[key] for key in common]
     selected_guarded = [guarded[key] for key in common]
+    limitations = (
+        ["Sentetik portal ortamı", "Tek seed kullanıldıysa belirsizlik görevler üzerinden yorumlanmalıdır"]
+        if args.producer_model
+        else ["Tek üretici model", "Sentetik portal ortamı", "Deterministik çıkarımda seed etkisi sınırlı olabilir"]
+    )
     summary = {
-        "experiment": "TR-PubAgent human-authored OOD robustness v1",
+        "experiment": args.experiment,
         "paired_runs": len(common),
         "tasks": len({task_id for task_id, _ in common}),
         "seeds": sorted({seed for _, seed in common}),
@@ -118,8 +125,10 @@ def main() -> None:
         "absolute_success_gain": mean(float(row["guarded_success"]) - float(row["unguarded_success"]) for row in pairs),
         "task_cluster_bootstrap_ci95": clustered_difference_ci(pairs),
         "mcnemar_exact_p": mcnemar_exact(outcomes["guarded_only_success"], outcomes["unguarded_only_success"]),
-        "limitations": ["Tek üretici model", "Sentetik portal ortamı", "Deterministik çıkarımda seed etkisi sınırlı olabilir"],
+        "limitations": limitations,
     }
+    if args.producer_model:
+        summary["producer_model"] = args.producer_model
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     with args.csv.open("w", encoding="utf-8", newline="") as handle:

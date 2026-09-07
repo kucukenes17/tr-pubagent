@@ -10,6 +10,7 @@ import argparse
 import gc
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Any, Callable
@@ -26,6 +27,22 @@ from benchmark.run_phi4 import MODEL_ID, Phi4Policy, run_task as run_unguarded_t
 from benchmark.run_phi4_guarded import GroundedPhi4Policy, run_task as run_guarded_task
 
 
+def safe_run_label(value: str) -> str:
+    """Dosya adlarında güvenle kullanılabilen, kararlı bir deney etiketi üretir."""
+    label = re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")
+    if not label:
+        raise ValueError("Deney etiketi en az bir harf veya rakam içermeli")
+    return label
+
+
+def result_paths(output_dir: Path, run_label: str) -> dict[str, Path]:
+    label = safe_run_label(run_label)
+    return {
+        "unguarded": output_dir / f"{label}_unguarded_ood_v1.jsonl",
+        "guarded": output_dir / f"{label}_guarded_ood_v2_1.jsonl",
+    }
+
+
 def load_rows(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -39,7 +56,7 @@ def save_rows(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def run_system(
     *, name: str, policy: Phi4Policy, runner: Callable[..., dict[str, Any]], tasks: list[dict[str, Any]],
-    seeds: list[int], output: Path, model: str, guarded: bool,
+    seeds: list[int], output: Path, model: str, guarded: bool, experiment_id: str,
 ) -> None:
     rows = load_rows(output)
     completed = {(row.get("task_id"), row.get("seed"), row.get("model")) for row in rows}
@@ -60,7 +77,8 @@ def run_system(
                     result = runner(client, task, policy, seed, prompt_version="guarded-v2.1-grounded")
                 else:
                     result = runner(client, task, policy, seed)
-                result["evaluation_suite"] = "human-authored-ood-v1"
+                result["evaluation_suite"] = experiment_id
+                result["producer_model"] = model
                 rows.append(result)
                 save_rows(output, rows)
     selected = [row for row in rows if row.get("model") == model and row.get("seed") in seeds]
@@ -89,6 +107,11 @@ def main() -> None:
     parser.add_argument("--systems", nargs="+", choices=["unguarded", "guarded"], default=["unguarded", "guarded"])
     parser.add_argument("--limit", type=int, default=24)
     parser.add_argument("--model", default=MODEL_ID)
+    parser.add_argument(
+        "--run-label", default="phi4",
+        help="Çıktı dosyası öneki. Farklı modeller için ayrı bir etiket kullanın.",
+    )
+    parser.add_argument("--experiment-id", default="human-authored-ood-v1")
     parser.add_argument("--no-4bit", action="store_true")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "outputs" / "robustness")
     args = parser.parse_args()
@@ -96,19 +119,24 @@ def main() -> None:
         parser.error(f"--limit 1 ile {len(ROBUSTNESS_TASKS)} arasında olmalı")
     if len(set(args.seeds)) != len(args.seeds):
         parser.error("--seeds tekrar eden değer içeremez")
+    try:
+        paths = result_paths(args.output_dir, args.run_label)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     selected_models = ROBUSTNESS_TASKS[:args.limit]
     TASK_BY_ID.update({task.id: task for task in selected_models})
     tasks = [task.model_dump(mode="json") for task in selected_models]
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    os.environ["TR_PUBAGENT_DB"] = str(args.output_dir / "robustness_runs.db")
+    run_label = safe_run_label(args.run_label)
+    os.environ["TR_PUBAGENT_DB"] = str(args.output_dir / f"{run_label}_runs.db")
 
     if "unguarded" in args.systems:
         policy = Phi4Policy(model_id=args.model, four_bit=not args.no_4bit)
         run_system(
             name="unguarded-v1", policy=policy, runner=run_unguarded_task, tasks=tasks,
-            seeds=args.seeds, output=args.output_dir / "phi4_unguarded_ood_v1.jsonl",
-            model=args.model, guarded=False,
+            seeds=args.seeds, output=paths["unguarded"], model=args.model,
+            guarded=False, experiment_id=args.experiment_id,
         )
         del policy
         release_model()
@@ -117,8 +145,8 @@ def main() -> None:
         policy = GroundedPhi4Policy(model_id=args.model, four_bit=not args.no_4bit)
         run_system(
             name="guarded-v2.1", policy=policy, runner=run_guarded_task, tasks=tasks,
-            seeds=args.seeds, output=args.output_dir / "phi4_guarded_ood_v2_1.jsonl",
-            model=args.model, guarded=True,
+            seeds=args.seeds, output=paths["guarded"], model=args.model,
+            guarded=True, experiment_id=args.experiment_id,
         )
         del policy
         release_model()

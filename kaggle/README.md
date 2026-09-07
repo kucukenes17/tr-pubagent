@@ -66,3 +66,46 @@ XLM-R modeli hazır olduğunda H3 ablation:
   --hybrid /kaggle/working/tr-pubagent-results/robustness/phi4_hybrid_guard_ood_v2_2.jsonl \
   --output /kaggle/working/tr-pubagent-results/robustness/guard_ablation_summary.json
 ```
+
+## İkinci üretici model doğrulaması
+
+Bu deney başlamadan önce `docs/CROSS_MODEL_PROTOCOL.md` içinde dondurulmuştur.
+Dondurulmuş Phi-4 sonuçlarına dokunmaz; Qwen sonuçları ayrı klasöre yazılır.
+Deterministik çıkarım nedeniyle 24 görev için tek seed kullanılır (48 model koşusu).
+
+```python
+%cd /kaggle/working/tr-pubagent
+!git pull --ff-only origin main
+
+QWEN_DIR = "/kaggle/working/tr-pubagent-results/cross-model/qwen2_5_7b"
+
+!python -m benchmark.run_robustness \
+  --model Qwen/Qwen2.5-7B-Instruct \
+  --run-label qwen2_5_7b \
+  --experiment-id cross-model-confirmation-v1 \
+  --seeds 0 \
+  --systems unguarded guarded \
+  --output-dir {QWEN_DIR}
+
+!python -m benchmark.analyze_robustness \
+  --unguarded {QWEN_DIR}/qwen2_5_7b_unguarded_ood_v1.jsonl \
+  --guarded {QWEN_DIR}/qwen2_5_7b_guarded_ood_v2_1.jsonl \
+  --output {QWEN_DIR}/qwen2_5_7b_summary.json \
+  --csv {QWEN_DIR}/qwen2_5_7b_task_comparison.csv \
+  --experiment "TR-PubAgent cross-model confirmation v1" \
+  --producer-model Qwen/Qwen2.5-7B-Instruct
+```
+
+İndirme paketi:
+
+```python
+import shutil
+from IPython.display import FileLink, display
+
+archive = shutil.make_archive(
+    "/kaggle/working/tr-pubagent-qwen2_5_7b-results",
+    "zip",
+    QWEN_DIR,
+)
+display(FileLink(archive))
+```

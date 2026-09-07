@@ -5,6 +5,7 @@ from pathlib import Path
 from benchmark.check_task_leakage import audit
 from benchmark.analyze_robustness import mcnemar_exact, wilson
 from benchmark.analyze_ablation import fisher_exact_two_sided, holm_adjust
+from benchmark.run_robustness import result_paths, safe_run_label
 from benchmark.robustness_tasks import ROBUSTNESS_TASKS
 
 
@@ -52,3 +53,12 @@ def test_robustness_statistics_are_bounded_and_exact():
     assert fisher_exact_two_sided(1, 9, 11, 3) < 0.01
     adjusted = holm_adjust({"a": 0.01, "b": 0.04, "c": 0.2})
     assert adjusted == {"a": 0.03, "b": 0.08, "c": 0.2}
+
+
+def test_cross_model_result_paths_cannot_overwrite_phi4_defaults(tmp_path):
+    assert safe_run_label("Qwen/Qwen2.5-7B-Instruct") == "qwen_qwen2_5_7b_instruct"
+    default_paths = result_paths(tmp_path, "phi4")
+    qwen_paths = result_paths(tmp_path, "qwen2_5_7b")
+    assert default_paths["unguarded"].name == "phi4_unguarded_ood_v1.jsonl"
+    assert qwen_paths["guarded"].name == "qwen2_5_7b_guarded_ood_v2_1.jsonl"
+    assert set(default_paths.values()).isdisjoint(qwen_paths.values())
