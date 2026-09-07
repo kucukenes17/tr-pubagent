@@ -292,7 +292,7 @@ export function PortalSimulator() {
         Sentetik araştırma ortamı — gerçek kamu hizmeti değildir ve gerçek veri kullanmaz.
       </div>
       <section id="content" className="mx-auto max-w-[1320px] px-5 py-7 lg:px-8">
-        <Tabs value={serviceId} onValueChange={changeService} className="mb-7">
+        <Tabs value={serviceId} onValueChange={changeService} className="mb-8 gap-4">
           <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="mono-label text-blue-700">Altı hizmet · tek güvenlik sözleşmesi</p>
@@ -302,7 +302,7 @@ export function PortalSimulator() {
             </div>
             <Badge variant="outline">6 / 6 yüzey hazır</Badge>
           </div>
-          <TabsList className="grid h-auto w-full grid-cols-2 gap-2 rounded-2xl border-0 bg-transparent p-0 sm:grid-cols-3 xl:grid-cols-6">
+          <TabsList className="grid !h-auto w-full grid-cols-2 gap-2 rounded-2xl border-0 bg-transparent p-0 group-data-horizontal/tabs:h-auto sm:grid-cols-3 xl:grid-cols-6">
             {services.map((item) => {
               const Icon = item.icon;
               return (
