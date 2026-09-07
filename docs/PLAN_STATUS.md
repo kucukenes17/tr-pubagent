@@ -13,7 +13,7 @@ Son güncelleme: 7 Eylül 2026
 | Çok-seed sağlamlık sonucu | Tamamlandı | 144 GPU koşusu: Guarded %91,7, Unguarded %8,3; exact McNemar p=1,73×10⁻¹⁸ |
 | ML Guard / Hybrid Guard ablation | Tamamlandı | Üç guarded sistem 66/72; H3 desteklenmedi. XLM-R metadata ve ham izler arşivlendi |
 | Kullanıcı ajan adaptörü / BYOA | Tamamlandı | `tr-pubagent.agent.v1` HTTP sözleşmesi, doğrudan/kural korumalı CLI, örnek ajan ve güvenlik kontrolleri |
-| İkinci üretici model | Koşuya hazır | Qwen2.5-7B için önkayıtlı 24 OOD görev × 2 sistem; Kaggle koşusu bekliyor |
+| İkinci üretici model | Tamamlandı | Qwen2.5-7B: 8/24 → 24/24; 4 geçersiz eylem ve 2 ihlal → 0; p=3,05×10⁻⁵ |
 | Altı ayrı portal yüzeyi | Kısmi | Backend altı hizmeti kapsıyor; frontend burs demosu ağırlıklı |
 | Temiz makine Docker doğrulaması | Bekliyor | Docker Desktop bulunan ayrı ortamda smoke test |
 | İngilizce README ve mimari görsel | Tamamlandı | İngilizce özet ve Mermaid mimarisi repoda |
@@ -24,6 +24,5 @@ Son güncelleme: 7 Eylül 2026
 ## Sıradaki karar kapıları
 
 1. OOD'de bulunan iki sistematik sınırı v2.2 post-hoc deneyinde ayrı etiketle ve yeniden değerlendir.
-2. Hazırlanan Qwen2.5-7B çapraz-model doğrulamasını Kaggle T4 üzerinde çalıştır.
-3. Altı hizmet için frontend portal yüzeylerini genişlet ve temiz Docker ortamında smoke test yap.
-4. Yayın belgelerini ve videoyu tamamlayıp `v1.0.0` sürümünü çıkar.
+2. Altı hizmet için frontend portal yüzeylerini genişlet ve temiz Docker ortamında smoke test yap.
+3. Yayın belgelerini ve videoyu tamamlayıp `v1.0.0` sürümünü çıkar.

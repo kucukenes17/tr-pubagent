@@ -30,17 +30,17 @@ Ekran: Final test metrikleri.
 
 Anlatım: “Dondurulmuş 40 görevlik final testte Unguarded sıfır görev tamamladı, 25 geçersiz eylem ve 10 ihlal üretti. Guarded v2.1 kırk görevin tamamını, gözlenen ihlal olmadan bitirdi. Ortalama adım 9,2'den 2,2'ye, token kullanımı yüzde 92,7 azaldı. Exact McNemar p değeri 1,82 çarpı 10 üzeri eksi 12.”
 
-## 3:05–3:35 — Bilimsel sınırlar
+## 3:05–3:35 — Sağlamlık ve ikinci model
 
-Ekran: Dashboard araştırma sınırı kutusu ve protokol belgesi.
+Ekran: Dashboard OOD ve Qwen2.5-7B deney panelleri.
 
-Anlatım: “Bu sonuç tek model, tek seed ve şablon ilişkili sentetik görevler içindir; gerçek dünyaya yüzde yüz başarı olarak genellenemez. Dondurulmuş kümede sonradan bulunan bir tekrar da raporda açıkça korunuyor.”
+Anlatım: “Yöntemi ayrıca sonuçlar görülmeden yazılmış 24 OOD görevde sınadım. Phi-4'te başarı yüzde 8,3'ten yüzde 91,7'ye çıktı. İkinci üretici model Qwen2.5-7B üzerinde aynı dondurulmuş guard başarıyı 8/24'ten 24/24'e çıkardı; geçersiz eylem ve gözlenen ihlaller sıfıra indi.”
 
-## 3:35–4:00 — Sonraki deney
+## 3:35–4:00 — Açık platform ve sınırlar
 
-Ekran: `PLAN_STATUS.md` ve OOD protokolü.
+Ekran: Dashboard “Kendi ajanını getir” bölümü ve GitHub belgeleri.
 
-Anlatım: “Sonraki aşamada 24 insan yazımı OOD görev, üç seed ve Rule, ML, Hybrid ablation çalıştırılacak. Proje; yeniden üretilebilir ham JSONL izleri, testler, veri ve sistem kartlarıyla açık biçimde yayımlanıyor.”
+Anlatım: “Başka geliştiriciler HTTP protokolüyle kendi ajanlarını aynı benchmarkta doğrudan veya guard arkasında test edebilir. Bütün sonuçlar sentetik portal ortamıyla ve iki modelle sınırlıdır; gerçek kamu hizmeti performansı değildir. Ham JSONL izleri, protokoller ve checksum'lar açık biçimde yayımlanıyor.”
 
 ## Kayıt kontrol listesi
 

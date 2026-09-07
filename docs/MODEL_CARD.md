@@ -4,7 +4,7 @@
 
 TR-PubGuard v2.1 tek bir üretici model veya öğrenilmiş güvenlik sınıflandırıcısı değildir. Dondurulmuş deney sistemi üç parçadan oluşur:
 
-1. `microsoft/Phi-4-mini-instruct`, görünür görev ve form durumundan yapılandırılmış araç eylemleri önerir.
+1. Üretici model (`microsoft/Phi-4-mini-instruct`; çapraz-model doğrulamasında `Qwen/Qwen2.5-7B-Instruct`) görünür görev ve form durumundan yapılandırılmış araç eylemleri önerir.
 2. Evidence-grounding adaptörü yalnızca kullanıcı isteğinde açıkça bulunan değerleri eksik, yazılabilir metin alanlarına bağlar; gizli oracle durumunu görmez.
 3. Deterministik yürütme katmanı araç/hedef allowlist'i, yetki sözleşmesi, gizlilik kısıtları, eksik bilgi, onay kapıları, tekrar tespiti ve güvenli sonlandırmayı uygular.
 
@@ -37,6 +37,10 @@ Girdi: Türkçe sentetik kullanıcı talebi, mevcut form durumu, izinli araç/he
 
 Bu değerler yalnızca TR-PubBench'in dondurulmuş sentetik test split'i için geçerlidir.
 
+## Çapraz-model doğrulaması
+
+Aynı `guarded-v2.1-frozen@91f2fb1` sistemi, önceden sabitlenen 24 görevlik sentetik OOD kümesinde Qwen2.5-7B ile ayrıca sınandı. Unguarded 8/24, Guarded 24/24 başarı verdi; geçersiz eylemler 4'ten 0'a ve gözlenen ihlaller 2'den 0'a indi. Bu sonuç ikinci-model kanıtıdır; bütün modeller veya gerçek portallar için güvenlik garantisi değildir.
+
 ## Amaç dışı kullanım
 
 - Gerçek kamu işlemlerini kullanıcı adına yürütmek
@@ -47,11 +51,11 @@ Bu değerler yalnızca TR-PubBench'in dondurulmuş sentetik test split'i için g
 
 ## Bilinen sınırlılıklar
 
-- Tek model, tek seed ve şablon ilişkili sentetik görevler kullanıldı.
+- Ana frozen test tek model ve tek seed'dir; çapraz-model OOD doğrulaması ikinci model ekler ancak yine tek deterministik seed kullanır.
 - Guard önceden tanımlı yetki sözleşmesine ve yapılandırılmış forma ihtiyaç duyar.
 - Gerçek DOM değişimleri, prompt injection ve dağılım dışı insan dili değerlendirilmedi.
 - Başarı, gerçek hizmet kalitesi veya mevzuata uygunluk anlamına gelmez.
-- Dış, insan yazımı bir değerlendirme olmadan yüzde yüz genelleme iddiası kurulamaz.
+- İnsan yazımı görevler de sentetik portalda çalışır; gerçek kullanıcı ve kurum değerlendirmesi olmadan genelleme iddiası kurulamaz.
 
 ## Sürümleme
 

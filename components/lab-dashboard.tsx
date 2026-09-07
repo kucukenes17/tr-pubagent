@@ -88,28 +88,30 @@ function SuccessMeasure({
 
 function Experiment({
   index,
+  eyebrow,
   title,
   subtitle,
   unguarded,
   guarded,
   p,
   gain,
+  wide = false,
 }: {
   index: string;
+  eyebrow: string;
   title: string;
   subtitle: string;
   unguarded: RobustnessMetrics;
   guarded: RobustnessMetrics;
   p: number;
   gain?: [number, number];
+  wide?: boolean;
 }) {
   return (
-    <article className="experiment">
+    <article className={`experiment${wide ? ' experiment-wide' : ''}`}>
       <header className="experiment-header">
         <div>
-          <div className="eyebrow">
-            {index === '01' ? 'Frozen final test' : 'Human-authored OOD'}
-          </div>
+          <div className="eyebrow">{eyebrow}</div>
           <h2>{title}</h2>
           <p>{subtitle}</p>
         </div>
@@ -237,6 +239,7 @@ export function LabDashboard() {
     );
   const test = data.summary.test;
   const ood = data.robustness.summary;
+  const crossModel = data.crossModel.summary;
   const ablation = data.robustness.ablation;
   const splitChart = [
     {
@@ -280,7 +283,7 @@ export function LabDashboard() {
           <div>
             <div className="eyebrow">
               <span className="research-kicker">Araştırma sonuçları</span>
-              <span className="model-label">Phi-4 / Guard v2.1</span>
+              <span className="model-label">Phi-4 + Qwen / Guard v2.1</span>
             </div>
             <h1>
               Ajan başarısı.
@@ -313,12 +316,16 @@ export function LabDashboard() {
             {test.unguarded_v1.successes}/{test.unguarded_v1.runs} →{' '}
             {test.guarded_v2_1.successes}/{test.guarded_v2_1.runs}; insan yazımı
             OOD’de {ood.guarded_v2_1.successes}/{ood.guarded_v2_1.runs} başarı.
+            Qwen doğrulamasında {crossModel.unguarded.successes}/
+            {crossModel.unguarded.runs} → {crossModel.guarded_v2_1.successes}/
+            {crossModel.guarded_v2_1.runs}.
             Gerçek kamu portallarına genelleme iddiası değildir.
           </p>
         </div>
         <div className="result-pair" id="results">
           <Experiment
             index="01"
+            eyebrow="Frozen final test"
             title="Dondurulmuş test"
             subtitle={`${test.guarded_v2_1.runs} eşlenmiş görev · Seed 0 · Şablon ilişkili sentetik test`}
             unguarded={test.unguarded_v1}
@@ -327,12 +334,24 @@ export function LabDashboard() {
           />
           <Experiment
             index="02"
+            eyebrow="Human-authored OOD"
             title="Görülmemiş görevler"
             subtitle={`${ood.tasks} insan yazımı görev × ${ood.seeds.length} seed = ${ood.paired_runs} eşlenmiş koşu`}
             unguarded={ood.unguarded}
             guarded={ood.guarded_v2_1}
             p={ood.mcnemar_exact_p}
             gain={ood.task_cluster_bootstrap_ci95}
+          />
+          <Experiment
+            index="03"
+            eyebrow="Cross-model confirmation"
+            title="Qwen2.5-7B doğrulaması"
+            subtitle={`${crossModel.tasks} insan yazımı OOD görev · Deterministik çıkarım · Seed 0`}
+            unguarded={crossModel.unguarded}
+            guarded={crossModel.guarded_v2_1}
+            p={crossModel.mcnemar_exact_p}
+            gain={crossModel.task_cluster_bootstrap_ci95}
+            wide
           />
         </div>
         <nav className="section-nav" aria-label="Araştırma bölümleri">
@@ -659,12 +678,16 @@ export function LabDashboard() {
               </h3>
               <ul>
                 <li>
-                  Frozen test: tek model, tek seed ve şablon ilişkili sentetik
-                  görevler.
+                  Frozen test: Phi-4, tek seed ve şablon ilişkili sentetik
+                  görevler; Qwen doğrulaması yalnız OOD kümesinde yapıldı.
                 </li>
                 <li>
                   OOD: 24 insan yazımı görev; üç seed aynı görevleri tekrarlar,
                   72 bağımsız görev değildir.
+                </li>
+                <li>
+                  Çapraz-model doğrulaması iki model ailesiyle sınırlıdır ve
+                  deterministik Qwen koşusu tek seed kullanır.
                 </li>
                 <li>
                   Sıfır gözlenen ihlal, bütün koşullarda güvenlik garantisi
@@ -754,6 +777,9 @@ export function LabDashboard() {
           </p>
           <p>
             OOD exact McNemar p: <code>{ood.mcnemar_exact_p}</code>
+          </p>
+          <p>
+            Qwen exact McNemar p: <code>{crossModel.mcnemar_exact_p}</code>
           </p>
           <p>
             Değerlendirme harness:{' '}

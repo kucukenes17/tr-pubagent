@@ -21,6 +21,12 @@ After the algorithm was frozen under the `robustness-protocol-v1` tag, 24 new ta
 
 All six guarded failures clustered in two tasks across every seed: numeric evidence extraction and grounding a negative day preference into a select action. The frozen result is retained; any correction will be evaluated separately as a post-hoc v2.2 system.
 
+## Qwen2.5-7B cross-model confirmation
+
+A separately pre-specified protocol ran the same 24 OOD tasks deterministically with `Qwen/Qwen2.5-7B-Instruct`. Unguarded succeeded on 8/24 (33.3%) and Guarded v2.1 on 24/24 (100%). Invalid actions fell from 4 to 0 and observed privacy violations from 2 to 0; paired exact McNemar was `p=3.05×10⁻⁵`.
+
+This is second-model evidence that the guarded gain is not unique to Phi-4. It remains limited to two model families, 24 synthetic OOD tasks, and one deterministic seed. Raw traces and checksums are published under [`results/cross-model/qwen2_5_7b`](results/cross-model/qwen2_5_7b).
+
 ## Rule / ML / Hybrid ablation
 
 The XLM-R risk classifier reached macro-F1 `1.0` on the held-out portion of 3,000 templated synthetic examples. On the same 72 OOD runs, Rule, ML-decision, and Hybrid systems each achieved 66/72 (91.7%) safe success. Rule recorded 141 blocks and 30 safe-action enforcements, ML 108 blocks and no enforcements, while Hybrid reproduced Rule's 141/30 intervention profile. The pre-defined H3 hypothesis—strict Hybrid superiority over both components—was not supported.
@@ -31,7 +37,7 @@ This negative result shows that a perfect synthetic classification score does no
 
 - TR-PubBench: 80 deterministic Turkish tasks across six service families.
 - Human-authored OOD suite: 24 additional tasks with leakage checks and a three-seed runner.
-- Phi-4 unguarded and evidence-grounded guarded agents.
+- Phi-4 and Qwen2.5-7B unguarded/evidence-grounded comparisons.
 - Deterministic authorization, privacy, confirmation, and state-preservation checks.
 - Experimental XLM-R ML-only and Hybrid Guard ablation infrastructure.
 - Versioned bring-your-own-agent HTTP protocol and local direct/guarded evaluator.
@@ -67,6 +73,6 @@ python -m benchmark.check_task_leakage --strict
 
 ## Research status
 
-The main 80-task experiment and the 144-run human-authored OOD comparison are complete. Rule/ML/Hybrid runners are ready, while the XLM-R artifact and second-provider experiment remain pending; no unobserved result is claimed. See [the current plan](docs/PLAN_STATUS.md), [experiment report](docs/EXPERIMENT_RESULTS.md), and [OOD protocol](docs/ROBUSTNESS_PROTOCOL.md).
+The main 80-task experiment, 144-run Phi-4 OOD comparison, Rule/ML/Hybrid ablation, and 48-run Qwen2.5-7B cross-model confirmation are complete. See [the current plan](docs/PLAN_STATUS.md), [experiment report](docs/EXPERIMENT_RESULTS.md), [OOD protocol](docs/ROBUSTNESS_PROTOCOL.md), and [cross-model protocol](docs/CROSS_MODEL_PROTOCOL.md).
 
 Code is Apache-2.0. Dataset and result licensing remains subject to the repository's final data-license audit.

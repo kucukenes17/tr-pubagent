@@ -57,7 +57,7 @@ function compactRun(run) {
   };
 }
 
-const [summary, guardedRuns, unguardedRuns, robustnessSummary, ablationSummary, guardedOodRuns, mlOodRuns, hybridOodRuns] = await Promise.all([
+const [summary, guardedRuns, unguardedRuns, robustnessSummary, ablationSummary, guardedOodRuns, mlOodRuns, hybridOodRuns, crossModelSummary] = await Promise.all([
   readJson(resolve(derived, 'frozen_summary.json')),
   readJsonl(resolve(raw, 'phi4_guarded_test_v2_1.jsonl')),
   readJsonl(resolve(raw, 'phi4_unguarded_test_v1.jsonl')),
@@ -66,6 +66,7 @@ const [summary, guardedRuns, unguardedRuns, robustnessSummary, ablationSummary, 
   readJsonl(resolve(root, 'results/robustness/phi4_guarded_ood_v2_1.jsonl')),
   readJsonl(resolve(root, 'results/robustness/phi4_ml_guard_ood_v2_2.jsonl')),
   readJsonl(resolve(root, 'results/robustness/phi4_hybrid_guard_ood_v2_2.jsonl')),
+  readJson(resolve(root, 'results/cross-model/qwen2_5_7b/derived/qwen2_5_7b_summary.json')),
 ]);
 
 const guardedByTask = new Map(guardedRuns.map((run) => [run.task_id, compactRun(run)]));
@@ -90,6 +91,7 @@ const payload = {
     unguarded: 'results/frozen/raw/phi4_unguarded_test_v1.jsonl',
     robustness: 'results/robustness/robustness_summary.json',
     ablation: 'results/robustness/guard_ablation_summary.json',
+    crossModel: 'results/cross-model/qwen2_5_7b/derived/qwen2_5_7b_summary.json',
   },
   summary,
   robustness: {
@@ -99,6 +101,9 @@ const payload = {
       summary: ablationSummary,
       interventions,
     },
+  },
+  crossModel: {
+    summary: crossModelSummary,
   },
   pairedRuns: taskIds.map((taskId) => ({
     taskId,

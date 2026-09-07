@@ -240,6 +240,17 @@
   border-radius: 8px;
   overflow: hidden;
 }
+.experiment-wide {
+  grid-column: 1 / -1;
+}
+.experiment-wide .experiment-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+.experiment-wide .system-line {
+  margin-bottom: 0;
+}
 .experiment-header {
   padding: 22px 24px 18px;
   border-bottom: 1px solid var(--border);
@@ -769,6 +780,13 @@
   .byoa-section,
   .result-notes {
     grid-template-columns: 1fr;
+  }
+  .experiment-wide {
+    grid-column: auto;
+  }
+  .experiment-wide .experiment-body {
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
   .experiment-header,
   .experiment-body {

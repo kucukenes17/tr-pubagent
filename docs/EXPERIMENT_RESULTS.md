@@ -90,9 +90,22 @@ Rule, ML ve Hybrid sistemlerin her biri Unguarded'a karşı 60 yalnız-guarded b
 
 ML karar katmanı 108 eylemi blokladı fakat güvenli alternatif eylem üretmedi. Hybrid'in müdahale profili ve uçtan uca sonucu Rule ile aynı kaldı. Bu bulgu, mevcut mimaride deterministik sözleşme ve kontrolcünün ana katkıyı sağladığını; şablonlu veriyle eğitilen sınıflandırıcının ek görev başarısı getirmediğini gösterir. “ML decision guard” koşusu da ortak public-contract doğrulamasını ve güvenli yürütme kontrolcüsünü kullanır; tamamen bağımsız bir ML ajanı değildir.
 
+## Qwen2.5-7B çapraz-model doğrulaması
+
+İkinci üretici model deneyi sonuçlar görülmeden önce [ayrı protokolde](CROSS_MODEL_PROTOCOL.md) sabitlendi. Aynı 24 insan yazımı OOD görevi ve değişmemiş Guarded v2.1, `Qwen/Qwen2.5-7B-Instruct` revision `a09a35458c702b33eeacc393d103063234e8bc28` üzerinde seed 0 ve deterministik çıkarımla değerlendirildi.
+
+| Sistem | Başarı | Wilson %95 GA | Geçersiz eylem | İhlal | Ort. adım |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Unguarded v1 | 8/24 (%33,3) | %18,0–%53,3 | 4 | 2 | 10,04 |
+| Guarded v2.1 | 24/24 (%100) | %86,2–%100 | 0 | 0 | 2,08 |
+
+On altı görev yalnız Guarded tarafından, sekiz görev iki sistem tarafından başarıldı; Unguarded lehine görev olmadı. Mutlak başarı farkı +66,7 yüzde puan, görev bootstrap %95 aralığı +45,8–+83,3 yüzde puan ve exact McNemar `p=3,0517578125×10⁻⁵` ölçüldü. Toplam süre 1.129,968 saniyeden 55,124 saniyeye, üretilen token 12.916'dan 609'a düştü. Unguarded koşuda gözlenen iki olay `PRIVACY_VIOLATION` idi.
+
+Bu doğrulama, guard kazanımının tek bir üretici modele özgü olduğu açıklamasını zayıflatır; gerçek portal genellemesi veya modelden bağımsız güvenlik garantisi oluşturmaz.
+
 ## Sınırlılıklar
 
-- Tek üretici model kullanıldı; OOD deneyinde üç seed olsa da deterministik çıkarım seed çeşitliliğini sınırladı.
+- İki üretici model kullanıldı; Qwen çapraz-model doğrulaması tek deterministik seed ile sınırlıdır.
 - Ana görevler programatik ve şablon ilişkiliydi; ek OOD görevler insan yazımı olsa da sentetik kaldı.
 - Guard yapılandırılmış form şemasına ve önceden tanımlı yetki sözleşmesine erişti.
 - Test hizmet aileleri yeni olsa da risk kalıpları tamamen dağılım dışı değildir.
@@ -107,7 +120,7 @@ Kanonik özet, ham JSONL dosyalarından şu komutla yeniden üretilir:
 python benchmark/generate_frozen_report.py
 ```
 
-Ham izler, görev düzeyindeki CSV, deney ortamı ve SHA-256 manifesti [`results/frozen`](../results/frozen) altında yayımlanır. Kanonik sayısal kaynak [`frozen_summary.json`](../results/frozen/derived/frozen_summary.json) dosyasıdır.
+Ana ham izler [`results/frozen`](../results/frozen), OOD artefaktları [`results/robustness`](../results/robustness), Qwen çapraz-model artefaktları ise [`results/cross-model/qwen2_5_7b`](../results/cross-model/qwen2_5_7b) altında SHA-256 manifestleriyle yayımlanır.
 
 ## CV için doğrulanabilir ifade
 

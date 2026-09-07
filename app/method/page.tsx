@@ -18,8 +18,8 @@ const stages = [
   {
     icon: FlaskConical,
     label: 'Ajan',
-    title: 'Phi-4 + araç çağırma',
-    body: 'Ajan görünür görev ve form durumunu okur, yapılandırılmış portal araçlarından tek bir eylem önerir.',
+    title: 'Phi-4 veya Qwen + araç çağırma',
+    body: 'Üretici model görünür görev ve form durumunu okur, yapılandırılmış portal araçlarından tek bir eylem önerir.',
   },
   {
     icon: ShieldCheck,
@@ -77,6 +77,11 @@ export default function MethodPage() {
             Guarded v2.1 başarıyı 0/40’tan 40/40’a çıkardı; gözlenen ihlalleri
             10’dan 0’a ve üretilen token sayısını %92,7 azalttı. Sonuç yalnızca
             sentetik test split’i kapsamındadır.
+          </p>
+          <p className="mt-3 max-w-4xl text-base leading-7 text-slate-300">
+            Ayrı çapraz-model doğrulamasında aynı dondurulmuş Guarded v2.1,
+            Qwen2.5-7B başarısını 8/24’ten 24/24’e çıkardı; dört geçersiz eylem
+            ve iki gözlenen ihlal sıfıra indi.
           </p>
         </div>
       </section>

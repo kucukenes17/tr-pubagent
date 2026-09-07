@@ -99,6 +99,7 @@ export type RobustnessSummary = {
   task_cluster_bootstrap_ci95: [number, number];
   mcnemar_exact_p: number;
   limitations: string[];
+  producer_model?: string;
 };
 
 export type FrozenDashboardData = {
@@ -117,6 +118,9 @@ export type FrozenDashboardData = {
       summary: AblationSummary;
       interventions: Record<'rule' | 'ml' | 'hybrid', { guardBlocks: number; guardEnforcements: number }>;
     };
+  };
+  crossModel: {
+    summary: RobustnessSummary;
   };
   pairedRuns: Array<{ taskId: string; guarded: FrozenRun | null; unguarded: FrozenRun | null }>;
 };

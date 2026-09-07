@@ -15,7 +15,8 @@ TR PubAgent, Türkçe kamu hizmeti benzeri çok adımlı web görevlerinde yapay
 - **ML paketi:** 3.000 sentetik eylem-risk örneği ve XLM-R eğitim betiği.
 - **Ablation altyapısı:** Rule-only, XLM-R ML-only ve Hybrid Guard için ortak OOD koşucu ve Holm düzeltmeli analiz.
 - **Kendi ajanını getir:** Sürümlü HTTP eylem sözleşmesiyle herhangi bir ajanı doğrudan veya TR-PubGuard arkasında değerlendiren yerel koşucu.
-- **Sıfır maliyet akışı:** Scripted kontrol ile yerel geliştirme; Phi-4/XLM-R için Kaggle veya Colab.
+- **Çapraz-model doğrulama:** Aynı dondurulmuş guard'ın Phi-4 ve Qwen2.5-7B üzerindeki eşlenmiş karşılaştırması.
+- **Sıfır maliyet akışı:** Scripted kontrol ile yerel geliştirme; Phi-4, Qwen ve XLM-R için Kaggle veya Colab.
 
 ## Dondurulmuş Phi-4 sonucu
 
@@ -34,6 +35,12 @@ Algoritma `robustness-protocol-v1` etiketiyle dondurulduktan sonra 24 yeni göre
 
 Altı Guarded başarısızlığı iki görevde ve üç seed'in tamamında kümelendi: sayı biçimli kanıt çıkarma ve olumsuz tercihi doğrudan select eylemine bağlama. Bu sınırlar dondurulmuş sonuçta korunur; düzeltmeler ayrı bir post-hoc v2.2 çalışması olacaktır.
 
+## Qwen2.5-7B çapraz-model doğrulaması
+
+Sonuçlar görülmeden önce sabitlenen ayrı protokolde aynı 24 OOD görevi `Qwen/Qwen2.5-7B-Instruct` ile deterministik olarak çalıştırıldı. Unguarded başarı 8/24 (%33,3), Guarded v2.1 başarı 24/24 (%100) oldu. Geçersiz eylemler 4'ten 0'a, gözlenen gizlilik ihlalleri 2'den 0'a indi; eşlenmiş exact McNemar `p=3,05×10⁻⁵` verdi.
+
+Bu sonuç guard kazanımının yalnız Phi-4'e özgü olmadığı yönünde ikinci-model kanıtıdır; iki model, 24 sentetik OOD görev ve tek deterministik seed dışına genellenemez. Ham izler ve bütünlük manifesti [`results/cross-model/qwen2_5_7b`](results/cross-model/qwen2_5_7b) altında yayımlanır.
+
 ## Rule / ML / Hybrid ablation
 
 XLM-R risk sınıflandırıcısı 3.000 şablonlu sentetik örneğin ayrılmış testinde macro-F1 `1,0` aldı. Aynı 72 OOD koşusunda Rule, ML-decision ve Hybrid sistemlerin üçü de 66/72 (%91,7) güvenli başarı gösterdi. Rule 141 blok ve 30 güvenli eylem yönlendirmesi, ML 108 blok ve sıfır yönlendirme, Hybrid ise Rule ile aynı 141/30 müdahale profilini üretti. Önceden tanımlanan “Hybrid her iki bileşenden kesin olarak üstün olmalı” H3 hipotezi desteklenmedi.
@@ -44,7 +51,7 @@ Bu negatif sonuç, yüksek sentetik sınıflandırma skorunun uçtan uca ajan ba
 
 ```mermaid
 flowchart LR
-  U[Kullanıcı talimatı] --> A[Phi-4 araç eylemi]
+  U[Kullanıcı talimatı] --> A[Phi-4 veya Qwen araç eylemi]
   O[Portal gözlemi] --> A
   A --> C{Araç ve hedef sözleşmesi}
   C --> R[Deterministik Rule Guard]

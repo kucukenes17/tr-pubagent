@@ -1,5 +1,7 @@
 # Üretici modeller arası doğrulama protokolü v1
 
+> Durum: Ön kayıtlı koşu 7 Eylül 2026'da tamamlandı. Aşağıdaki tasarım sonuçlar görülmeden önce sabitlendi; gerçekleşen sonuç belgenin sonunda ayrı verilir.
+
 ## Amaç
 
 Bu doğrulama, Guarded v2.1 kazanımının yalnızca `microsoft/Phi-4-mini-instruct`
@@ -35,3 +37,14 @@ komut yeniden çalıştırıldığında tamamlanan görevler atlanır.
 ihlallerini artırmaması halinde desteklenir. Sonuç ne olursa olsun raporlanır;
 Phi-4 üzerinde dondurulmuş ana sonuçların yerine geçmez, harici doğrulama olarak
 sunulur.
+
+## Gerçekleşen sonuç
+
+48 model koşusu tamamlandı. Unguarded 8/24 (%33,3), Guarded v2.1 24/24
+(%100) başarı verdi. Geçersiz eylemler 4'ten 0'a, gözlenen ihlaller 2'den 0'a
+indi. On altı görev yalnız Guarded tarafından, sekiz görev iki sistem tarafından
+başarıldı; ters sonuç yoktu. Mutlak fark +66,7 yüzde puan, görev bootstrap %95
+aralığı +45,8–+83,3 yüzde puan ve exact McNemar `p=3,0517578125×10⁻⁵`
+olarak ölçüldü. Ham artefaktlar
+[`results/cross-model/qwen2_5_7b`](../results/cross-model/qwen2_5_7b)
+altındadır.

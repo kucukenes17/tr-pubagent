@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "experiment": "TR-PubAgent cross-model confirmation v1",
+  "files": [
+    {
+      "file": "raw/qwen2_5_7b_guarded_ood_v2_1.jsonl",
+      "bytes": 132938,
+      "sha256": "02827777fb814eea5fbf22b9ba50528d016c7fc6301abbbb68dfbc3a301ea72e"
+    },
+    {
+      "file": "raw/qwen2_5_7b_unguarded_ood_v1.jsonl",
+      "bytes": 586188,
+      "sha256": "8a5a608b3afe3f83cb0c9fed1ed90e6896fa63b1b04179bed7b3ae8facd4e28f"
+    },
+    {
+      "file": "derived/qwen2_5_7b_summary.json",
+      "bytes": 1361,
+      "sha256": "69aa6c1b935f30be6ae2ad9a3c94643cad13e186149f56617f5fa024409ff066"
+    },
+    {
+      "file": "derived/qwen2_5_7b_task_comparison.csv",
+      "bytes": 2398,
+      "sha256": "9240cce10ffa083cb69a63def617b33b62faf5db6de1a38a1da9609cde30c337"
+    }
+  ]
+}
