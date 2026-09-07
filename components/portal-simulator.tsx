@@ -302,12 +302,22 @@ export function PortalSimulator() {
             </div>
             <Badge variant="outline">6 / 6 yüzey hazır</Badge>
           </div>
-          <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5">
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-2 rounded-2xl border-0 bg-transparent p-0 sm:grid-cols-3 xl:grid-cols-6">
             {services.map((item) => {
               const Icon = item.icon;
               return (
-                <TabsTrigger key={item.id} value={item.id} className="min-h-10 min-w-max px-3">
-                  <Icon className="size-4" /> {item.shortName}
+                <TabsTrigger
+                  key={item.id}
+                  value={item.id}
+                  className="group min-h-16 justify-start gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-slate-600 shadow-sm hover:border-blue-300 hover:bg-blue-50 hover:text-blue-800 data-active:border-blue-600 data-active:bg-blue-600 data-active:text-white data-active:shadow-md data-active:shadow-blue-600/20"
+                >
+                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-blue-100 group-hover:text-blue-700 group-data-active:bg-white/15 group-data-active:text-white">
+                    <Icon className="size-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block font-semibold leading-5">{item.shortName}</span>
+                    <span className="block text-xs opacity-70">{item.code}</span>
+                  </span>
                 </TabsTrigger>
               );
             })}
@@ -400,37 +410,37 @@ export function PortalSimulator() {
           </div>
 
           <aside aria-label="PubGuard karar günlüğü">
-            <Card className="sticky top-5 overflow-hidden border-slate-800 bg-slate-950 text-white">
-              <CardHeader className="border-b border-white/10">
+            <Card className="sticky top-5 overflow-hidden border-blue-200 bg-gradient-to-b from-white to-blue-50/80 text-slate-950 shadow-lg shadow-blue-950/5">
+              <CardHeader className="border-b border-blue-100 bg-blue-50/70">
                 <div className="flex items-center gap-3">
-                  <span className="grid size-10 place-items-center rounded-xl bg-cyan-300/10 text-cyan-300">
+                  <span className="grid size-10 place-items-center rounded-xl bg-blue-700 text-white shadow-sm shadow-blue-700/20">
                     <ShieldCheck className="size-5" />
                   </span>
                   <div>
-                    <p className="mono-label text-cyan-300">Canlı eylem denetimi</p>
-                    <CardTitle className="text-xl">TR-PubGuard</CardTitle>
+                    <p className="mono-label text-blue-700">Canlı eylem denetimi</p>
+                    <CardTitle className="text-xl text-slate-950">TR-PubGuard</CardTitle>
                   </div>
                 </div>
               </CardHeader>
               <CardContent aria-live="polite" className="space-y-3 p-4">
                 {events.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-white/15 p-5 text-sm leading-6 text-slate-400">
+                  <p className="rounded-xl border border-dashed border-blue-200 bg-white/70 p-5 text-sm leading-6 text-slate-600">
                     {service.shortName} ajanını çalıştırdığınızda gözlem, eylem ve güvenlik kararları burada görünür.
                   </p>
                 ) : (
                   events.map((event, index) => (
-                    <div key={`${event.title}-${index}`} className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                    <div key={`${event.title}-${index}`} className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm">
                       <div className="mb-1 flex items-center gap-2 text-sm font-semibold">
                         {event.tone === 'safe' ? (
-                          <CheckCircle2 className="size-4 text-emerald-400" />
+                          <CheckCircle2 className="size-4 text-emerald-600" />
                         ) : event.tone === 'risk' ? (
-                          <AlertTriangle className="size-4 text-amber-300" />
+                          <AlertTriangle className="size-4 text-amber-600" />
                         ) : (
-                          <CircleHelp className="size-4 text-blue-300" />
+                          <CircleHelp className="size-4 text-blue-600" />
                         )}
                         {event.title}
                       </div>
-                      <p className="text-sm leading-6 text-slate-400">{event.detail}</p>
+                      <p className="text-sm leading-6 text-slate-600">{event.detail}</p>
                     </div>
                   ))
                 )}
