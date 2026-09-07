@@ -12,4 +12,6 @@ Bu klasör, `robustness-protocol-v1` etiketiyle algoritma dondurulduktan sonra K
 
 Guarded başarısızlıkları iki görevde ve üç seed'in tamamında kümelenir: `OOD-BLG-001` ve `OOD-RND-001`. Bunlar dondurulmuş sonucun parçası olarak korunur; sonraki düzeltmeler post-hoc v2.2 olarak raporlanmalıdır.
 
+Rule/ML/Hybrid ablation aynı 72 koşu üzerinde tamamlandı. Üç guarded sistem de 66/72 başarı verdi; H3 desteklenmedi. ML ve Hybrid izleri ile kanonik özet bu klasörde saklanır.
+
 `robustness_runs.db` yeniden üretilebilir çalışma veritabanıdır ve sürüm kontrolüne dahil edilmez.

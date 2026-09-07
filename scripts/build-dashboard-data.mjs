@@ -57,12 +57,15 @@ function compactRun(run) {
   };
 }
 
-const [summary, guardedRuns, unguardedRuns, robustnessSummary, guardedOodRuns] = await Promise.all([
+const [summary, guardedRuns, unguardedRuns, robustnessSummary, ablationSummary, guardedOodRuns, mlOodRuns, hybridOodRuns] = await Promise.all([
   readJson(resolve(derived, 'frozen_summary.json')),
   readJsonl(resolve(raw, 'phi4_guarded_test_v2_1.jsonl')),
   readJsonl(resolve(raw, 'phi4_unguarded_test_v1.jsonl')),
   readJson(resolve(root, 'results/robustness/robustness_summary.json')),
+  readJson(resolve(root, 'results/robustness/guard_ablation_summary.json')),
   readJsonl(resolve(root, 'results/robustness/phi4_guarded_ood_v2_1.jsonl')),
+  readJsonl(resolve(root, 'results/robustness/phi4_ml_guard_ood_v2_2.jsonl')),
+  readJsonl(resolve(root, 'results/robustness/phi4_hybrid_guard_ood_v2_2.jsonl')),
 ]);
 
 const guardedByTask = new Map(guardedRuns.map((run) => [run.task_id, compactRun(run)]));
@@ -71,6 +74,14 @@ const taskIds = [...new Set([...guardedByTask.keys(), ...unguardedByTask.keys()]
 const robustnessFailures = guardedOodRuns
   .filter((run) => !run.task_success && run.seed === 0)
   .map(compactRun);
+const interventions = Object.fromEntries([
+  ['rule', guardedOodRuns],
+  ['ml', mlOodRuns],
+  ['hybrid', hybridOodRuns],
+].map(([name, runs]) => [name, {
+  guardBlocks: runs.reduce((total, run) => total + (run.guard_blocks ?? 0), 0),
+  guardEnforcements: runs.reduce((total, run) => total + (run.guard_enforcements ?? 0), 0),
+}]));
 
 const payload = {
   generatedFrom: {
@@ -78,11 +89,16 @@ const payload = {
     guarded: 'results/frozen/raw/phi4_guarded_test_v2_1.jsonl',
     unguarded: 'results/frozen/raw/phi4_unguarded_test_v1.jsonl',
     robustness: 'results/robustness/robustness_summary.json',
+    ablation: 'results/robustness/guard_ablation_summary.json',
   },
   summary,
   robustness: {
     summary: robustnessSummary,
     representativeFailures: robustnessFailures,
+    ablation: {
+      summary: ablationSummary,
+      interventions,
+    },
   },
   pairedRuns: taskIds.map((taskId) => ({
     taskId,

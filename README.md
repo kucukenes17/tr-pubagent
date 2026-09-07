@@ -33,6 +33,12 @@ Algoritma `robustness-protocol-v1` etiketiyle dondurulduktan sonra 24 yeni göre
 
 Altı Guarded başarısızlığı iki görevde ve üç seed'in tamamında kümelendi: sayı biçimli kanıt çıkarma ve olumsuz tercihi doğrudan select eylemine bağlama. Bu sınırlar dondurulmuş sonuçta korunur; düzeltmeler ayrı bir post-hoc v2.2 çalışması olacaktır.
 
+## Rule / ML / Hybrid ablation
+
+XLM-R risk sınıflandırıcısı 3.000 şablonlu sentetik örneğin ayrılmış testinde macro-F1 `1,0` aldı. Aynı 72 OOD koşusunda Rule, ML-decision ve Hybrid sistemlerin üçü de 66/72 (%91,7) güvenli başarı gösterdi. Rule 141 blok ve 30 güvenli eylem yönlendirmesi, ML 108 blok ve sıfır yönlendirme, Hybrid ise Rule ile aynı 141/30 müdahale profilini üretti. Önceden tanımlanan “Hybrid her iki bileşenden kesin olarak üstün olmalı” H3 hipotezi desteklenmedi.
+
+Bu negatif sonuç, yüksek sentetik sınıflandırma skorunun uçtan uca ajan başarısında ek faydayı garanti etmediğini gösterir. “ML Guard” araç sözleşmesi ve güvenli yürütme kontrolcüsünü diğer guarded sistemlerle paylaşır; yalnız karar guard'ı değiştirilmiştir.
+
 ## Mimari
 
 ```mermaid

@@ -1,0 +1,121 @@
+{
+  "experiment": "TR-PubAgent four-system OOD guard ablation",
+  "paired_runs_per_system": 72,
+  "tasks": 24,
+  "seeds": [
+    0,
+    17,
+    42
+  ],
+  "systems": {
+    "unguarded": {
+      "runs": 72,
+      "successes": 6,
+      "success_rate": 0.08333333333333333,
+      "success_ci95_wilson": [
+        0.038752424956949666,
+        0.17012355220676517
+      ],
+      "invalid_actions": 45,
+      "violations": {
+        "IRREVERSIBLE_CONFIRMATION_REQUIRED": 3,
+        "LANGUAGE_INTERPRETATION_ERROR": 3,
+        "PRIVACY_VIOLATION": 3,
+        "UNAUTHORIZED": 3
+      },
+      "violation_count": 12,
+      "mean_safety_score": 0.9666666666666667,
+      "mean_steps": 8.25,
+      "latency_seconds": 2146.804,
+      "generated_tokens": 31107,
+      "joint_safe_success_rate": 0.08333333333333333
+    },
+    "rule": {
+      "runs": 72,
+      "successes": 66,
+      "success_rate": 0.9166666666666666,
+      "success_ci95_wilson": [
+        0.8298764477932348,
+        0.9612475750430503
+      ],
+      "invalid_actions": 0,
+      "violations": {},
+      "violation_count": 0,
+      "mean_safety_score": 1.0,
+      "mean_steps": 3.4583333333333335,
+      "latency_seconds": 596.607,
+      "generated_tokens": 8988,
+      "joint_safe_success_rate": 0.9166666666666666
+    },
+    "ml": {
+      "runs": 72,
+      "successes": 66,
+      "success_rate": 0.9166666666666666,
+      "success_ci95_wilson": [
+        0.8298764477932348,
+        0.9612475750430503
+      ],
+      "invalid_actions": 0,
+      "violations": {},
+      "violation_count": 0,
+      "mean_safety_score": 1.0,
+      "mean_steps": 3.4583333333333335,
+      "latency_seconds": 522.968,
+      "generated_tokens": 7635,
+      "joint_safe_success_rate": 0.9166666666666666
+    },
+    "hybrid": {
+      "runs": 72,
+      "successes": 66,
+      "success_rate": 0.9166666666666666,
+      "success_ci95_wilson": [
+        0.8298764477932348,
+        0.9612475750430503
+      ],
+      "invalid_actions": 0,
+      "violations": {},
+      "violation_count": 0,
+      "mean_safety_score": 1.0,
+      "mean_steps": 3.4583333333333335,
+      "latency_seconds": 601.138,
+      "generated_tokens": 8988,
+      "joint_safe_success_rate": 0.9166666666666666
+    }
+  },
+  "paired_success_comparisons_vs_unguarded": {
+    "rule": {
+      "guarded_only_success": 60,
+      "unguarded_only_success": 0
+    },
+    "ml": {
+      "guarded_only_success": 60,
+      "unguarded_only_success": 0
+    },
+    "hybrid": {
+      "guarded_only_success": 60,
+      "unguarded_only_success": 0
+    }
+  },
+  "mcnemar_exact_p": {
+    "rule": 1.734723475976807e-18,
+    "ml": 1.734723475976807e-18,
+    "hybrid": 1.734723475976807e-18
+  },
+  "mcnemar_holm_adjusted_p": {
+    "rule": 5.204170427930421e-18,
+    "ml": 5.204170427930421e-18,
+    "hybrid": 5.204170427930421e-18
+  },
+  "fisher_violation_p": {
+    "rule": 0.002994343149490347,
+    "ml": 0.002994343149490347,
+    "hybrid": 0.002994343149490347
+  },
+  "fisher_holm_adjusted_p": {
+    "rule": 0.008983029448471042,
+    "ml": 0.008983029448471042,
+    "hybrid": 0.008983029448471042
+  },
+  "h3_definition": "Hybrid joint safe-success rate is strictly greater than both Rule and ML.",
+  "h3_supported": false
+}

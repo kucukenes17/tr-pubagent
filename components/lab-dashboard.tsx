@@ -34,6 +34,10 @@ function RunRow({ name, run, guarded }: { name: string; run: ResultMetrics; guar
   return <div className="grid grid-cols-[1.35fr_.7fr_.55fr_.55fr] items-center border-b border-white/10 px-5 py-4 last:border-0"><div className="flex items-center gap-2">{guarded ? <ShieldCheck className="size-4 text-cyan-300" /> : <FlaskConical className="size-4 text-slate-500" />}<span className="font-medium">{name}</span></div><span className="font-mono text-lg">{percent(run.success_rate)}</span><span className={guarded ? 'font-mono text-lg text-cyan-300' : 'font-mono text-lg'}>{run.violation_count}</span><span className="font-mono text-lg">{compact(run.mean_steps)}</span></div>;
 }
 
+function AblationRow({ name, success, blocks, enforcements, note, highlighted }: { name: string; success: number; blocks: number; enforcements: number; note: string; highlighted?: boolean }) {
+  return <div className={`grid gap-2 border-b border-slate-200 px-5 py-4 last:border-0 md:grid-cols-[1.1fr_.55fr_.45fr_.55fr_1.5fr] md:items-center ${highlighted ? 'bg-blue-50/70' : ''}`}><strong className="text-slate-950">{name}</strong><span className="font-mono text-lg text-slate-900">{percent(success)}</span><span className="font-mono text-slate-700">{blocks}</span><span className="font-mono text-slate-700">{enforcements}</span><span className="text-sm leading-6 text-slate-500">{note}</span></div>;
+}
+
 export function LabDashboard() {
   const { data, error } = useDashboardData();
   const splitChart = useMemo(() => data ? [
@@ -56,6 +60,7 @@ export function LabDashboard() {
 
   const test = data.summary.test;
   const robustness = data.robustness.summary;
+  const ablation = data.robustness.ablation;
   const tokenReduction = 1 - (test.guarded_v2_1.generated_tokens / test.unguarded_v1.generated_tokens);
   const latencyReduction = 1 - (test.guarded_v2_1.latency_seconds / test.unguarded_v1.latency_seconds);
   const oodTokenReduction = 1 - (robustness.guarded_v2_1.generated_tokens / robustness.unguarded.generated_tokens);
@@ -77,6 +82,18 @@ export function LabDashboard() {
           <div className="rounded-xl border border-white/10 bg-white/5 p-4"><Timer className="mb-3 size-5 text-cyan-300" /><div className="mono-label text-slate-400">Gecikme azalması</div><strong className="mt-1 block text-2xl">{percent(oodLatencyReduction)}</strong><p className="mt-2 text-sm leading-6 text-slate-400">{compact(robustness.unguarded.latency_seconds)} → {compact(robustness.guarded_v2_1.latency_seconds)} saniye</p></div>
           <div className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-4 sm:col-span-2"><div className="flex gap-3"><AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-300" /><div><div className="font-semibold text-amber-100">İki sistematik sınır bulundu</div><p className="mt-1 text-sm leading-6 text-amber-50/70">Belge türü görevinde “18.000 TL” kanıtı çıkarılamadı; randevu görevinde “salı değil, perşembe” ifadesi doğrudan seçime bağlanamadı. Her iki hata üç seed’de de tekrarlandı. Dondurulmuş v2.1 sonucu korunuyor; düzeltmeler ayrı v2.2 çalışması olarak değerlendirilecek.</p></div></div></div>
         </div>
+      </CardContent>
+    </Card>
+
+    <Card className="mb-7 overflow-hidden border-slate-200 bg-white shadow-sm">
+      <CardHeader className="border-b border-slate-200"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="mono-label text-blue-700">Rule / ML / Hybrid ablation</p><CardTitle className="mt-1 text-2xl">Öğrenilmiş guard ek başarı sağlamadı</CardTitle><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Dört sistem aynı 72 OOD koşusunda karşılaştırıldı. “ML” yalnız öğrenilmiş karar guard’ını ifade eder; araç sözleşmesi ve güvenli yürütme kontrolcüsü bütün guarded sistemlerde ortaktır.</p></div><Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">H3: desteklenmedi</Badge></div></CardHeader>
+      <CardContent className="p-0">
+        <div className="hidden grid-cols-[1.1fr_.55fr_.45fr_.55fr_1.5fr] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-medium uppercase tracking-wide text-slate-500 md:grid"><span>Sistem</span><span>Başarı</span><span>Blok</span><span>Yönlendirme</span><span>Yorum</span></div>
+        <AblationRow name="Unguarded v1" success={ablation.summary.systems.unguarded.success_rate} blocks={0} enforcements={0} note="Korumasız referans; 45 geçersiz eylem ve 12 ihlal." />
+        <AblationRow name="Rule Guard v2.1" success={ablation.summary.systems.rule.success_rate} blocks={ablation.interventions.rule.guardBlocks} enforcements={ablation.interventions.rule.guardEnforcements} note="30 eylemi güvenli alternatife dönüştürdü." highlighted />
+        <AblationRow name="ML decision guard" success={ablation.summary.systems.ml.success_rate} blocks={ablation.interventions.ml.guardBlocks} enforcements={ablation.interventions.ml.guardEnforcements} note="108 blok; güvenli alternatif üretmedi." />
+        <AblationRow name="Hybrid Rule + ML" success={ablation.summary.systems.hybrid.success_rate} blocks={ablation.interventions.hybrid.guardBlocks} enforcements={ablation.interventions.hybrid.guardEnforcements} note="Rule ile aynı sonuç; ek başarı yok." />
+        <div className="grid gap-4 border-t border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-600 lg:grid-cols-2"><p><strong className="text-slate-900">İstatistik:</strong> Üç guarded sistemin Unguarded karşısındaki Holm-düzeltilmiş McNemar değeri {ablation.summary.mcnemar_holm_adjusted_p.rule.toExponential(2)}. Başarıları birbirine eşit olduğu için Hybrid üstünlük hipotezi karşılanmadı.</p><p><strong className="text-slate-900">ML sınırı:</strong> XLM-R, 3.000 şablonlu sentetik örneğin ayrılmış testinde macro-F1=1,0 aldı. Bu kolay ayrılabilir veri sonucu gerçek dünya genellemesi değildir; OOD ajan sonucu esas ölçümdür.</p></div>
       </CardContent>
     </Card>
 

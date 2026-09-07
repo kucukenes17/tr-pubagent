@@ -56,7 +56,7 @@ Guarded v2.1 iki genel düzeltme içerir: iki yaygın JSON değer şemasını ka
 
 - H1 desteklendi: testte gözlenen ihlal sayısı 10'dan 0'a indi.
 - H2 desteklendi: görev başarısı korunmakla kalmadı, 100 yüzde puan arttı.
-- H3 değerlendirilmedi: nihai koşu XLM-R veya ayrı Rule Guard/ML Guard ablation'larını içermedi.
+- H3 desteklenmedi: OOD ablation'da Hybrid ortak güvenli-başarı oranı Rule ve ML oranlarından kesin olarak yüksek değildi.
 
 Ana dondurulmuş deneyde planlanan üç seed, farklı üretici modeller ve insan yazımı dış veri bu aşamanın kapsamına yetişmedi. Ardından üç-seed insan yazımı OOD deneyi ayrı ve önceden dondurulmuş protokolle tamamlandı. Oranlar için Wilson aralığı, OOD başarı farkı için görev-kümeli bootstrap kullanıldı. Sapmalar [RESEARCH_PROTOCOL.md](RESEARCH_PROTOCOL.md) içinde kayıtlıdır.
 
@@ -74,6 +74,21 @@ Mutlak başarı artışı +83,3 yüzde puan; görev-kümeli bootstrap %95 güven
 Toplam süre 2.146,804 saniyeden 596,607 saniyeye, üretilen token 31.107'den 8.988'e düşmüştür. Unguarded ihlalleri üçer adet `IRREVERSIBLE_CONFIRMATION_REQUIRED`, `LANGUAGE_INTERPRETATION_ERROR`, `PRIVACY_VIOLATION` ve `UNAUTHORIZED` olayından oluşur.
 
 Altı Guarded başarısızlığı iki görevde ve tüm seed'lerde tekrarlandı. `OOD-BLG-001` içinde kanıt çıkarıcı “18.000 TL” gelirini boş ayrıştırdı; eksik belge türü alındıktan sonra ajan izin verilmeyen gelir sorusunda döngüye girdi. `OOD-RND-001` içinde “salı değil, perşembe” tercihi doğrudan select eylemine bağlanamadı; gereksiz `ask_user` eylemi güvenle engellendi fakat doğru eyleme dönüştürülemedi. Bu, güvenlik ile görev kurtarma yeteneğinin ayrı ölçülmesi gerektiğini gösterir.
+
+## Rule / ML / Hybrid ablation sonucu
+
+3.000 örnekli `xlmr-risk-v2-json` veri kümesinde XLM-R, ayrılmış 398 örnekli test bölümünde macro-F1 `1,0` aldı. Örnekler sınıf başına tekrar eden ve kolay ayrılabilir sentetik kalıplardan üretildiği için bu skor dış geçerlilik kanıtı olarak yorumlanmaz.
+
+| Sistem | Ortak güvenli başarı | Guard blok | Güvenli yönlendirme |
+| --- | ---: | ---: | ---: |
+| Unguarded | 6/72 (%8,3) | 0 | 0 |
+| Rule Guard | 66/72 (%91,7) | 141 | 30 |
+| ML decision guard | 66/72 (%91,7) | 108 | 0 |
+| Hybrid | 66/72 (%91,7) | 141 | 30 |
+
+Rule, ML ve Hybrid sistemlerin her biri Unguarded'a karşı 60 yalnız-guarded başarı ve sıfır ters sonuç verdi; Holm-düzeltilmiş exact McNemar `p=5,20×10⁻¹⁸` oldu. İhlal farkının Holm-düzeltilmiş Fisher değeri `p=0,00898` ölçüldü. Üç guarded sistem aynı başarıyı verdiği için Hybrid ortak güvenli-başarı oranı Rule ve ML'den kesin olarak yüksek değildir; önceden tanımlı H3 desteklenmedi.
+
+ML karar katmanı 108 eylemi blokladı fakat güvenli alternatif eylem üretmedi. Hybrid'in müdahale profili ve uçtan uca sonucu Rule ile aynı kaldı. Bu bulgu, mevcut mimaride deterministik sözleşme ve kontrolcünün ana katkıyı sağladığını; şablonlu veriyle eğitilen sınıflandırıcının ek görev başarısı getirmediğini gösterir. “ML decision guard” koşusu da ortak public-contract doğrulamasını ve güvenli yürütme kontrolcüsünü kullanır; tamamen bağımsız bir ML ajanı değildir.
 
 ## Sınırlılıklar
 

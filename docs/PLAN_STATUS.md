@@ -11,7 +11,7 @@ Son güncelleme: 7 Eylül 2026
 | Gerçek veriye bağlı dashboard | Tamamlandı | Grafikler ve 40 görevlik JSONL replay explorer |
 | İnsan yazımı OOD sağlamlık paketi | Tamamlandı | 24 görev, sızıntı denetimi ve dondurulmuş protokol |
 | Çok-seed sağlamlık sonucu | Tamamlandı | 144 GPU koşusu: Guarded %91,7, Unguarded %8,3; exact McNemar p=1,73×10⁻¹⁸ |
-| ML Guard / Hybrid Guard ablation | Altyapı tamamlandı | Çalışma zamanı adaptörü, Rule/ML/Hybrid runner ve Holm düzeltmeli analiz hazır; XLM-R artefaktı/koşu bekliyor |
+| ML Guard / Hybrid Guard ablation | Tamamlandı | Üç guarded sistem 66/72; H3 desteklenmedi. XLM-R metadata ve ham izler arşivlendi |
 | İkinci üretici model | Bekliyor | GPU kotasına göre 24 OOD görevde ek model |
 | Altı ayrı portal yüzeyi | Kısmi | Backend altı hizmeti kapsıyor; frontend burs demosu ağırlıklı |
 | Temiz makine Docker doğrulaması | Bekliyor | Docker Desktop bulunan ayrı ortamda smoke test |
@@ -23,6 +23,6 @@ Son güncelleme: 7 Eylül 2026
 ## Sıradaki karar kapıları
 
 1. OOD'de bulunan iki sistematik sınırı v2.2 post-hoc deneyinde ayrı etiketle ve yeniden değerlendir.
-2. XLM-R artefaktı bulunursa ML/Hybrid ablation'a geç; bulunamazsa veri ve modeli yeniden üret.
-3. İkinci üretici model ile 24 OOD görevi çalıştır.
+2. İkinci üretici model ile 24 OOD görevi çalıştır.
+3. Kullanıcı ajan adaptörü/API arayüzünü ürünleştir ve örnek üçüncü taraf ajan ekle.
 4. Yayın belgelerini ve videoyu tamamlayıp `v1.0.0` sürümünü çıkar.

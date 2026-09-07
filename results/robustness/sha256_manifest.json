@@ -21,6 +21,21 @@
       "file": "robustness_task_comparison.csv",
       "bytes": 7292,
       "sha256": "45892393c926e421dd6d34e4beafe1e456f2b480e039b278bfebaae348017270"
+    },
+    {
+      "file": "phi4_ml_guard_ood_v2_2.jsonl",
+      "bytes": 583687,
+      "sha256": "d5b90bb716ee862d54536f22df72eb7eea588a2c8a6853e10bfa2d78415da79f"
+    },
+    {
+      "file": "phi4_hybrid_guard_ood_v2_2.jsonl",
+      "bytes": 584204,
+      "sha256": "1e96af7efe133f6675f0a6331b90871402d9ede61b991679849dbda7a07d2440"
+    },
+    {
+      "file": "guard_ablation_summary.json",
+      "bytes": 3198,
+      "sha256": "8bd81ee32ef13460a30f0b0ede25fbdc49e36bc65c4fd29ee11197bae4be90d7"
     }
   ]
 }

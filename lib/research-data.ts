@@ -72,6 +72,19 @@ export type RobustnessMetrics = {
   mean_steps: number;
   latency_seconds: number;
   generated_tokens: number;
+  joint_safe_success_rate?: number;
+};
+
+export type AblationSummary = {
+  experiment: string;
+  paired_runs_per_system: number;
+  tasks: number;
+  seeds: number[];
+  systems: Record<'unguarded' | 'rule' | 'ml' | 'hybrid', RobustnessMetrics>;
+  mcnemar_holm_adjusted_p: Record<'rule' | 'ml' | 'hybrid', number>;
+  fisher_holm_adjusted_p: Record<'rule' | 'ml' | 'hybrid', number>;
+  h3_definition: string;
+  h3_supported: boolean;
 };
 
 export type RobustnessSummary = {
@@ -100,6 +113,10 @@ export type FrozenDashboardData = {
   robustness: {
     summary: RobustnessSummary;
     representativeFailures: FrozenRun[];
+    ablation: {
+      summary: AblationSummary;
+      interventions: Record<'rule' | 'ml' | 'hybrid', { guardBlocks: number; guardEnforcements: number }>;
+    };
   };
   pairedRuns: Array<{ taskId: string; guarded: FrozenRun | null; unguarded: FrozenRun | null }>;
 };

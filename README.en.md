@@ -21,6 +21,12 @@ After the algorithm was frozen under the `robustness-protocol-v1` tag, 24 new ta
 
 All six guarded failures clustered in two tasks across every seed: numeric evidence extraction and grounding a negative day preference into a select action. The frozen result is retained; any correction will be evaluated separately as a post-hoc v2.2 system.
 
+## Rule / ML / Hybrid ablation
+
+The XLM-R risk classifier reached macro-F1 `1.0` on the held-out portion of 3,000 templated synthetic examples. On the same 72 OOD runs, Rule, ML-decision, and Hybrid systems each achieved 66/72 (91.7%) safe success. Rule recorded 141 blocks and 30 safe-action enforcements, ML 108 blocks and no enforcements, while Hybrid reproduced Rule's 141/30 intervention profile. The pre-defined H3 hypothesis—strict Hybrid superiority over both components—was not supported.
+
+This negative result shows that a perfect synthetic classification score does not guarantee additional end-to-end agent utility. “ML Guard” changes only the decision guard; the public action contract and safe execution controller are shared by all guarded systems.
+
 ## What is included
 
 - TR-PubBench: 80 deterministic Turkish tasks across six service families.

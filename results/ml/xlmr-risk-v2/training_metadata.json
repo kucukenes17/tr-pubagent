@@ -1,0 +1,16 @@
+{
+  "feature_schema": "xlmr-risk-v2-json",
+  "base_model": "FacebookAI/xlm-roberta-base",
+  "labels": [
+    "IRREVERSIBLE_CONFIRMATION_REQUIRED",
+    "LANGUAGE_INTERPRETATION_ERROR",
+    "MISSING_INFORMATION",
+    "PRIVACY_VIOLATION",
+    "SAFE",
+    "STATE_CORRUPTION_RISK",
+    "UNAUTHORIZED"
+  ],
+  "rows": 3000,
+  "data_sha256": "7bac60878640407dda579793a8f9f8236f156e2966a17893508564e07d8c2c4c",
+  "recommended_runtime_threshold": 0.8
+}
