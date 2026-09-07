@@ -1,113 +1,750 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ArrowRight, Braces, CheckCircle2, Database, FlaskConical, Gauge, PlugZap, ShieldAlert, ShieldCheck, Timer, Zap } from 'lucide-react';
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { useEffect, useState } from 'react';
+import {
+  AlertTriangle,
+  ArrowRight,
+  ArrowUpRight,
+  Braces,
+  Database,
+  FlaskConical,
+  Info,
+  PlugZap,
+  ShieldCheck,
+  Timer,
+  Zap,
+} from 'lucide-react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SiteHeader } from '@/components/site-header';
-import type { FrozenDashboardData, ResultMetrics } from '@/lib/research-data';
+import type {
+  FrozenDashboardData,
+  RobustnessMetrics,
+} from '@/lib/research-data';
 
-const percent = (value: number) => `%${(value * 100).toLocaleString('tr-TR', { maximumFractionDigits: 1 })}`;
-const compact = (value: number) => value.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
+const percent = (value: number) =>
+  `%${(value * 100).toLocaleString('tr-TR', { maximumFractionDigits: 1 })}`;
+const compact = (value: number) =>
+  value.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
+const colors = { guarded: '#08735c', unguarded: '#9d513b' };
 
-function useDashboardData() {
-  const [data, setData] = useState<FrozenDashboardData | null>(null);
-  const [error, setError] = useState(false);
-  useEffect(() => {
-    fetch('/data/frozen-dashboard.json').then((response) => {
-      if (!response.ok) throw new Error('Sonuç dosyası yüklenemedi.');
-      return response.json() as Promise<FrozenDashboardData>;
-    }).then(setData).catch(() => setError(true));
-  }, []);
-  return { data, error };
+function SystemLegend() {
+  return (
+    <div className="chart-legend">
+      <span>
+        <i className="system-marker unguarded" /> Unguarded v1
+      </span>
+      <span>
+        <i className="system-marker" /> Guarded v2.1
+      </span>
+    </div>
+  );
 }
 
-function MetricCard({ label, value, detail, icon: Icon }: { label: string; value: string; detail: string; icon: typeof Database }) {
-  return <div className="bg-white p-5"><div className="flex items-center justify-between"><span className="mono-label text-slate-500">{label}</span><Icon className="size-4 text-blue-600" /></div><div className="mt-2 flex items-end justify-between gap-4"><strong className="text-3xl tracking-tight text-slate-950">{value}</strong><span className="max-w-32 text-right text-xs leading-5 text-slate-500">{detail}</span></div></div>;
+function SuccessMeasure({
+  run,
+  guarded,
+}: {
+  run: RobustnessMetrics;
+  guarded?: boolean;
+}) {
+  return (
+    <div className="system-line">
+      <div className="system-line-title">
+        <span>
+          <i className={`system-marker ${guarded ? '' : 'unguarded'}`} />
+          {guarded ? 'Guarded v2.1' : 'Unguarded v1'}
+        </span>
+        <strong className={guarded ? 'guarded-text' : 'unguarded-text'}>
+          {run.successes}
+          <small>/ {run.runs}</small>
+        </strong>
+      </div>
+      <div className="measure-track" aria-hidden="true">
+        <div
+          className={`measure-fill ${guarded ? '' : 'unguarded'}`}
+          style={{ width: run.success_rate * 100 + '%' }}
+        />
+      </div>
+      <p className="measure-caption">
+        {percent(run.success_rate)} başarı · Wilson %95 GA:{' '}
+        {percent(run.success_ci95_wilson[0])}–
+        {percent(run.success_ci95_wilson[1])}
+      </p>
+    </div>
+  );
 }
 
-function RunRow({ name, run, guarded }: { name: string; run: ResultMetrics; guarded?: boolean }) {
-  return <div className="grid grid-cols-[1.35fr_.7fr_.55fr_.55fr] items-center border-b border-white/10 px-5 py-4 last:border-0"><div className="flex items-center gap-2">{guarded ? <ShieldCheck className="size-4 text-cyan-300" /> : <FlaskConical className="size-4 text-slate-500" />}<span className="font-medium">{name}</span></div><span className="font-mono text-lg">{percent(run.success_rate)}</span><span className={guarded ? 'font-mono text-lg text-cyan-300' : 'font-mono text-lg'}>{run.violation_count}</span><span className="font-mono text-lg">{compact(run.mean_steps)}</span></div>;
-}
-
-function AblationRow({ name, success, blocks, enforcements, note, highlighted }: { name: string; success: number; blocks: number; enforcements: number; note: string; highlighted?: boolean }) {
-  return <div className={`grid gap-2 border-b border-slate-200 px-5 py-4 last:border-0 md:grid-cols-[1.1fr_.55fr_.45fr_.55fr_1.5fr] md:items-center ${highlighted ? 'bg-blue-50/70' : ''}`}><strong className="text-slate-950">{name}</strong><span className="font-mono text-lg text-slate-900">{percent(success)}</span><span className="font-mono text-slate-700">{blocks}</span><span className="font-mono text-slate-700">{enforcements}</span><span className="text-sm leading-6 text-slate-500">{note}</span></div>;
+function Experiment({
+  index,
+  title,
+  subtitle,
+  unguarded,
+  guarded,
+  p,
+  gain,
+}: {
+  index: string;
+  title: string;
+  subtitle: string;
+  unguarded: RobustnessMetrics;
+  guarded: RobustnessMetrics;
+  p: number;
+  gain?: [number, number];
+}) {
+  return (
+    <article className="experiment">
+      <header className="experiment-header">
+        <div>
+          <div className="eyebrow">
+            {index === '01' ? 'Frozen final test' : 'Human-authored OOD'}
+          </div>
+          <h2>{title}</h2>
+          <p>{subtitle}</p>
+        </div>
+        <span className="experiment-index">{index}</span>
+      </header>
+      <div className="experiment-body">
+        <SuccessMeasure run={unguarded} />
+        <SuccessMeasure run={guarded} guarded />
+      </div>
+      <dl className="safety-comparison">
+        {[
+          [
+            'Geçersiz eylem',
+            unguarded.invalid_actions,
+            guarded.invalid_actions,
+          ],
+          [
+            'Gözlenen ihlal',
+            unguarded.violation_count,
+            guarded.violation_count,
+          ],
+        ].map(([label, before, after]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>
+              <span className="unguarded-text">{before}</span>
+              <ArrowRight size={17} aria-label="değerinden" />
+              <span className="guarded-text">{after}</span>
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <div className="stat-foot">
+        <span className="w-full">
+          Başarı farkı:{' '}
+          <strong>
+            +{compact((guarded.success_rate - unguarded.success_rate) * 100)}{' '}
+            yüzde puanı
+          </strong>
+        </span>
+        <span>Exact McNemar</span>
+        <code title={String(p)}>p = {p.toExponential(3)}</code>
+        {gain && (
+          <span className="w-full">
+            Farkın görev-kümeli bootstrap %95 GA’sı:{' '}
+            <strong>
+              +{compact(gain[0] * 100)}–+{compact(gain[1] * 100)} yüzde puanı
+            </strong>
+          </span>
+        )}
+      </div>
+    </article>
+  );
 }
 
 export function LabDashboard() {
-  const { data, error } = useDashboardData();
-  const splitChart = useMemo(() => data ? [
-    { split: 'Geliştirme', Unguarded: data.summary.development.unguarded_v1.success_rate * 100, 'Guarded v2.1': data.summary.development.guarded_v2_1.success_rate * 100 },
-    { split: 'Doğrulama', Unguarded: data.summary.validation.unguarded_v1.success_rate * 100, 'Guarded v2.1': data.summary.validation.guarded_v2_1.success_rate * 100 },
-    { split: 'Final test', Unguarded: data.summary.test.unguarded_v1.success_rate * 100, 'Guarded v2.1': data.summary.test.guarded_v2_1.success_rate * 100 },
-  ] : [], [data]);
-  const outcomeChart = useMemo(() => data ? [
-    { metric: 'Başarılı görev', Unguarded: data.summary.test.unguarded_v1.successes, 'Guarded v2.1': data.summary.test.guarded_v2_1.successes },
-    { metric: 'Geçersiz eylem', Unguarded: data.summary.test.unguarded_v1.invalid_actions, 'Guarded v2.1': data.summary.test.guarded_v2_1.invalid_actions },
-    { metric: 'İhlal', Unguarded: data.summary.test.unguarded_v1.violation_count, 'Guarded v2.1': data.summary.test.guarded_v2_1.violation_count },
-  ] : [], [data]);
-  const robustnessChart = useMemo(() => data ? [
-    { system: 'Unguarded v1', success: data.robustness.summary.unguarded.success_rate * 100 },
-    { system: 'Guarded v2.1', success: data.robustness.summary.guarded_v2_1.success_rate * 100 },
-  ] : [], [data]);
-
-  if (error) return <main className="min-h-screen"><SiteHeader /><section className="mx-auto max-w-3xl px-5 py-20"><Card className="border-red-200 bg-red-50"><CardContent className="flex gap-3 p-6"><AlertTriangle className="size-5 text-red-700" /><div><h1 className="font-semibold text-red-950">Dondurulmuş sonuçlar yüklenemedi</h1><p className="mt-1 text-sm text-red-800">Dashboard veri paketi yeniden üretilmelidir.</p></div></CardContent></Card></section></main>;
-  if (!data) return <main className="min-h-screen"><SiteHeader /><section className="mx-auto max-w-[1440px] space-y-6 px-5 py-10"><Skeleton className="h-44 w-full" /><div className="grid gap-5 md:grid-cols-2"><Skeleton className="h-80" /><Skeleton className="h-80" /></div></section></main>;
-
+  const [data, setData] = useState<FrozenDashboardData | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/data/frozen-dashboard.json', { signal: controller.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error('Veri yüklenemedi');
+        return r.json() as Promise<FrozenDashboardData>;
+      })
+      .then(setData)
+      .catch((err) => {
+        if (err.name !== 'AbortError') setError(true);
+      });
+    return () => controller.abort();
+  }, []);
+  if (error)
+    return (
+      <main>
+        <SiteHeader />
+        <section id="content" className="research-workspace">
+          <h1>Sonuç verisi yüklenemedi</h1>
+          <p>Bağlantınızı kontrol edip sayfayı yeniden yükleyin.</p>
+          <button
+            className={buttonVariants()}
+            onClick={() => window.location.reload()}
+          >
+            Yeniden dene
+          </button>
+        </section>
+      </main>
+    );
+  if (!data)
+    return (
+      <main>
+        <SiteHeader />
+        <section
+          id="content"
+          className="research-workspace"
+          aria-busy="true"
+          aria-label="Araştırma sonuçları yükleniyor"
+        >
+          <Skeleton className="mb-6 h-32" />
+          <div className="result-pair">
+            <Skeleton className="h-96" />
+            <Skeleton className="h-96" />
+          </div>
+        </section>
+      </main>
+    );
   const test = data.summary.test;
-  const robustness = data.robustness.summary;
+  const ood = data.robustness.summary;
   const ablation = data.robustness.ablation;
-  const tokenReduction = 1 - (test.guarded_v2_1.generated_tokens / test.unguarded_v1.generated_tokens);
-  const latencyReduction = 1 - (test.guarded_v2_1.latency_seconds / test.unguarded_v1.latency_seconds);
-  const oodTokenReduction = 1 - (robustness.guarded_v2_1.generated_tokens / robustness.unguarded.generated_tokens);
-  const oodLatencyReduction = 1 - (robustness.guarded_v2_1.latency_seconds / robustness.unguarded.latency_seconds);
-
-  return <main className="min-h-screen"><SiteHeader /><section className="mx-auto max-w-[1440px] px-5 py-7 lg:px-8 lg:py-10">
-    <div className="mb-8 grid gap-6 border-b border-slate-200 pb-8 lg:grid-cols-[1.2fr_.8fr] lg:items-end"><div><div className="mb-4 flex flex-wrap items-center gap-2"><Badge className="bg-blue-600 text-white">Canlı araştırma dashboard’u</Badge><Badge variant="outline">40 eşlenmiş test görevi</Badge><Badge variant="outline">Seed 0</Badge></div><h1 className="max-w-4xl text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-slate-950 md:text-6xl">Güvenlik katmanı, başarıyı <span className="text-blue-600">ölçülebilir biçimde değiştiriyor.</span></h1></div><div className="lg:pb-1"><p className="max-w-xl text-base leading-7 text-slate-600">Tüm metrikler doğrudan dondurulmuş Phi-4 JSONL kayıtlarından üretilir. Bir görevi seçip her iki ajanın gerçek karar zincirini karşılaştırabilirsiniz.</p><div className="mt-5 flex flex-wrap gap-3"><Link className={buttonVariants({ className: 'bg-slate-950 text-white hover:bg-blue-700' })} href="/replays">Gerçek koşuları incele <ArrowRight className="size-4" /></Link><Link className={buttonVariants({ variant: 'outline' })} href="/method">Yöntemi oku</Link></div></div></div>
-
-    <div className="mb-7 grid gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 sm:grid-cols-2 xl:grid-cols-4"><MetricCard label="Final başarı farkı" value="+100 pp" detail={`${test.unguarded_v1.successes}/40 → ${test.guarded_v2_1.successes}/40`} icon={CheckCircle2} /><MetricCard label="Gözlenen ihlal" value={`${test.unguarded_v1.violation_count} → ${test.guarded_v2_1.violation_count}`} detail="4 gizlilik + 6 dil yorumlama" icon={ShieldAlert} /><MetricCard label="Token azalması" value={percent(tokenReduction)} detail={`${compact(test.unguarded_v1.generated_tokens)} → ${compact(test.guarded_v2_1.generated_tokens)}`} icon={Zap} /><MetricCard label="Gecikme azalması" value={percent(latencyReduction)} detail={`${compact(test.unguarded_v1.latency_seconds)} sn → ${compact(test.guarded_v2_1.latency_seconds)} sn`} icon={Timer} /></div>
-
-    <Card className="mb-7 overflow-hidden border-blue-200 bg-blue-50/70 shadow-sm">
-      <CardContent className="grid gap-5 p-5 lg:grid-cols-[1fr_auto] lg:items-center lg:p-6">
-        <div className="flex gap-4"><div className="grid size-11 shrink-0 place-items-center rounded-xl bg-blue-600 text-white"><PlugZap className="size-5" /></div><div><p className="mono-label text-blue-700">Kendi ajanını getir · HTTP v1</p><h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">Ajanını aynı görevlerde doğrudan ve korumalı ölç.</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Standart <code className="rounded bg-white px-1.5 py-0.5 font-mono text-xs text-blue-800">POST /act</code> endpoint’ini bağla; başarı, güvenlik, geçersiz eylem ve adım izini JSONL olarak al. Aynı koşuyu <strong>Guard yok</strong> ve <strong>Rule Guard</strong> modlarında karşılaştır.</p></div></div>
-        <div className="flex flex-wrap gap-3 lg:justify-end"><Link className={buttonVariants({ className: 'bg-blue-600 text-white hover:bg-blue-700' })} href="https://github.com/kucukenes17/tr-pubagent/blob/main/docs/BRING_YOUR_OWN_AGENT.md" target="_blank" rel="noreferrer">Bağlantı rehberi <ArrowRight className="size-4" /></Link><Link className={buttonVariants({ variant: 'outline', className: 'border-blue-200 bg-white' })} href="https://github.com/kucukenes17/tr-pubagent/blob/main/examples/http_agent.py" target="_blank" rel="noreferrer"><Braces className="size-4" /> Örnek ajan</Link></div>
-      </CardContent>
-    </Card>
-
-    <Card className="mb-7 overflow-hidden border-blue-900 bg-slate-950 text-white shadow-xl shadow-blue-950/10">
-      <CardHeader className="border-b border-white/10"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="mb-2 flex flex-wrap gap-2"><Badge className="bg-cyan-300 text-slate-950">OOD sağlamlık</Badge><Badge variant="outline" className="border-white/20 text-slate-300">24 görev × 3 seed</Badge></div><CardTitle className="text-3xl">Görülmemiş görevlerde %91,7 başarı</CardTitle><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">İnsan yazımı 24 yeni görev, algoritma dondurulduktan sonra üç seed ile çalıştırıldı. Guarded sistem 72 koşunun 66’sını tamamladı; geçersiz eylem ve gözlenen ihlal üretmedi.</p></div><div className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-right"><div className="mono-label text-cyan-200">Exact McNemar</div><strong className="font-mono text-lg text-white">p={robustness.mcnemar_exact_p.toExponential(2)}</strong></div></div></CardHeader>
-      <CardContent className="grid gap-6 p-5 lg:grid-cols-[.85fr_1.15fr] lg:p-7">
-        <div className="h-72"><ResponsiveContainer width="100%" height="100%"><BarChart data={robustnessChart} margin={{ top: 12, right: 12, left: -12, bottom: 0 }}><CartesianGrid stroke="#334155" strokeDasharray="3 3" vertical={false} /><XAxis dataKey="system" stroke="#94a3b8" tickLine={false} axisLine={false} /><YAxis domain={[0, 100]} unit="%" stroke="#94a3b8" tickLine={false} axisLine={false} /><Tooltip formatter={(value) => [`%${Number(value).toLocaleString('tr-TR', { maximumFractionDigits: 1 })}`, 'Başarı']} /><Bar dataKey="success" fill="#22d3ee" radius={[6, 6, 0, 0]} /></BarChart></ResponsiveContainer></div>
-        <div className="grid content-start gap-4 sm:grid-cols-2">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4"><Gauge className="mb-3 size-5 text-cyan-300" /><div className="mono-label text-slate-400">Başarı artışı</div><strong className="mt-1 block text-2xl">+{compact(robustness.absolute_success_gain * 100)} pp</strong><p className="mt-2 text-sm leading-6 text-slate-400">Görev-kümeli %95 GA: +{compact(robustness.task_cluster_bootstrap_ci95[0] * 100)}–+{compact(robustness.task_cluster_bootstrap_ci95[1] * 100)} pp</p></div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4"><ShieldCheck className="mb-3 size-5 text-cyan-300" /><div className="mono-label text-slate-400">Hata baskılama</div><strong className="mt-1 block text-2xl">45 → 0</strong><p className="mt-2 text-sm leading-6 text-slate-400">Geçersiz eylemler; gözlenen ihlaller ayrıca 12’den 0’a indi.</p></div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4"><Zap className="mb-3 size-5 text-cyan-300" /><div className="mono-label text-slate-400">Token azalması</div><strong className="mt-1 block text-2xl">{percent(oodTokenReduction)}</strong><p className="mt-2 text-sm leading-6 text-slate-400">{compact(robustness.unguarded.generated_tokens)} → {compact(robustness.guarded_v2_1.generated_tokens)} token</p></div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4"><Timer className="mb-3 size-5 text-cyan-300" /><div className="mono-label text-slate-400">Gecikme azalması</div><strong className="mt-1 block text-2xl">{percent(oodLatencyReduction)}</strong><p className="mt-2 text-sm leading-6 text-slate-400">{compact(robustness.unguarded.latency_seconds)} → {compact(robustness.guarded_v2_1.latency_seconds)} saniye</p></div>
-          <div className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-4 sm:col-span-2"><div className="flex gap-3"><AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-300" /><div><div className="font-semibold text-amber-100">İki sistematik sınır bulundu</div><p className="mt-1 text-sm leading-6 text-amber-50/70">Belge türü görevinde “18.000 TL” kanıtı çıkarılamadı; randevu görevinde “salı değil, perşembe” ifadesi doğrudan seçime bağlanamadı. Her iki hata üç seed’de de tekrarlandı. Dondurulmuş v2.1 sonucu korunuyor; düzeltmeler ayrı v2.2 çalışması olarak değerlendirilecek.</p></div></div></div>
+  const splitChart = [
+    {
+      split: 'Geliştirme',
+      Unguarded: data.summary.development.unguarded_v1.success_rate * 100,
+      Guarded: data.summary.development.guarded_v2_1.success_rate * 100,
+    },
+    {
+      split: 'Doğrulama',
+      Unguarded: data.summary.validation.unguarded_v1.success_rate * 100,
+      Guarded: data.summary.validation.guarded_v2_1.success_rate * 100,
+    },
+    {
+      split: 'Final test',
+      Unguarded: test.unguarded_v1.success_rate * 100,
+      Guarded: test.guarded_v2_1.success_rate * 100,
+    },
+  ];
+  const outcomes = [
+    {
+      metric: 'Başarılı görev',
+      Unguarded: test.unguarded_v1.successes,
+      Guarded: test.guarded_v2_1.successes,
+    },
+    {
+      metric: 'Geçersiz eylem',
+      Unguarded: test.unguarded_v1.invalid_actions,
+      Guarded: test.guarded_v2_1.invalid_actions,
+    },
+    {
+      metric: 'Gözlenen ihlal',
+      Unguarded: test.unguarded_v1.violation_count,
+      Guarded: test.guarded_v2_1.violation_count,
+    },
+  ];
+  return (
+    <main>
+      <SiteHeader />
+      <div id="content" className="research-workspace">
+        <header className="research-heading">
+          <div>
+            <div className="eyebrow">
+              <FlaskConical size={16} /> Araştırma / Sonuçlar{' '}
+              <span aria-hidden="true">·</span> Phi-4
+            </div>
+            <h1>Ajan başarısı, güvenlik sınırlarıyla birlikte.</h1>
+            <p>
+              Türkçe kamu hizmeti benzeri görevlerde AI ajanlarını ölçen
+              araştırma platformu. Aynı ajan, iki koşul:{' '}
+              <strong>Unguarded v1</strong> ve <strong>TR-PubGuard v2.1</strong>
+              .
+            </p>
+          </div>
+          <div className="research-actions">
+            <Link href="/replays" className={buttonVariants()}>
+              Karar izini incele <ArrowUpRight size={16} />
+            </Link>
+            <Link
+              href="#byoa"
+              className={buttonVariants({ variant: 'outline' })}
+            >
+              Ajanını test et
+            </Link>
+          </div>
+        </header>
+        <div className="scope-note">
+          <Info size={17} />
+          <p>
+            <strong>Deney kapsamı: sentetik ortam.</strong> Frozen testte{' '}
+            {test.unguarded_v1.successes}/{test.unguarded_v1.runs} →{' '}
+            {test.guarded_v2_1.successes}/{test.guarded_v2_1.runs}; insan yazımı
+            OOD’de {ood.guarded_v2_1.successes}/{ood.guarded_v2_1.runs} başarı.
+            Gerçek kamu portallarına genelleme iddiası değildir.
+          </p>
         </div>
-      </CardContent>
-    </Card>
-
-    <Card className="mb-7 overflow-hidden border-slate-200 bg-white shadow-sm">
-      <CardHeader className="border-b border-slate-200"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="mono-label text-blue-700">Rule / ML / Hybrid ablation</p><CardTitle className="mt-1 text-2xl">Öğrenilmiş guard ek başarı sağlamadı</CardTitle><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Dört sistem aynı 72 OOD koşusunda karşılaştırıldı. “ML” yalnız öğrenilmiş karar guard’ını ifade eder; araç sözleşmesi ve güvenli yürütme kontrolcüsü bütün guarded sistemlerde ortaktır.</p></div><Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">H3: desteklenmedi</Badge></div></CardHeader>
-      <CardContent className="p-0">
-        <div className="hidden grid-cols-[1.1fr_.55fr_.45fr_.55fr_1.5fr] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-medium uppercase tracking-wide text-slate-500 md:grid"><span>Sistem</span><span>Başarı</span><span>Blok</span><span>Yönlendirme</span><span>Yorum</span></div>
-        <AblationRow name="Unguarded v1" success={ablation.summary.systems.unguarded.success_rate} blocks={0} enforcements={0} note="Korumasız referans; 45 geçersiz eylem ve 12 ihlal." />
-        <AblationRow name="Rule Guard v2.1" success={ablation.summary.systems.rule.success_rate} blocks={ablation.interventions.rule.guardBlocks} enforcements={ablation.interventions.rule.guardEnforcements} note="30 eylemi güvenli alternatife dönüştürdü." highlighted />
-        <AblationRow name="ML decision guard" success={ablation.summary.systems.ml.success_rate} blocks={ablation.interventions.ml.guardBlocks} enforcements={ablation.interventions.ml.guardEnforcements} note="108 blok; güvenli alternatif üretmedi." />
-        <AblationRow name="Hybrid Rule + ML" success={ablation.summary.systems.hybrid.success_rate} blocks={ablation.interventions.hybrid.guardBlocks} enforcements={ablation.interventions.hybrid.guardEnforcements} note="Rule ile aynı sonuç; ek başarı yok." />
-        <div className="grid gap-4 border-t border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-600 lg:grid-cols-2"><p><strong className="text-slate-900">İstatistik:</strong> Üç guarded sistemin Unguarded karşısındaki Holm-düzeltilmiş McNemar değeri {ablation.summary.mcnemar_holm_adjusted_p.rule.toExponential(2)}. Başarıları birbirine eşit olduğu için Hybrid üstünlük hipotezi karşılanmadı.</p><p><strong className="text-slate-900">ML sınırı:</strong> XLM-R, 3.000 şablonlu sentetik örneğin ayrılmış testinde macro-F1=1,0 aldı. Bu kolay ayrılabilir veri sonucu gerçek dünya genellemesi değildir; OOD ajan sonucu esas ölçümdür.</p></div>
-      </CardContent>
-    </Card>
-
-    <div className="grid gap-7 xl:grid-cols-[1.05fr_.95fr]">
-      <Card className="border-slate-200 bg-white shadow-sm"><CardHeader><p className="mono-label text-blue-700">Split tutarlılığı</p><CardTitle className="text-2xl">Görev başarı oranı</CardTitle><p className="text-sm text-slate-500">Geliştirme, doğrulama ve daha önce görülmemiş final test görevleri.</p></CardHeader><CardContent className="h-80"><ResponsiveContainer width="100%" height="100%"><BarChart data={splitChart} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="split" tickLine={false} axisLine={false} /><YAxis domain={[0, 100]} unit="%" tickLine={false} axisLine={false} /><Tooltip formatter={(value) => [`%${String(value)}`, 'Başarı']} /><Legend /><Bar dataKey="Unguarded" fill="#94a3b8" radius={[5, 5, 0, 0]} /><Bar dataKey="Guarded v2.1" fill="#2563eb" radius={[5, 5, 0, 0]} /></BarChart></ResponsiveContainer></CardContent></Card>
-      <Card className="border-slate-200 bg-white shadow-sm"><CardHeader><p className="mono-label text-blue-700">Final test · n=40</p><CardTitle className="text-2xl">Sonuç türleri</CardTitle><p className="text-sm text-slate-500">Başarı artarken geçersiz eylem ve ihlal sayısı sıfıra indi.</p></CardHeader><CardContent className="h-80"><ResponsiveContainer width="100%" height="100%"><BarChart data={outcomeChart} layout="vertical" margin={{ top: 10, right: 10, left: 18, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" horizontal={false} /><XAxis type="number" tickLine={false} axisLine={false} /><YAxis type="category" dataKey="metric" width={105} tickLine={false} axisLine={false} /><Tooltip /><Legend /><Bar dataKey="Unguarded" fill="#94a3b8" radius={[0, 5, 5, 0]} /><Bar dataKey="Guarded v2.1" fill="#0891b2" radius={[0, 5, 5, 0]} /></BarChart></ResponsiveContainer></CardContent></Card>
-      <Card className="overflow-hidden border-slate-800 bg-slate-950 text-white shadow-xl shadow-blue-950/10 xl:col-span-2"><CardHeader className="border-b border-white/10"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="mono-label text-cyan-300">Dondurulmuş karşılaştırma</p><CardTitle className="mt-1 text-2xl">Başarı / güvenlik / verimlilik</CardTitle></div><Badge variant="outline" className="border-cyan-300/30 text-cyan-200">McNemar p={test.mcnemar_exact_p.toExponential(2)}</Badge></div></CardHeader><CardContent className="p-0"><div className="grid grid-cols-[1.35fr_.7fr_.55fr_.55fr] border-b border-white/10 px-5 py-3 text-xs font-medium text-slate-400"><span>Yöntem</span><span>Başarı</span><span>İhlal</span><span>Adım</span></div><RunRow name="TR-PubGuard v2.1" run={test.guarded_v2_1} guarded /><RunRow name="Unguarded v1" run={test.unguarded_v1} /><div className="m-5 grid gap-4 rounded-xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-slate-300 md:grid-cols-[1fr_auto]"><p><strong className="text-white">Araştırma sınırı:</strong> Sonuçlar tek model, tek seed ve sentetik Türkçe kamu hizmeti görevlerini kapsar; gerçek sistemlere doğrudan genellenemez.</p><div className="flex items-center gap-2 font-mono text-xs text-cyan-200"><Database className="size-4" /> harness={String(data.summary.provenance.evaluation_harness)}</div></div></CardContent></Card>
-    </div>
-  </section></main>;
+        <div className="result-pair" id="results">
+          <Experiment
+            index="01"
+            title="Dondurulmuş test"
+            subtitle={`${test.guarded_v2_1.runs} eşlenmiş görev · Seed 0 · Şablon ilişkili sentetik test`}
+            unguarded={test.unguarded_v1}
+            guarded={test.guarded_v2_1}
+            p={test.mcnemar_exact_p}
+          />
+          <Experiment
+            index="02"
+            title="Görülmemiş görevler"
+            subtitle={`${ood.tasks} insan yazımı görev × ${ood.seeds.length} seed = ${ood.paired_runs} eşlenmiş koşu`}
+            unguarded={ood.unguarded}
+            guarded={ood.guarded_v2_1}
+            p={ood.mcnemar_exact_p}
+            gain={ood.task_cluster_bootstrap_ci95}
+          />
+        </div>
+        <nav className="section-nav" aria-label="Araştırma bölümleri">
+          <span className="font-semibold text-slate-800">Bu görünümde</span>
+          <a href="#ablation">01 / Ablation</a>
+          <a href="#analysis">02 / Metrikler</a>
+          <a href="#limits">03 / Sınırlar</a>
+          <a href="#byoa">04 / Kendi ajanını getir</a>
+        </nav>
+        <section id="ablation">
+          <div className="section-title">
+            <div>
+              <div className="eyebrow">01 / Rule · ML · Hybrid</div>
+              <h2>Öğrenilmiş guard ek başarı sağlamadı.</h2>
+              <p>
+                Aynı {ablation.summary.paired_runs_per_system} OOD koşusunda
+                karar guard’ı değiştirildi. Araç sözleşmesi ve güvenli yürütme
+                kontrolcüsü bütün guarded sistemlerde ortak tutuldu.
+              </p>
+            </div>
+            <Badge
+              variant="outline"
+              className="border-amber-300 bg-amber-50 text-amber-900"
+            >
+              H3:{' '}
+              {ablation.summary.h3_supported ? 'desteklendi' : 'desteklenmedi'}
+            </Badge>
+          </div>
+          <div
+            className="table-wrap"
+            aria-label="Guard ablation karşılaştırma tablosu"
+          >
+            <table className="research-table">
+              <caption className="sr-only">
+                Aynı OOD koşularında başarı ve müdahale sayıları
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Sistem</th>
+                  <th scope="col">Başarı</th>
+                  <th scope="col">Blok</th>
+                  <th scope="col">Güvenli yönlendirme</th>
+                  <th scope="col">Gözlenen ihlal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(['unguarded', 'rule', 'ml', 'hybrid'] as const).map((key) => {
+                  const run = ablation.summary.systems[key];
+                  const intervention =
+                    key === 'unguarded' ? null : ablation.interventions[key];
+                  return (
+                    <tr key={key} className={key === 'rule' ? 'preferred' : ''}>
+                      <td className="font-semibold">
+                        {
+                          {
+                            unguarded: 'Unguarded v1',
+                            rule: 'Rule Guard v2.1',
+                            ml: 'ML decision guard',
+                            hybrid: 'Hybrid Rule + ML',
+                          }[key]
+                        }
+                      </td>
+                      <td data-label="Başarı">
+                        <strong>
+                          {run.successes}/{run.runs}
+                        </strong>{' '}
+                        <span className="text-slate-500">
+                          ({percent(run.success_rate)})
+                        </span>
+                      </td>
+                      <td data-label="Blok">
+                        {intervention ? intervention.guardBlocks : '—'}
+                      </td>
+                      <td data-label="Güvenli yönlendirme">
+                        {intervention ? intervention.guardEnforcements : '—'}
+                      </td>
+                      <td data-label="Gözlenen ihlal">{run.violation_count}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="result-notes">
+            <p>
+              <strong>Negatif sonuç da bulgudur.</strong> Hybrid, iki
+              bileşeninden kesin olarak üstün olma koşulunu karşılamadı. Üç
+              guarded sistemin Unguarded karşısında Holm-düzeltilmiş McNemar p
+              değeri:{' '}
+              <code>
+                {ablation.summary.mcnemar_holm_adjusted_p.rule.toExponential(3)}
+              </code>
+              .
+            </p>
+            <p>
+              <strong>ML genelleme sınırı.</strong> XLM-R, 3.000 şablonlu
+              sentetik örneğin ayrılmış testinde macro-F1=1,0 aldı. Bu skor
+              gerçek dünya genellemesi değildir; OOD ajan sonucu esas ölçümdür.
+            </p>
+          </div>
+        </section>
+        <section id="analysis" className="research-section">
+          <div className="section-title">
+            <div>
+              <div className="eyebrow">02 / Başarı · Güvenlik · Verimlilik</div>
+              <h2>Sonuçların ölçüm profili</h2>
+            </div>
+          </div>
+          <div className="analysis-grid">
+            <article className="chart-panel">
+              <h3>Split’ler boyunca görev başarısı</h3>
+              <p>Dikey eksen: başarılı görev oranı (%).</p>
+              <SystemLegend />
+              <div className="chart-box">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={splitChart}
+                    margin={{ left: -20, right: 8, top: 8 }}
+                    accessibilityLayer
+                  >
+                    <CartesianGrid vertical={false} stroke="#e1e7ea" />
+                    <XAxis
+                      dataKey="split"
+                      interval={0}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#536570' }}
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      ticks={[0, 50, 100]}
+                      unit="%"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 13, fill: '#536570' }}
+                    />
+                    <Tooltip
+                      formatter={(v, name) => [
+                        `%${compact(Number(v))}`,
+                        name === 'Guarded' ? 'Guarded v2.1' : 'Unguarded v1',
+                      ]}
+                    />
+                    <Bar
+                      dataKey="Unguarded"
+                      fill={colors.unguarded}
+                      isAnimationActive={false}
+                      radius={[2, 2, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="Guarded"
+                      fill={colors.guarded}
+                      isAnimationActive={false}
+                      radius={[2, 2, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <details className="source-details">
+                <summary>Grafik verilerini tablo olarak göster</summary>
+                <table className="research-table">
+                  <thead>
+                    <tr>
+                      <th>Split</th>
+                      <th>Unguarded</th>
+                      <th>Guarded</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {splitChart.map((row) => (
+                      <tr key={row.split}>
+                        <td>{row.split}</td>
+                        <td>%{compact(row.Unguarded)}</td>
+                        <td>%{compact(row.Guarded)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </details>
+            </article>
+            <article className="chart-panel">
+              <h3>Final testte sonuç türleri</h3>
+              <p>
+                Yatay eksen: sayı · Başarıda yüksek, hatalarda düşük değer
+                olumlu.
+              </p>
+              <SystemLegend />
+              <div className="chart-box">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={outcomes}
+                    layout="vertical"
+                    margin={{ left: 0, right: 14, top: 8 }}
+                    accessibilityLayer
+                  >
+                    <CartesianGrid horizontal={false} stroke="#e1e7ea" />
+                    <XAxis
+                      type="number"
+                      domain={[0, test.guarded_v2_1.runs]}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 13, fill: '#536570' }}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="metric"
+                      width={110}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 13, fill: '#536570' }}
+                    />
+                    <Tooltip
+                      formatter={(v, name) => [
+                        v,
+                        name === 'Guarded' ? 'Guarded v2.1' : 'Unguarded v1',
+                      ]}
+                    />
+                    <Bar
+                      dataKey="Unguarded"
+                      fill={colors.unguarded}
+                      isAnimationActive={false}
+                      radius={[0, 2, 2, 0]}
+                    />
+                    <Bar
+                      dataKey="Guarded"
+                      fill={colors.guarded}
+                      isAnimationActive={false}
+                      radius={[0, 2, 2, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <p>
+                Kesin sayılar yukarıdaki dondurulmuş test panelinde yer alır.
+              </p>
+            </article>
+          </div>
+          <div className="efficiency-grid mt-5">
+            {[
+              {
+                label: 'Final / Token azalması',
+                a: test.unguarded_v1.generated_tokens,
+                b: test.guarded_v2_1.generated_tokens,
+                unit: 'token',
+                icon: Zap,
+              },
+              {
+                label: 'Final / Gecikme azalması',
+                a: test.unguarded_v1.latency_seconds,
+                b: test.guarded_v2_1.latency_seconds,
+                unit: 'sn',
+                icon: Timer,
+              },
+              {
+                label: 'OOD / Token azalması',
+                a: ood.unguarded.generated_tokens,
+                b: ood.guarded_v2_1.generated_tokens,
+                unit: 'token',
+                icon: Zap,
+              },
+              {
+                label: 'OOD / Gecikme azalması',
+                a: ood.unguarded.latency_seconds,
+                b: ood.guarded_v2_1.latency_seconds,
+                unit: 'sn',
+                icon: Timer,
+              },
+            ].map((m) => (
+              <article className="efficiency-item" key={m.label}>
+                <h3>
+                  <m.icon size={16} />
+                  {m.label}
+                </h3>
+                <strong>{percent(1 - m.b / m.a)}</strong>
+                <p>
+                  {compact(m.a)} → {compact(m.b)} {m.unit}
+                </p>
+              </article>
+            ))}
+          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            Final test ortalama adım sayısı: Unguarded{' '}
+            {compact(test.unguarded_v1.mean_steps)} → Guarded{' '}
+            {compact(test.guarded_v2_1.mean_steps)}. Gecikme ve token değerleri
+            kayıtlı koşuların toplamıdır; maliyet veya üretim performansı
+            garantisi değildir.
+          </p>
+        </section>
+        <section id="limits" className="research-section">
+          <div className="section-title">
+            <div>
+              <div className="eyebrow">03 / Hata analizi</div>
+              <h2>Güçlü sonuç, açık sınırlar.</h2>
+            </div>
+            <Link
+              href="/method"
+              className={buttonVariants({ variant: 'outline' })}
+            >
+              Yöntemi incele <ArrowUpRight size={16} />
+            </Link>
+          </div>
+          <div className="limit-layout">
+            <div>
+              {data.robustness.representativeFailures.map((run) => (
+                <article className="failure" key={run.taskId}>
+                  <code>{run.taskId}</code>
+                  <p>
+                    {run.taskId === 'OOD-BLG-001'
+                      ? 'Belge türü görevinde “18.000 TL” kanıtı çıkarılamadı.'
+                      : run.taskId === 'OOD-RND-001'
+                        ? 'Randevu görevinde “salı değil, perşembe” ifadesi doğrudan seçime bağlanamadı.'
+                        : run.trace[0]?.task}
+                  </p>
+                </article>
+              ))}
+              <p className="text-sm leading-6 text-slate-600">
+                İki hata da üç seed’de tekrarlandı. Dondurulmuş v2.1 sonucu
+                korunuyor; düzeltmeler ayrı v2.2 çalışması olarak
+                değerlendirilecek.
+              </p>
+            </div>
+            <aside className="limitations">
+              <h3>
+                <AlertTriangle size={19} /> Bilimsel sınırlamalar
+              </h3>
+              <ul>
+                <li>
+                  Frozen test: tek model, tek seed ve şablon ilişkili sentetik
+                  görevler.
+                </li>
+                <li>
+                  OOD: 24 insan yazımı görev; üç seed aynı görevleri tekrarlar,
+                  72 bağımsız görev değildir.
+                </li>
+                <li>
+                  Sıfır gözlenen ihlal, bütün koşullarda güvenlik garantisi
+                  vermez.
+                </li>
+                <li>
+                  Gerçek kamu portalı veya insan katılımcı değerlendirmesi
+                  yapılmadı.
+                </li>
+              </ul>
+            </aside>
+          </div>
+        </section>
+        <section id="byoa" className="research-section byoa-section">
+          <div>
+            <div className="eyebrow">
+              <PlugZap size={17} /> 04 / Kendi ajanını getir · HTTP v1
+            </div>
+            <h2>Aynı benchmark. Senin ajanın.</h2>
+            <p>
+              Kendi ajanını doğrudan veya Rule Guard arkasında ölç. Başarı,
+              güvenlik, geçersiz eylem ve karar izi raporlarını JSONL olarak al.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link
+                href="https://github.com/kucukenes17/tr-pubagent/blob/main/docs/BRING_YOUR_OWN_AGENT.md"
+                target="_blank"
+                rel="noreferrer"
+                className={buttonVariants({
+                  className: 'bg-white text-slate-950 hover:bg-slate-200',
+                })}
+              >
+                Bağlantı rehberi <ArrowUpRight size={16} />
+              </Link>
+              <Link
+                href="https://github.com/kucukenes17/tr-pubagent/blob/main/examples/http_agent.py"
+                target="_blank"
+                rel="noreferrer"
+                className={buttonVariants({
+                  variant: 'outline',
+                  className:
+                    'border-slate-500 bg-transparent text-white hover:bg-slate-700 hover:text-white',
+                })}
+              >
+                <Braces size={16} /> Örnek HTTP ajanı
+              </Link>
+            </div>
+          </div>
+          <ol className="byoa-steps">
+            <li>
+              Protokole uygun <code>POST /act</code> endpoint’ini hazırla.
+            </li>
+            <li>
+              Rehberdeki çalıştırıcıyla <strong>Guard yok</strong> ve{' '}
+              <strong>Rule Guard</strong> koşularını başlat.
+            </li>
+            <li>
+              Üretilen metrikleri ve her adımdaki karar izini karşılaştır.
+            </li>
+          </ol>
+          <div className="scope-note">
+            <ShieldCheck size={17} />
+            <p>
+              Yalnızca sentetik ortamda çalışır. Uzak endpoint kullanımı
+              bilinçli izin gerektirir; bağlantı ve izin adımları rehberdedir.
+            </p>
+          </div>
+        </section>
+        <details className="source-details">
+          <summary>Veri kaynakları ve tam istatistik değerleri</summary>
+          <ul>
+            {Object.entries(data.generatedFrom).map(([key, path]) => (
+              <li key={key}>
+                <a
+                  className="underline"
+                  target="_blank"
+                  rel="noreferrer"
+                  href={`https://github.com/kucukenes17/tr-pubagent/blob/main/${path}`}
+                >
+                  {path}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p>
+            Final exact McNemar p: <code>{test.mcnemar_exact_p}</code>
+          </p>
+          <p>
+            OOD exact McNemar p: <code>{ood.mcnemar_exact_p}</code>
+          </p>
+          <p>
+            Değerlendirme harness:{' '}
+            <code>{String(data.summary.provenance.evaluation_harness)}</code>
+          </p>
+        </details>
+        <footer className="research-footer">
+          <span className="flex items-center gap-2">
+            <Database size={15} /> Gerçek JSON / JSONL kayıtlarından üretilir.
+          </span>
+          <Link href="/replays" className="flex items-center gap-2 font-medium">
+            Bir sonucun karar zincirine git <ArrowRight size={16} />
+          </Link>
+        </footer>
+      </div>
+    </main>
+  );
 }

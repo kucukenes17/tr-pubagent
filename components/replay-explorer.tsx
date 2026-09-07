@@ -1,34 +1,170 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ArrowRight, CheckCircle2, CircleHelp, Pause, Play, ShieldCheck, XCircle } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  CircleHelp,
+  Pause,
+  Play,
+  ShieldCheck,
+  XCircle,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from '@/components/ui/native-select';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SiteHeader } from '@/components/site-header';
-import type { FrozenDashboardData, FrozenRun, FrozenTraceStep } from '@/lib/research-data';
+import type {
+  FrozenDashboardData,
+  FrozenRun,
+  FrozenTraceStep,
+} from '@/lib/research-data';
 
 type AgentKey = 'unguarded' | 'guarded';
-
-const toolNames: Record<string, string> = { fill: 'Alanı doldur', select: 'Seçim yap', ask_user: 'Kullanıcıya sor', request_confirmation: 'Onay iste', submit: 'Gönder', finish: 'Bitir', upload_fixture: 'Dosya yükle' };
-const labelViolation = (value: string) => value === 'PRIVACY_VIOLATION' ? 'Gizlilik ihlali' : value === 'LANGUAGE_INTERPRETATION_ERROR' ? 'Dil yorumlama hatası' : value;
-
+const toolNames: Record<string, string> = {
+  fill: 'Alanı doldur',
+  select: 'Seçim yap',
+  ask_user: 'Kullanıcıya sor',
+  request_confirmation: 'Onay iste',
+  submit: 'Gönder',
+  finish: 'Bitir',
+  upload_fixture: 'Dosya yükle',
+};
+const labelViolation = (v: string) =>
+  v === 'PRIVACY_VIOLATION'
+    ? 'Gizlilik ihlali'
+    : v === 'LANGUAGE_INTERPRETATION_ERROR'
+      ? 'Dil yorumlama hatası'
+      : v;
 function stepStatus(step: FrozenTraceStep) {
-  if (step.guard?.decision === 'BLOCK') return { label: 'Guard engelledi', icon: AlertTriangle, cls: 'border-amber-200 bg-amber-50 text-amber-900' };
-  if (step.environmentResult?.applied === false) return { label: 'Eylem uygulanmadı', icon: XCircle, cls: 'border-red-200 bg-red-50 text-red-800' };
-  if (step.action?.tool === 'ask_user' || step.action?.tool === 'request_confirmation') return { label: 'Bilgi / onay istedi', icon: CircleHelp, cls: 'border-blue-200 bg-blue-50 text-blue-800' };
-  if (step.action?.tool === 'finish') return { label: 'Tamamlandı', icon: ShieldCheck, cls: 'border-cyan-200 bg-cyan-50 text-cyan-900' };
-  return { label: 'Uygulandı', icon: CheckCircle2, cls: 'border-emerald-200 bg-emerald-50 text-emerald-800' };
+  if (step.guard?.decision.startsWith('BLOCK'))
+    return {
+      label:
+        step.guard.decision === 'BLOCK'
+          ? 'Guard engelledi'
+          : 'Guard yönlendirdi',
+      icon: AlertTriangle,
+      cls: 'border-amber-200 bg-amber-50 text-amber-900',
+    };
+  if (step.parseError)
+    return {
+      label: 'Ayrıştırma hatası',
+      icon: XCircle,
+      cls: 'border-red-200 bg-red-50 text-red-800',
+    };
+  if (
+    step.environmentResult?.applied === false ||
+    (step.environmentStatus ?? 0) >= 400
+  )
+    return {
+      label: 'Eylem uygulanmadı',
+      icon: XCircle,
+      cls: 'border-red-200 bg-red-50 text-red-800',
+    };
+  if (step.environmentResult?.applied == null)
+    return {
+      label: 'Uygulama kaydı yok',
+      icon: CircleHelp,
+      cls: 'border-slate-200 bg-slate-50 text-slate-700',
+    };
+  if (
+    step.action?.tool === 'ask_user' ||
+    step.action?.tool === 'request_confirmation'
+  )
+    return {
+      label: 'Bilgi / onay istedi',
+      icon: CircleHelp,
+      cls: 'border-blue-200 bg-blue-50 text-blue-800',
+    };
+  if (step.action?.tool === 'finish')
+    return {
+      label: 'Bitirme eylemi',
+      icon: ShieldCheck,
+      cls: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+    };
+  return {
+    label: 'Uygulandı',
+    icon: CheckCircle2,
+    cls: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+  };
 }
-
-function RunSummary({ run, guarded, selected, onSelect }: { run: FrozenRun; guarded: boolean; selected: boolean; onSelect: () => void }) {
+function RunSummary({
+  run,
+  guarded,
+  selected,
+  onSelect,
+}: {
+  run: FrozenRun;
+  guarded: boolean;
+  selected: boolean;
+  onSelect: () => void;
+}) {
   const name = guarded ? 'Guarded v2.1' : 'Unguarded v1';
-  return <button type="button" aria-label={`${name} koşusunu göster`} onClick={onSelect} className={`w-full rounded-xl border p-4 text-left ${selected ? 'border-blue-400 bg-blue-50 ring-2 ring-blue-100' : 'border-slate-200 bg-white'}`}><div className="mb-3 flex items-center justify-between"><span className="font-semibold text-slate-950">{name}</span><Badge className={run.taskSuccess ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}>{run.taskSuccess ? 'Başarılı' : 'Başarısız'}</Badge></div><div className="grid grid-cols-3 gap-3 text-sm"><div><span className="block text-xs text-slate-500">Sonlanma</span><strong className="mt-1 block font-mono text-xs">{run.termination}</strong></div><div><span className="block text-xs text-slate-500">Adım</span><strong className="mt-1 block">{run.steps}</strong></div><div><span className="block text-xs text-slate-500">İhlal</span><strong className="mt-1 block">{run.violations.length}</strong></div></div></button>;
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      aria-label={`${name} koşusunu göster`}
+      onClick={onSelect}
+      className={`w-full rounded-lg border p-4 text-left ${selected ? 'border-slate-600 bg-slate-50 ring-1 ring-slate-600' : 'border-slate-200 bg-white'}`}
+    >
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <span
+          className={`flex items-center gap-2 font-semibold ${guarded ? 'guarded-text' : 'unguarded-text'}`}
+        >
+          <i className={`system-marker ${guarded ? '' : 'unguarded'}`} />
+          {name}
+        </span>
+        <Badge
+          className={
+            run.taskSuccess
+              ? 'bg-emerald-700 text-white'
+              : 'bg-red-700 text-white'
+          }
+        >
+          {run.taskSuccess ? 'Başarılı' : 'Başarısız'}
+        </Badge>
+      </div>
+      <dl className="grid grid-cols-3 gap-2 text-sm">
+        <div>
+          <dt className="text-slate-500">Adım</dt>
+          <dd className="mt-1 text-xl font-semibold">{run.steps}</dd>
+        </div>
+        <div>
+          <dt className="text-slate-500">İhlal</dt>
+          <dd className="mt-1 text-xl font-semibold">
+            {run.violations.length}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-slate-500">Token</dt>
+          <dd className="mt-1 text-xl font-semibold">{run.generatedTokens}</dd>
+        </div>
+      </dl>
+      <p className="mt-3 break-words text-sm text-slate-600">
+        Sonlanma: <code>{run.termination}</code> · Geçersiz eylem:{' '}
+        {run.invalidAction ? 'Var' : 'Yok'}
+      </p>
+    </button>
+  );
 }
-
+function TechnicalDetails({ title, value }: { title: string; value: unknown }) {
+  return (
+    <details className="trace-details">
+      <summary>{title}</summary>
+      <pre>
+        {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
+      </pre>
+    </details>
+  );
+}
 export function ReplayExplorer() {
   const [data, setData] = useState<FrozenDashboardData | null>(null);
   const [failed, setFailed] = useState(false);
@@ -36,35 +172,457 @@ export function ReplayExplorer() {
   const [agent, setAgent] = useState<AgentKey>('unguarded');
   const [active, setActive] = useState(0);
   const [playing, setPlaying] = useState(false);
-
-  useEffect(() => { fetch('/data/frozen-dashboard.json').then((r) => { if (!r.ok) throw new Error(); return r.json() as Promise<FrozenDashboardData>; }).then((payload) => { setData(payload); const illustrative = payload.pairedRuns.find((pair) => (pair.unguarded?.violations.length ?? 0) > 0 && (pair.guarded?.guardBlocks ?? 0) > 0) ?? payload.pairedRuns.find((pair) => (pair.unguarded?.violations.length ?? 0) > 0) ?? payload.pairedRuns[0]; setTaskId(illustrative?.taskId ?? ''); }).catch(() => setFailed(true)); }, []);
-  const pair = useMemo(() => data?.pairedRuns.find((item) => item.taskId === taskId) ?? null, [data, taskId]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/data/frozen-dashboard.json', { signal: controller.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json() as Promise<FrozenDashboardData>;
+      })
+      .then((payload) => {
+        setData(payload);
+        const illustrative =
+          payload.pairedRuns.find(
+            (p) =>
+              (p.unguarded?.violations.length ?? 0) > 0 &&
+              (p.guarded?.guardBlocks ?? 0) > 0,
+          ) ??
+          payload.pairedRuns.find(
+            (p) => (p.unguarded?.violations.length ?? 0) > 0,
+          ) ??
+          payload.pairedRuns[0];
+        setTaskId(illustrative?.taskId ?? '');
+      })
+      .catch((err) => {
+        if (err.name !== 'AbortError') setFailed(true);
+      });
+    return () => controller.abort();
+  }, []);
+  const pair = useMemo(
+    () => data?.pairedRuns.find((p) => p.taskId === taskId) ?? null,
+    [data, taskId],
+  );
   const run = pair?.[agent] ?? null;
   const trace = run?.trace ?? [];
-  const step = trace[Math.min(active, Math.max(0, trace.length - 1))];
-
-  useEffect(() => { if (!playing || trace.length < 2) return; const timer = window.setInterval(() => setActive((current) => { if (current >= trace.length - 1) { setPlaying(false); return current; } return current + 1; }), 1500); return () => window.clearInterval(timer); }, [playing, trace.length]);
-
-  if (failed) return <main className="min-h-screen"><SiteHeader /><section className="mx-auto max-w-3xl px-5 py-20"><Card className="border-red-200 bg-red-50"><CardContent className="p-6 text-red-900">Dondurulmuş replay verisi yüklenemedi.</CardContent></Card></section></main>;
-  if (!data || !pair || !run || !step) return <main className="min-h-screen"><SiteHeader /><section className="mx-auto max-w-[1400px] space-y-5 px-5 py-8"><Skeleton className="h-36" /><Skeleton className="h-[520px]" /></section></main>;
-
-  const status = stepStatus(step); const StatusIcon = status.icon;
-  const taskText = step.task ?? pair.guarded?.trace[0]?.task ?? pair.unguarded?.trace[0]?.task ?? '';
+  const step = trace[active];
+  useEffect(() => {
+    if (!playing || trace.length < 2 || active >= trace.length - 1) return;
+    const timer = window.setInterval(
+      () => setActive((v) => Math.min(v + 1, trace.length - 1)),
+      1500,
+    );
+    return () => window.clearInterval(timer);
+  }, [playing, trace.length, active]);
+  const selectAgent = (key: AgentKey) => {
+    setAgent(key);
+    setActive(0);
+    setPlaying(false);
+  };
+  if (failed)
+    return (
+      <main>
+        <SiteHeader />
+        <section id="content" className="research-workspace">
+          <h1>Karar izleri yüklenemedi</h1>
+          <p>Bağlantınızı kontrol edip yeniden deneyin.</p>
+          <Button onClick={() => window.location.reload()}>Yeniden dene</Button>
+        </section>
+      </main>
+    );
+  if (!data)
+    return (
+      <main>
+        <SiteHeader />
+        <section id="content" className="research-workspace" aria-busy="true">
+          <Skeleton className="h-36" />
+          <Skeleton className="mt-5 h-96" />
+        </section>
+      </main>
+    );
+  if (!pair || !run || !step)
+    return (
+      <main>
+        <SiteHeader />
+        <section id="content" className="research-workspace">
+          <h1>Bu koşuda gösterilebilir karar izi yok.</h1>
+          <Button
+            onClick={() => {
+              setTaskId(data.pairedRuns[0]?.taskId ?? '');
+              selectAgent('unguarded');
+            }}
+          >
+            İlk göreve dön
+          </Button>
+        </section>
+      </main>
+    );
+  const status = stepStatus(step);
+  const StatusIcon = status.icon;
+  const taskText =
+    step.task ??
+    pair.guarded?.trace[0]?.task ??
+    pair.unguarded?.trace[0]?.task ??
+    '';
   const action = step.action;
-
-  return <main className="min-h-screen"><SiteHeader /><section className="mx-auto max-w-[1450px] px-5 py-8 lg:px-8">
-    <div className="mb-7 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end"><div><p className="mono-label text-blue-700">Dondurulmuş final test · gerçek JSONL izi</p><h1 className="mt-1 text-4xl font-semibold tracking-tight text-slate-950">Karar zinciri karşılaştırması</h1><p className="mt-2 max-w-3xl leading-7 text-slate-600">Aynı görevin korumasız ve korumalı koşularını seçin; model çıktısını, eylemi, ortam yanıtını ve Guard kararını adım adım inceleyin.</p></div><div><label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="task-select">Final test görevi</label><NativeSelect className="w-full min-w-60" id="task-select" value={taskId} onChange={(event) => { setTaskId(event.target.value); setActive(0); setPlaying(false); }}>{data.pairedRuns.map((item) => <NativeSelectOption value={item.taskId} key={item.taskId}>{item.taskId}</NativeSelectOption>)}</NativeSelect></div></div>
-
-    <Card className="mb-6 border-slate-200 bg-white"><CardContent className="p-5"><div className="grid gap-5 xl:grid-cols-[1fr_460px]"><div><span className="mono-label text-slate-500">Görev talimatı</span><p className="mt-2 text-lg font-medium leading-7 text-slate-950">{taskText}</p></div><div className="grid grid-cols-2 gap-3"><RunSummary run={pair.unguarded!} guarded={false} selected={agent === 'unguarded'} onSelect={() => { setAgent('unguarded'); setActive(0); setPlaying(false); }} /><RunSummary run={pair.guarded!} guarded selected={agent === 'guarded'} onSelect={() => { setAgent('guarded'); setActive(0); setPlaying(false); }} /></div></div></CardContent></Card>
-
-    <div className="mb-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 md:grid-cols-[auto_1fr_auto] md:items-center"><div className="flex rounded-xl bg-slate-100 p-1"><Button size="sm" variant={agent === 'unguarded' ? 'default' : 'ghost'} onClick={() => { setAgent('unguarded'); setActive(0); setPlaying(false); }}>Unguarded</Button><Button size="sm" variant={agent === 'guarded' ? 'default' : 'ghost'} onClick={() => { setAgent('guarded'); setActive(0); setPlaying(false); }}>Guarded v2.1</Button></div><div><div className="mb-2 flex justify-between text-sm"><span className="font-medium">Koşu ilerlemesi</span><span className="font-mono text-slate-500">{active + 1} / {trace.length}</span></div><Progress value={((active + 1) / trace.length) * 100} /></div><div className="flex gap-2"><Button variant="outline" disabled={active === 0} onClick={() => setActive((v) => v - 1)}>Önceki</Button><Button variant="outline" disabled={active === trace.length - 1} onClick={() => setActive((v) => v + 1)}>Sonraki <ArrowRight className="size-4" /></Button><Button aria-label={playing ? 'Duraklat' : 'Oynat'} onClick={() => setPlaying((v) => !v)} className="bg-slate-950 text-white">{playing ? <Pause className="size-4" /> : <Play className="size-4" />}</Button></div></div>
-
-    <div className="grid gap-6 lg:grid-cols-[300px_1fr]"><Card className="h-fit border-slate-200 bg-white"><CardHeader><CardTitle className="text-lg">Zaman çizgisi</CardTitle></CardHeader><CardContent className="space-y-2">{trace.map((item, index) => { const itemStatus = stepStatus(item); return <button key={`${item.step}-${index}`} onClick={() => { setActive(index); setPlaying(false); }} className={`w-full rounded-xl border p-3 text-left transition-colors ${index === active ? 'border-blue-300 bg-blue-50' : 'border-transparent hover:bg-slate-50'}`}><span className="flex items-center gap-2 text-sm font-semibold"><span className={`grid size-6 shrink-0 place-items-center rounded-full text-xs ${index === active ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-500'}`}>{index + 1}</span><span className="truncate">{toolNames[item.action?.tool ?? ''] ?? item.action?.tool ?? 'Model denemesi'}</span></span><span className="mt-1 block pl-8 text-xs text-slate-500">{itemStatus.label}</span></button>; })}</CardContent></Card>
-
-      <div className="grid gap-5 md:grid-cols-2"><Card className="border-slate-200 bg-white md:col-span-2"><CardHeader className="flex-row items-start justify-between"><div><p className="mono-label text-slate-500">Adım {active + 1} · {step.route}</p><CardTitle className="mt-1 text-2xl">{toolNames[action?.tool ?? ''] ?? action?.tool ?? 'Ayrıştırılamayan çıktı'}</CardTitle></div><Badge variant="outline" className={status.cls}><StatusIcon className="size-3.5" />{status.label}</Badge></CardHeader></Card>
-        <Card className="border-slate-200 bg-white"><CardHeader><p className="mono-label text-blue-700">01 · Gözlem</p><CardTitle className="text-lg">Ajan ne gördü?</CardTitle></CardHeader><CardContent className="space-y-3 text-sm"><div><span className="text-slate-500">Sayfa</span><p className="mt-1 font-medium">{step.pageTitle}</p></div><div><span className="text-slate-500">Kalan zorunlu alanlar</span><p className="mt-1 font-mono">{step.remainingRequiredFields.join(', ') || 'Yok'}</p></div><div><span className="text-slate-500">Aday eylemler</span><div className="mt-2 flex flex-wrap gap-1">{step.candidateActions.map((item) => <Badge variant="secondary" key={item}>{item}</Badge>)}</div></div></CardContent></Card>
-        <Card className="border-slate-200 bg-white"><CardHeader><p className="mono-label text-blue-700">02 · Eylem</p><CardTitle className="text-lg">Model ne önerdi?</CardTitle></CardHeader><CardContent><code className="block max-h-56 overflow-auto whitespace-pre-wrap rounded-xl bg-slate-950 p-4 text-sm leading-6 text-cyan-200">{action ? JSON.stringify(action, null, 2) : step.rawModelOutput ?? 'Eylem yok'}</code>{action?.reason && <p className="mt-3 text-sm leading-6 text-slate-600">{action.reason}</p>}</CardContent></Card>
-        <Card className="border-slate-800 bg-slate-950 text-white md:col-span-2"><CardHeader><p className="mono-label text-cyan-300">03 · Güvenlik ve ortam kararı</p><CardTitle className="text-xl">{step.guard ? `${step.guard.decision} · ${(step.guard.risk_labels ?? []).join(', ')}` : 'Guard kullanılmadı'}</CardTitle></CardHeader><CardContent className="grid gap-4 md:grid-cols-[1fr_auto]"><div><p className="leading-7 text-slate-300">{step.guard?.explanation ?? step.environmentResult?.error ?? (step.environmentResult?.applied ? 'Eylem ortam tarafından uygulandı.' : 'Eylem ortam tarafından uygulanmadı.')}</p>{run.violations.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{run.violations.map((v) => <Badge key={v} className="bg-red-500/20 text-red-200">{labelViolation(v)}</Badge>)}</div>}</div><div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 font-mono text-xs text-slate-300"><div>applied={String(step.environmentResult?.applied ?? false)}</div><div>status={step.environmentStatus ?? '—'}</div><div>guard_blocks={run.guardBlocks}</div></div></CardContent></Card>
-      </div></div>
-  </section></main>;
+  const applied = step.environmentResult?.applied;
+  const problemIndex = trace.findIndex(
+    (s) =>
+      s.parseError ||
+      s.environmentResult?.applied === false ||
+      (s.environmentStatus ?? 0) >= 400 ||
+      s.guard?.decision.startsWith('BLOCK'),
+  );
+  return (
+    <main className="subpage">
+      <SiteHeader />
+      <section id="content" className="research-workspace">
+        <header className="research-heading">
+          <div>
+            <div className="eyebrow">Karar izleri / Frozen final test</div>
+            <h1>Bir sonucu, adım adım sorgula.</h1>
+            <p>
+              Aynı görevin korumasız ve korumalı koşuları. Her sistem kendi
+              karar sırasıyla gösterilir; adım numaraları bire bir eşleşme
+              anlamına gelmez.
+            </p>
+          </div>
+          <div className="w-full sm:w-auto">
+            <label
+              className="mb-2 block text-sm font-medium"
+              htmlFor="task-select"
+            >
+              Final test görevi · {data.pairedRuns.length} eşlenmiş kayıt
+            </label>
+            <NativeSelect
+              className="w-full sm:min-w-64"
+              id="task-select"
+              value={taskId}
+              onChange={(e) => {
+                setTaskId(e.target.value);
+                setActive(0);
+                setPlaying(false);
+              }}
+            >
+              {data.pairedRuns.map((p) => (
+                <NativeSelectOption value={p.taskId} key={p.taskId}>
+                  {p.taskId}
+                  {p.unguarded?.violations.length ? ' · ihlal gözlendi' : ''}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+          </div>
+        </header>
+        <div className="mb-6 grid gap-5 border-y border-slate-300 py-5 xl:grid-cols-[1fr_1.3fr]">
+          <div>
+            <p className="eyebrow">Görev talimatı</p>
+            <p className="mt-3 text-lg leading-7">{taskText}</p>
+            <p className="mt-3 text-sm text-slate-600">
+              Sentetik görev · Dondurulmuş JSONL kayıtları · Seed 0
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {pair.unguarded && (
+              <RunSummary
+                run={pair.unguarded}
+                guarded={false}
+                selected={agent === 'unguarded'}
+                onSelect={() => selectAgent('unguarded')}
+              />
+            )}
+            {pair.guarded && (
+              <RunSummary
+                run={pair.guarded}
+                guarded
+                selected={agent === 'guarded'}
+                onSelect={() => selectAgent('guarded')}
+              />
+            )}
+          </div>
+        </div>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span
+              className={`system-marker ${agent === 'unguarded' ? 'unguarded' : ''}`}
+            />
+            <h2 className="text-xl font-semibold">
+              {agent === 'guarded' ? 'Guarded v2.1' : 'Unguarded v1'} karar
+              zinciri
+            </h2>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={problemIndex < 0}
+              onClick={() => {
+                setActive(problemIndex);
+                setPlaying(false);
+              }}
+            >
+              İlk hata / müdahale
+            </Button>
+            <Button
+              variant="outline"
+              disabled={active === 0}
+              onClick={() => {
+                setActive(active - 1);
+                setPlaying(false);
+              }}
+            >
+              Önceki
+            </Button>
+            <Button
+              variant="outline"
+              disabled={active === trace.length - 1}
+              onClick={() => {
+                setActive(active + 1);
+                setPlaying(false);
+              }}
+            >
+              Sonraki <ArrowRight size={16} />
+            </Button>
+            <Button
+              aria-label={
+                playing && active < trace.length - 1 ? 'Duraklat' : 'Oynat'
+              }
+              onClick={() => {
+                if (active === trace.length - 1) setActive(0);
+                setPlaying(!playing || active === trace.length - 1);
+              }}
+            >
+              {playing && active < trace.length - 1 ? (
+                <Pause size={16} />
+              ) : (
+                <Play size={16} />
+              )}
+            </Button>
+          </div>
+        </div>
+        <div className="mb-5">
+          <div className="mb-2 flex justify-between text-sm">
+            <span>Koşu ilerlemesi</span>
+            <span aria-live="polite">
+              Adım {active + 1} / {trace.length}
+            </span>
+          </div>
+          <Progress
+            value={((active + 1) / trace.length) * 100}
+            aria-label="Karar izi ilerlemesi"
+          />
+        </div>
+        {run.violations.length > 0 && (
+          <div className="scope-note border-amber-300 bg-amber-50">
+            <AlertTriangle size={17} />
+            <p>
+              <strong>Koşu düzeyinde gözlenen ihlal:</strong>{' '}
+              {run.violations.map(labelViolation).join(', ')}. İhlal etiketi
+              belirli bir adıma bağlı kaydedilmedi; aşağıdaki durumlar adımın
+              kendi ortam yanıtını gösterir.
+            </p>
+          </div>
+        )}
+        <div className="trace-summary" aria-label="Seçili adımın karar akışı">
+          {[
+            ['01 / Gözlem', step.pageTitle ?? 'Kayıt yok'],
+            [
+              '02 / Model önerisi',
+              step.rawModelOutput
+                ? 'Ham çıktı mevcut'
+                : 'Ham çıktı kaydedilmedi',
+            ],
+            ['03 / Guard kararı', step.guard?.decision ?? 'Guard yok'],
+            ['04 / Yürütme eylemi', action?.tool ?? 'Eylem yok'],
+            [
+              '05 / Ortam sonucu',
+              applied === true
+                ? 'Uygulandı'
+                : applied === false
+                  ? 'Uygulanmadı'
+                  : 'Kayıt yok',
+            ],
+          ].map(([label, value]) => (
+            <div key={label}>
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </div>
+          ))}
+        </div>
+        <div className="grid items-start gap-5 lg:grid-cols-[250px_1fr]">
+          <aside
+            className="rounded-lg border bg-white p-4"
+            aria-label="Adım seçimi"
+          >
+            <h3 className="mb-3 font-semibold">Zaman çizgisi</h3>
+            <div className="max-h-96 space-y-1 overflow-y-auto lg:max-h-[720px]">
+              {trace.map((s, i) => {
+                const state = stepStatus(s);
+                const Icon = state.icon;
+                return (
+                  <button
+                    key={i}
+                    aria-current={i === active ? 'step' : undefined}
+                    onClick={() => {
+                      setActive(i);
+                      setPlaying(false);
+                    }}
+                    className={`w-full rounded-md border p-3 text-left ${i === active ? 'border-slate-500 bg-slate-100' : 'border-transparent hover:bg-slate-50'}`}
+                  >
+                    <span className="flex items-center gap-2 text-sm font-semibold">
+                      <span className="font-mono text-slate-500">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      {toolNames[s.action?.tool ?? ''] ??
+                        s.action?.tool ??
+                        'Model denemesi'}
+                    </span>
+                    <span className="mt-2 flex items-center gap-2 text-sm text-slate-600">
+                      <Icon size={14} />
+                      {state.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </aside>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 md:col-span-2">
+              <h3 className="text-xl font-semibold">
+                Adım {active + 1}{' '}
+                <span className="text-base font-normal text-slate-600">
+                  / {step.route}
+                </span>
+              </h3>
+              <Badge variant="outline" className={status.cls}>
+                <StatusIcon size={14} />
+                {status.label}
+              </Badge>
+            </div>
+            <Card className="bg-white">
+              <CardHeader>
+                <p className="eyebrow">01 / Gözlem</p>
+                <CardTitle>Ajan ne gördü?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="leading-7">{step.pageTitle}</p>
+                <p className="mt-3 text-sm text-slate-600">
+                  Kalan zorunlu alanlar:{' '}
+                  <strong>
+                    {step.remainingRequiredFields.join(', ') || 'Yok'}
+                  </strong>
+                </p>
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {step.candidateActions.map((v) => (
+                    <Badge variant="secondary" key={v}>
+                      {v}
+                    </Badge>
+                  ))}
+                </div>
+                <TechnicalDetails
+                  title="Gözlem durumunu aç"
+                  value={step.state}
+                />
+              </CardContent>
+            </Card>
+            <Card className="bg-white">
+              <CardHeader>
+                <p className="eyebrow">02 / Model önerisi</p>
+                <CardTitle>Ham model çıktısı</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="leading-7 text-slate-600">
+                  {step.rawModelOutput
+                    ? 'Model çıktısını yürütme eylemiyle karşılaştırın. Kontrolcü çıktıyı dönüştürmüş olabilir.'
+                    : 'Bu adımda ham model çıktısı kaydedilmedi. Kayıtlı yürütme eylemi aşağıdadır.'}
+                </p>
+                {step.parseError && (
+                  <p className="mt-3 text-sm text-red-800">
+                    Ayrıştırma hatası: {step.parseError}
+                  </p>
+                )}
+                {step.rawModelOutput && (
+                  <TechnicalDetails
+                    title="Ham öneriyi aç"
+                    value={step.rawModelOutput}
+                  />
+                )}
+              </CardContent>
+            </Card>
+            <Card className="border-slate-700 bg-slate-950 text-white md:col-span-2">
+              <CardHeader>
+                <p className="eyebrow text-emerald-300">03 / Guard kararı</p>
+                <CardTitle>
+                  {step.guard?.decision ?? 'Guard kullanılmadı'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="leading-7 text-slate-300">
+                  {step.guard?.explanation ??
+                    'Korumasız koşu: eylem bir guard kararından geçirilmedi.'}
+                </p>
+                {step.guard?.risk_labels && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {step.guard.risk_labels.map((v) => (
+                      <Badge key={v} className="bg-slate-700 text-white">
+                        {v}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                {step.guard && (
+                  <TechnicalDetails
+                    title="Guard kanıtlarını ve teknik ayrıntıları aç"
+                    value={step.guard}
+                  />
+                )}
+              </CardContent>
+            </Card>
+            <Card className="bg-white">
+              <CardHeader>
+                <p className="eyebrow">04 / Yürütme eylemi</p>
+                <CardTitle>
+                  {toolNames[action?.tool ?? ''] ?? action?.tool ?? 'Eylem yok'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="font-mono text-sm">
+                  Hedef: {action?.target_id || '—'}
+                </p>
+                <p className="mt-3 leading-7 text-slate-600">
+                  {action?.reason ?? 'Eylem gerekçesi kaydedilmedi.'}
+                </p>
+                <TechnicalDetails
+                  title="Yapılandırılmış eylemi aç"
+                  value={action}
+                />
+              </CardContent>
+            </Card>
+            <Card className="bg-white">
+              <CardHeader>
+                <p className="eyebrow">05 / Ortam sonucu</p>
+                <CardTitle>
+                  {applied === true
+                    ? 'Eylem uygulandı'
+                    : applied === false
+                      ? 'Eylem uygulanmadı'
+                      : 'Uygulama kaydı yok'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="leading-7 text-slate-600">
+                  {step.environmentResult?.error ??
+                    'Ortam yanıtı ve sonraki durum teknik kayıtta görülebilir.'}
+                </p>
+                <p className="mt-3 text-sm">
+                  HTTP durumu: {step.environmentStatus ?? '—'}
+                </p>
+                <TechnicalDetails
+                  title="Ortam yanıtını ve sonraki durumu aç"
+                  value={step.environmentResult}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
 }
