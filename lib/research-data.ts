@@ -102,6 +102,21 @@ export type RobustnessSummary = {
   producer_model?: string;
 };
 
+export type PostHocSummary = {
+  experiment: string;
+  posthoc: true;
+  paired_runs: number;
+  tasks: number;
+  seeds: number[];
+  guarded_v2_1_frozen: RobustnessMetrics;
+  guarded_v2_2_posthoc: RobustnessMetrics;
+  paired_outcomes: Record<string, number>;
+  absolute_success_gain: number;
+  task_cluster_bootstrap_ci95: [number, number];
+  mcnemar_exact_p: number;
+  limitations: string[];
+};
+
 export type FrozenDashboardData = {
   generatedFrom: Record<string, string>;
   summary: {
@@ -113,6 +128,7 @@ export type FrozenDashboardData = {
   };
   robustness: {
     summary: RobustnessSummary;
+    posthoc: PostHocSummary;
     representativeFailures: FrozenRun[];
     ablation: {
       summary: AblationSummary;

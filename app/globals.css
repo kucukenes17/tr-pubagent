@@ -389,6 +389,66 @@
 .stat-foot code {
   font-size: 13px;
 }
+.posthoc-card {
+  overflow: visible;
+}
+.posthoc-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+}
+.posthoc-system {
+  display: grid;
+  gap: 4px;
+  border-left: 3px solid #708997;
+  padding: 8px 16px;
+}
+.posthoc-system-improved {
+  border-left-color: var(--guarded);
+  background: #eef7f3;
+}
+.posthoc-system span,
+.posthoc-system small {
+  color: #536570;
+  font-size: 14px;
+}
+.posthoc-system strong {
+  color: var(--ink);
+  font-size: 32px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.posthoc-system-improved strong {
+  color: var(--guarded);
+}
+.posthoc-arrow {
+  color: #708997;
+}
+.posthoc-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--border);
+  background: #f8fafb;
+}
+.posthoc-stats div {
+  padding: 16px 24px;
+  border-right: 1px solid var(--border);
+}
+.posthoc-stats div:last-child {
+  border-right: 0;
+}
+.posthoc-stats dt {
+  color: #536570;
+  font-size: 13px;
+}
+.posthoc-stats dd {
+  margin-top: 3px;
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
 .section-nav {
   display: flex;
   flex-wrap: wrap;
@@ -787,6 +847,26 @@
   .experiment-wide .experiment-body {
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+  .posthoc-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 18px;
+  }
+  .posthoc-arrow {
+    transform: rotate(90deg);
+    justify-self: center;
+  }
+  .posthoc-stats {
+    grid-template-columns: 1fr;
+  }
+  .posthoc-stats div,
+  .posthoc-stats div:last-child {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .posthoc-stats div:last-child {
+    border-bottom: 0;
   }
   .experiment-header,
   .experiment-body {

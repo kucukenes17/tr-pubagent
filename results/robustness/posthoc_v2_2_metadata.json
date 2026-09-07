@@ -1,0 +1,20 @@
+{
+  "experiment": "TR-PubAgent Guarded v2.2 post-hoc OOD",
+  "posthoc": true,
+  "tasks": 24,
+  "seeds": [
+    0,
+    17,
+    42
+  ],
+  "runs": 72,
+  "successes": 72,
+  "invalid_actions": 0,
+  "violations": 0,
+  "model": "microsoft/Phi-4-mini-instruct",
+  "guard_version": "v2.2-posthoc",
+  "git_commit": "74dac86b5e848363d16b083651102ed562110725",
+  "transformers": "4.53.2",
+  "bitsandbytes": "0.46.1",
+  "result_sha256": "a85f54ac904453b2d70e7b27ef2c151d32558d0afafd246dfc49fb98541ae239"
+}

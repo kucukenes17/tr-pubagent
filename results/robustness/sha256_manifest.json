@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "experiment": "TR-PubAgent human-authored OOD robustness v1",
+  "experiment": "TR-PubAgent human-authored OOD robustness and Guard v2.2 post-hoc",
   "files": [
     {
       "file": "phi4_guarded_ood_v2_1.jsonl",
@@ -36,6 +36,26 @@
       "file": "guard_ablation_summary.json",
       "bytes": 3198,
       "sha256": "8bd81ee32ef13460a30f0b0ede25fbdc49e36bc65c4fd29ee11197bae4be90d7"
+    },
+    {
+      "file": "phi4_guarded_ood_v2_2.jsonl",
+      "bytes": 397777,
+      "sha256": "a85f54ac904453b2d70e7b27ef2c151d32558d0afafd246dfc49fb98541ae239"
+    },
+    {
+      "file": "posthoc_v2_1_vs_v2_2_summary.json",
+      "bytes": 1422,
+      "sha256": "a93b13583683514f34f9968a87b70a1fce308b662d3e9ac9799bb5d8e693c635"
+    },
+    {
+      "file": "posthoc_v2_1_vs_v2_2_tasks.csv",
+      "bytes": 6600,
+      "sha256": "d882e4e7a8846a21ed3d3bc1c8b9468d3b0d587f780fd2402005a0b73e29fef5"
+    },
+    {
+      "file": "posthoc_v2_2_metadata.json",
+      "bytes": 492,
+      "sha256": "47d39ff014b15b2b1ea509a9fb86fe080ea9a61ebc6af6b3b3515ea84a31d45c"
     }
   ]
 }

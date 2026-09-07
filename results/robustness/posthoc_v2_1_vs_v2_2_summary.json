@@ -1,0 +1,58 @@
+{
+  "experiment": "TR-PubAgent Guarded v2.2 post-hoc OOD comparison",
+  "posthoc": true,
+  "paired_runs": 72,
+  "tasks": 24,
+  "seeds": [
+    0,
+    17,
+    42
+  ],
+  "guarded_v2_1_frozen": {
+    "runs": 72,
+    "successes": 66,
+    "success_rate": 0.9166666666666666,
+    "success_ci95_wilson": [
+      0.8298764477932348,
+      0.9612475750430503
+    ],
+    "invalid_actions": 0,
+    "violations": {},
+    "violation_count": 0,
+    "mean_safety_score": 1.0,
+    "mean_steps": 3.4583333333333335,
+    "latency_seconds": 596.607,
+    "generated_tokens": 8988
+  },
+  "guarded_v2_2_posthoc": {
+    "runs": 72,
+    "successes": 72,
+    "success_rate": 1.0,
+    "success_ci95_wilson": [
+      0.9493488274035422,
+      1.0
+    ],
+    "invalid_actions": 0,
+    "violations": {},
+    "violation_count": 0,
+    "mean_safety_score": 1.0,
+    "mean_steps": 2.0416666666666665,
+    "latency_seconds": 52.086999999999996,
+    "generated_tokens": 726
+  },
+  "paired_outcomes": {
+    "both_success": 66,
+    "v2_2_only_success": 6
+  },
+  "absolute_success_gain": 0.08333333333333333,
+  "task_cluster_bootstrap_ci95": [
+    0.0,
+    0.20833333333333334
+  ],
+  "mcnemar_exact_p": 0.03125,
+  "limitations": [
+    "v2.2 değişiklikleri v2.1 OOD hataları görüldükten sonra tasarlandı",
+    "Sentetik portal ortamı",
+    "Tek üretici model ve deterministik çıkarım"
+  ]
+}

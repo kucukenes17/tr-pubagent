@@ -239,6 +239,7 @@ export function LabDashboard() {
     );
   const test = data.summary.test;
   const ood = data.robustness.summary;
+  const posthoc = data.robustness.posthoc;
   const crossModel = data.crossModel.summary;
   const ablation = data.robustness.ablation;
   const splitChart = [
@@ -283,7 +284,9 @@ export function LabDashboard() {
           <div>
             <div className="eyebrow">
               <span className="research-kicker">Araştırma sonuçları</span>
-              <span className="model-label">Phi-4 + Qwen / Guard v2.1</span>
+              <span className="model-label">
+                Phi-4 + Qwen / Guard v2.1 · post-hoc v2.2
+              </span>
             </div>
             <h1>
               Ajan başarısı.
@@ -316,6 +319,9 @@ export function LabDashboard() {
             {test.unguarded_v1.successes}/{test.unguarded_v1.runs} →{' '}
             {test.guarded_v2_1.successes}/{test.guarded_v2_1.runs}; insan yazımı
             OOD’de {ood.guarded_v2_1.successes}/{ood.guarded_v2_1.runs} başarı.
+            Post-hoc v2.2 aynı OOD koşularında{' '}
+            {posthoc.guarded_v2_2_posthoc.successes}/
+            {posthoc.guarded_v2_2_posthoc.runs} başarıya ulaştı.
             Qwen doğrulamasında {crossModel.unguarded.successes}/
             {crossModel.unguarded.runs} → {crossModel.guarded_v2_1.successes}/
             {crossModel.guarded_v2_1.runs}.
@@ -354,17 +360,86 @@ export function LabDashboard() {
             wide
           />
         </div>
+        <section id="posthoc" className="research-section">
+          <div className="section-title">
+            <div>
+              <div className="eyebrow">Post-hoc hata düzeltmesi</div>
+              <h2>İki tekrarlayan sınır, ayrı bir sürümde kapatıldı.</h2>
+              <p>
+                v2.1 sonucu dondurulmuş halde korunuyor. v2.2; para kanıtı ve
+                olumsuzlanan seçim ifadeleri için, önceki hatalar görüldükten
+                sonra tasarlanmış sınırlı bir düzeltmedir.
+              </p>
+            </div>
+            <Badge
+              variant="outline"
+              className="border-sky-300 bg-sky-50 text-sky-900"
+            >
+              POST-HOC
+            </Badge>
+          </div>
+          <article className="experiment posthoc-card">
+            <div className="posthoc-grid">
+              <div className="posthoc-system">
+                <span>Dondurulmuş Guard v2.1</span>
+                <strong>
+                  {posthoc.guarded_v2_1_frozen.successes}/
+                  {posthoc.guarded_v2_1_frozen.runs}
+                </strong>
+                <small>{percent(posthoc.guarded_v2_1_frozen.success_rate)} başarı</small>
+              </div>
+              <ArrowRight className="posthoc-arrow" aria-hidden="true" />
+              <div className="posthoc-system posthoc-system-improved">
+                <span>Post-hoc Guard v2.2</span>
+                <strong>
+                  {posthoc.guarded_v2_2_posthoc.successes}/
+                  {posthoc.guarded_v2_2_posthoc.runs}
+                </strong>
+                <small>{percent(posthoc.guarded_v2_2_posthoc.success_rate)} başarı</small>
+              </div>
+            </div>
+            <dl className="posthoc-stats">
+              <div>
+                <dt>Yalnız v2.2 başarısı</dt>
+                <dd>{posthoc.paired_outcomes.v2_2_only_success ?? 0}</dd>
+              </div>
+              <div>
+                <dt>Regresyon</dt>
+                <dd>{posthoc.paired_outcomes.v2_1_only_success ?? 0}</dd>
+              </div>
+              <div>
+                <dt>Exact McNemar</dt>
+                <dd>p = {posthoc.mcnemar_exact_p.toLocaleString('tr-TR')}</dd>
+              </div>
+            </dl>
+          </article>
+          <div className="result-notes">
+            <p>
+              <strong>Sonuç:</strong> Altı koşu kurtarıldı; geçersiz eylem ve
+              gözlenen ihlal sayısı sıfır kaldı. Mutlak başarı artışı{' '}
+              {compact(posthoc.absolute_success_gain * 100)} yüzde puanı.
+            </p>
+            <p>
+              <strong>Temkinli yorum:</strong> Altı kazanım yalnız iki görevde
+              kümelendi. Bu nedenle görev-kümeli bootstrap %95 aralığı{' '}
+              {compact(posthoc.task_cluster_bootstrap_ci95[0] * 100)}–
+              {compact(posthoc.task_cluster_bootstrap_ci95[1] * 100)} yüzde
+              puanı ve sıfırı içeriyor.
+            </p>
+          </div>
+        </section>
         <nav className="section-nav" aria-label="Araştırma bölümleri">
           <span className="font-semibold text-slate-800">Bu görünümde</span>
-          <a href="#ablation">01 / Ablation</a>
-          <a href="#analysis">02 / Metrikler</a>
-          <a href="#limits">03 / Sınırlar</a>
-          <a href="#byoa">04 / Kendi ajanını getir</a>
+          <a href="#posthoc">01 / Post-hoc v2.2</a>
+          <a href="#ablation">02 / Ablation</a>
+          <a href="#analysis">03 / Metrikler</a>
+          <a href="#limits">04 / Sınırlar</a>
+          <a href="#byoa">05 / Kendi ajanını getir</a>
         </nav>
         <section id="ablation">
           <div className="section-title">
             <div>
-              <div className="eyebrow">01 / Rule · ML · Hybrid</div>
+              <div className="eyebrow">02 / Rule · ML · Hybrid</div>
               <h2>Öğrenilmiş guard ek başarı sağlamadı.</h2>
               <p>
                 Aynı {ablation.summary.paired_runs_per_system} OOD koşusunda
@@ -456,7 +531,7 @@ export function LabDashboard() {
         <section id="analysis" className="research-section">
           <div className="section-title">
             <div>
-              <div className="eyebrow">02 / Başarı · Güvenlik · Verimlilik</div>
+              <div className="eyebrow">03 / Başarı · Güvenlik · Verimlilik</div>
               <h2>Sonuçların ölçüm profili</h2>
             </div>
           </div>
@@ -642,7 +717,7 @@ export function LabDashboard() {
         <section id="limits" className="research-section">
           <div className="section-title">
             <div>
-              <div className="eyebrow">03 / Hata analizi</div>
+              <div className="eyebrow">04 / Hata analizi</div>
               <h2>Güçlü sonuç, açık sınırlar.</h2>
             </div>
             <Link
@@ -668,8 +743,8 @@ export function LabDashboard() {
               ))}
               <p className="text-sm leading-6 text-slate-600">
                 İki hata da üç seed’de tekrarlandı. Dondurulmuş v2.1 sonucu
-                korunuyor; düzeltmeler ayrı v2.2 çalışması olarak
-                değerlendirilecek.
+                korunuyor; ayrı etiketlenen post-hoc v2.2 koşusu bu altı
+                başarısızlığın tamamını regresyonsuz kurtardı.
               </p>
             </div>
             <aside className="limitations">
@@ -704,7 +779,7 @@ export function LabDashboard() {
         <section id="byoa" className="research-section byoa-section">
           <div>
             <div className="eyebrow">
-              <PlugZap size={17} /> 04 / Kendi ajanını getir · HTTP v1
+              <PlugZap size={17} /> 05 / Kendi ajanını getir · HTTP v1
             </div>
             <h2>Aynı benchmark. Senin ajanın.</h2>
             <p>

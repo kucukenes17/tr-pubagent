@@ -90,6 +90,19 @@ Rule, ML ve Hybrid sistemlerin her biri Unguarded'a karşı 60 yalnız-guarded b
 
 ML karar katmanı 108 eylemi blokladı fakat güvenli alternatif eylem üretmedi. Hybrid'in müdahale profili ve uçtan uca sonucu Rule ile aynı kaldı. Bu bulgu, mevcut mimaride deterministik sözleşme ve kontrolcünün ana katkıyı sağladığını; şablonlu veriyle eğitilen sınıflandırıcının ek görev başarısı getirmediğini gösterir. “ML decision guard” koşusu da ortak public-contract doğrulamasını ve güvenli yürütme kontrolcüsünü kullanır; tamamen bağımsız bir ML ajanı değildir.
 
+## Guard v2.2 post-hoc OOD sonucu
+
+Guarded v2.1 dondurulmuş OOD sonucundaki altı başarısız koşu incelendikten sonra, iki hata sınıfıyla sınırlı [ayrı bir post-hoc protokol](POSTHOC_V22_PROTOCOL.md) oluşturuldu. v2.2; görünür kullanıcı metnindeki tek, açık para değerini semantik olarak eşleşen tek zorunlu sayısal alana bağlar ve olumsuzlanan select seçeneklerini yalnız tek olumlu seçenek kaldığında eler. Gizli oracle, görev kimliği ve beklenen sonuç bu kurallara girdi değildir.
+
+| Sistem | Başarı | Wilson %95 GA | Geçersiz eylem | İhlal | Ort. adım |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Guarded v2.1 frozen | 66/72 (%91,7) | %83,0–%96,1 | 0 | 0 | 3,46 |
+| Guarded v2.2 post-hoc | 72/72 (%100) | %94,9–%100 | 0 | 0 | 2,04 |
+
+Eşlenmiş sonuçlarda 66 ortak başarı, altı yalnız-v2.2 başarısı ve sıfır v2.1-only başarı vardır. Mutlak fark +8,33 yüzde puanı ve iki yönlü exact McNemar `p=0,03125`tir. Görev-kümeli bootstrap %95 fark aralığı 0–20,83 yüzde puanıdır; çünkü altı kazanım iki benzersiz görevde ve bunların üç seed tekrarında kümelenmiştir. Bu nedenle sonuç, hedeflenen iki hata sınıfının düzeltildiğini destekler fakat bağımsız yeni hata sınıflarına genelleme kanıtı değildir.
+
+v2.2 post-hoc sonuçları ana dondurulmuş v2.1 iddiasının yerine geçmez. Ham iz, eşlenmiş analiz ve ortam kaydı `results/robustness` altında ayrı dosyalarda yayımlanır.
+
 ## Qwen2.5-7B çapraz-model doğrulaması
 
 İkinci üretici model deneyi sonuçlar görülmeden önce [ayrı protokolde](CROSS_MODEL_PROTOCOL.md) sabitlendi. Aynı 24 insan yazımı OOD görevi ve değişmemiş Guarded v2.1, `Qwen/Qwen2.5-7B-Instruct` revision `a09a35458c702b33eeacc393d103063234e8bc28` üzerinde seed 0 ve deterministik çıkarımla değerlendirildi.

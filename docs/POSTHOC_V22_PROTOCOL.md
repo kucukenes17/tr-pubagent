@@ -1,6 +1,6 @@
 # Guarded v2.2 post-hoc değerlendirme protokolü
 
-Durum: Uygulama hazırlanıyor; sonuçlar görülmeden önce bu kapsam sabitlenmiştir.
+Durum: Tamamlandı. Bu kapsam sonuçlar görülmeden önce sabitlendi; sonuçlar aşağıda ayrı bir post-hoc deney olarak raporlanır.
 
 ## Neden ayrı bir sürüm?
 
@@ -29,3 +29,15 @@ Guarded v2.1, OOD değerlendirmesinden önce donduruldu ve sonuçları değişti
 - Bu çalışma açıkça “post-hoc v2.2” olarak etiketlenir; v2.1'in dondurulmuş OOD sonucu korunur.
 
 Smoke koşusu `benchmark.run_robustness` içindeki `--task-ids` seçimiyle yapılır; tam koşu aynı çıktı dosyasındaki bu iki tamamlanmış satırı atlayarak kalan görevleri sürdürür.
+
+## Gerçekleşen sonuç
+
+- Smoke: `OOD-RND-001` ve `OOD-BLG-001`, seed 0 üzerinde `2/2` başarı.
+- Tam koşu: 24 görev × 3 seed = 72 eşlenmiş koşu.
+- Guarded v2.1 frozen: `66/72` (%91,7), 0 geçersiz eylem, 0 gözlenen ihlal.
+- Guarded v2.2 post-hoc: `72/72` (%100), 0 geçersiz eylem, 0 gözlenen ihlal.
+- Eşlenmiş sonuç: 66 ortak başarı, 6 yalnız-v2.2 başarısı, 0 regresyon.
+- Mutlak fark: +8,33 yüzde puanı; exact McNemar `p=0,03125`.
+- Görev-kümeli bootstrap %95 aralığı: 0–20,83 yüzde puanı.
+
+Altı kazanım iki görevde ve bunların üç seed tekrarında kümelendiği için bootstrap aralığı sıfırı içerir. Sonuç hedeflenen hata sınıflarının düzeldiğini gösterir; bağımsız yeni görev ailelerine genelleme kanıtı olarak yorumlanmaz.
