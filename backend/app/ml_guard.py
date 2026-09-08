@@ -70,6 +70,7 @@ def prediction_to_decision(
     required_facts: list[str],
     known_facts: dict[str, Any],
     confirmation_gates: list[str],
+    confirmed_actions: list[str],
     threshold: float,
 ) -> GuardDecision:
     if prediction.confidence < threshold or prediction.label == RiskLabel.SAFE:
@@ -80,11 +81,33 @@ def prediction_to_decision(
         )
 
     missing = [fact for fact in required_facts if known_facts.get(fact) in (None, "")]
+    required_confirmation = next(
+        (gate for gate in confirmation_gates if gate in {action.tool, action.target_id}),
+        action.tool if action.tool == "submit" else action.target_id,
+    )
+
+    # Risk modeli tek bir eylemi sınıflandırır; onayın daha önce alındığını
+    # yorumlamak ise durumlu denetleyicinin sorumluluğudur. Aksi halde model,
+    # onaylanmış bir gönderim için her adımda yeniden onay isteyerek döngüye girer.
+    if (
+        prediction.label in {RiskLabel.IRREVERSIBLE_CONFIRMATION_REQUIRED, RiskLabel.STATE_CORRUPTION_RISK}
+        and required_confirmation in confirmed_actions
+    ):
+        return GuardDecision(
+            decision=GuardDecisionType.ALLOW,
+            risk_labels=[prediction.label],
+            confidence=prediction.confidence,
+            explanation="Gerekli kullanıcı onayı bu oturumda daha önce alındı.",
+            evidence=[
+                f"ml:{prediction.label}:{prediction.confidence:.4f}",
+                f"confirmed:{required_confirmation}",
+            ],
+        )
+
     if prediction.label == RiskLabel.MISSING_INFORMATION and missing:
         decision, required_confirmation = GuardDecisionType.BLOCK_AND_ASK, None
     elif prediction.label in {RiskLabel.IRREVERSIBLE_CONFIRMATION_REQUIRED, RiskLabel.STATE_CORRUPTION_RISK}:
         decision = GuardDecisionType.REQUIRE_CONFIRMATION
-        required_confirmation = next((gate for gate in confirmation_gates if gate in {action.tool, action.target_id}), action.tool if action.tool == "submit" else action.target_id)
     else:
         decision, required_confirmation = GuardDecisionType.BLOCK, None
 

@@ -20,7 +20,8 @@ def test_classifier_text_is_stable_and_contains_no_python_repr():
 def test_low_confidence_prediction_allows_action():
     decision = prediction_to_decision(
         prediction(RiskLabel.PRIVACY_VIOLATION, 0.4), action=action(),
-        required_facts=[], known_facts={}, confirmation_gates=["submit"], threshold=0.8,
+        required_facts=[], known_facts={}, confirmation_gates=["submit"],
+        confirmed_actions=[], threshold=0.8,
     )
     assert decision.decision == GuardDecisionType.ALLOW
 
@@ -28,10 +29,21 @@ def test_low_confidence_prediction_allows_action():
 def test_missing_information_prediction_can_be_enforced_as_question():
     decision = prediction_to_decision(
         prediction(RiskLabel.MISSING_INFORMATION), action=action("fill", "district"),
-        required_facts=["district"], known_facts={}, confirmation_gates=[], threshold=0.8,
+        required_facts=["district"], known_facts={}, confirmation_gates=[],
+        confirmed_actions=[], threshold=0.8,
     )
     assert decision.decision == GuardDecisionType.BLOCK_AND_ASK
     assert decision.missing_facts == ["district"]
+
+
+def test_confirmed_irreversible_action_is_not_requested_again():
+    decision = prediction_to_decision(
+        prediction(RiskLabel.IRREVERSIBLE_CONFIRMATION_REQUIRED), action=action(),
+        required_facts=[], known_facts={}, confirmation_gates=["submit"],
+        confirmed_actions=["submit"], threshold=0.8,
+    )
+    assert decision.decision == GuardDecisionType.ALLOW
+    assert "confirmed:submit" in decision.evidence
 
 
 def test_hybrid_never_overrides_rule_block():

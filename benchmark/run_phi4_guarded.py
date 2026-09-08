@@ -165,6 +165,7 @@ def run_task(
             learned_decision = prediction_to_decision(
                 prediction, action=proposed, required_facts=contract.required_facts,
                 known_facts=state.get("fields", {}), confirmation_gates=contract.confirmation_gates,
+                confirmed_actions=state.get("confirmed_actions", []),
                 threshold=ml_threshold,
             )
             decision = learned_decision if guard_strategy == "ml" else hybrid_decision(rule_decision, learned_decision)
