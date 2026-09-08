@@ -91,6 +91,5 @@ The CI workflow was updated locally; no remote CI run or release is claimed.
   Deploy only on loopback in a trusted research environment. No public
   backend deployment or public-agent security claim is made.
 - New model measurements and guarded browser comparisons
-  and responsive visual acceptance of this local test surface remain
-  separate work. Existing frozen numbers must not be reused as browser
-  performance results.
+  use the separately versioned [Phi-4 browser transfer protocol](BROWSER_MODEL_PROTOCOL.md).
+  Existing frozen numbers must not be reused as browser performance results.

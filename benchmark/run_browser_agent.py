@@ -16,32 +16,102 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 from app.browser_env import BrowserActionError, SafeBrowserEnvironment
 from app.external_agent import ExternalAgentError, HttpAgentPolicy
+from app.guard import check_action
+from app.guarded_policy import action_signature, enforced_action, public_action_error
+from app.models import GuardCheckRequest, GuardDecision, GuardDecisionType, RiskLabel
 from app.tasks import TASK_BY_ID
 
 
-async def run_task(api, browser, policy, task_id: str, max_steps: int, seed: int = 0) -> dict:
-    created = await api.post("/v1/runs", json={"task_id": task_id, "agent": "browser-external-v1", "seed": seed})
+class BrowserPolicyError(RuntimeError):
+    """A browser policy could not return a schema-valid action."""
+
+    def __init__(self, message: str, attempts: list[dict] | None = None):
+        super().__init__(message)
+        self.attempts = attempts or []
+
+
+async def run_task(
+    api, browser, policy, task_id: str, max_steps: int, seed: int = 0,
+    *, guarded: bool = False, agent_name: str = "browser-external-v1",
+) -> dict:
+    created = await api.post("/v1/runs", json={"task_id": task_id, "agent": agent_name, "seed": seed})
     created.raise_for_status()
     run_id = created.json()["id"]
     obs = await browser.open(f"/browser/runs/{run_id}")
     trace, feedback, termination = [], "", "MAX_STEPS"
+    guard_blocks = 0
+    guard_enforcements = 0
+    applied_signatures: set[str] = set()
     start = time.monotonic()
     for _ in range(max_steps - 1):
         before = asdict(obs)
         try:
             # No task oracle, authorization gold, response policy or API state is
             # passed to the agent. Its input is the rendered accessibility tree.
-            action, _ = await asyncio.to_thread(policy.next_action, task_id, before, feedback)
-        except ExternalAgentError as error:
-            trace.append({"observation": before, "error": str(error)})
+            proposed, agent_metadata = await asyncio.to_thread(
+                policy.next_action, task_id, before, feedback
+            )
+        except (ExternalAgentError, BrowserPolicyError) as error:
+            trace.append({
+                "observation": before, "error": str(error),
+                "agent_metadata": {"attempts": getattr(error, "attempts", [])},
+            })
             termination = "AGENT_ERROR"
             break
+        action = proposed
+        guard = None
+        if guarded:
+            internal_response = await api.get(f"/v1/environments/{run_id}/observation")
+            internal_response.raise_for_status()
+            internal = internal_response.json()
+            state = internal.get("state", {})
+            contract_error = public_action_error(proposed, internal, applied_signatures)
+            if contract_error:
+                guard = GuardDecision(
+                    decision=GuardDecisionType.BLOCK,
+                    risk_labels=[RiskLabel.UNAUTHORIZED],
+                    confidence=0.99,
+                    explanation="Eylem görünür görev sözleşmesinin dışında.",
+                    evidence=[f"public_contract:{contract_error}"],
+                )
+            else:
+                guard = check_action(GuardCheckRequest(
+                    user_request=TASK_BY_ID[task_id].user_request,
+                    action=proposed,
+                    contract=TASK_BY_ID[task_id].authorization,
+                    known_facts=state.get("fields", {}),
+                    confirmed_actions=state.get("confirmed_actions", []),
+                ))
+            if guard.decision != GuardDecisionType.ALLOW:
+                guard_blocks += 1
+                replacement = enforced_action(guard, internal)
+                if replacement is None:
+                    feedback = guard.explanation + " Kanıt: " + ", ".join(guard.evidence)
+                    trace.append({
+                        "observation": before,
+                        "proposed_action": proposed.model_dump(mode="json"),
+                        "action": None,
+                        "guard": guard.model_dump(mode="json"),
+                        "agent_metadata": agent_metadata,
+                        "error": feedback,
+                    })
+                    continue
+                action = replacement
+                guard_enforcements += 1
         try:
             obs = await browser.act(action)
+            applied_signatures.add(action_signature(action))
             feedback = ""
         except BrowserActionError as error:
             feedback = str(error)
-        trace.append({"observation": before, "action": action.model_dump(mode="json"), "error": feedback or None})
+        trace.append({
+            "observation": before,
+            "proposed_action": proposed.model_dump(mode="json"),
+            "action": action.model_dump(mode="json"),
+            "guard": guard.model_dump(mode="json") if guard else None,
+            "agent_metadata": agent_metadata,
+            "error": feedback or None,
+        })
         if obs.status != "running":
             termination = "FINISHED" if action.tool == "finish" and not feedback else obs.status.upper()
             break
@@ -50,6 +120,12 @@ async def run_task(api, browser, policy, task_id: str, max_steps: int, seed: int
     return {
         "experiment": "browser-external-v1", "environment": "playwright-html-v1",
         "task_id": task_id, "seed": seed, "termination": termination,
+        "agent": agent_name, "guarded": guarded,
+        "guard_blocks": guard_blocks, "guard_enforcements": guard_enforcements,
+        "generated_tokens": sum(
+            int(step.get("agent_metadata", {}).get("generated_tokens", 0))
+            for step in trace
+        ),
         "latency_seconds": round(time.monotonic() - start, 3),
         "trace": trace, **evaluation.json(),
     }

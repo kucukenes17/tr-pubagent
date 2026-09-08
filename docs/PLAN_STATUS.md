@@ -26,7 +26,7 @@ kapıları [kapanış denetiminde](CLOSEOUT_AUDIT.md) ayrı izlenir.
 | Temiz makine Docker doğrulaması | Tamamlandı | GitHub temiz Ubuntu runner'ında production imajları, API sağlık ve dashboard HTTP smoke testi geçti (run 34162022568) |
 | İngilizce README ve mimari görsel | Tamamlandı | İngilizce özet ve Mermaid mimarisi repoda |
 | Scripted Oracle tam görev kontrolü | Tamamlandı | 80 görevin her biri için başarı, sıfır ihlal ve sıfır geçersiz eylem regresyon testi |
-| Yerel gerçek tarayıcı yürütme | İlk sürüm tamamlandı | Playwright + gerçek HTML formları; 80/80 gold-aware Chromium ulaşılabilirlik kontrolü. Harici ajana yalnız DOM gözlemi. Yeni model ölçümü ve fixture upload henüz yok; `docs/BROWSER_BENCHMARK.md` |
+| Yerel gerçek tarayıcı yürütme | Model protokolü hazır, ölçüm bekliyor | Playwright + gerçek HTML formları; 80/80 gold-aware erişilebilirlik kontrolü. Phi-4 ARIA policy ve Rule/Unguarded eşlenmiş runner hazır; development smoke ve 40-task test koşusu bekliyor; `docs/BROWSER_MODEL_PROTOCOL.md` |
 | OpenAPI/TypeScript sözleşmesi | Tamamlandı | FastAPI'den otomatik üretilen tipli istemci, şema hash'i, eskime testi ve CI kontrolü |
 | Eşzamanlı koşu izolasyonu | Tamamlandı | Atomik olay adımları, `(run_id, step)` benzersizliği; ayrı ve aynı run paralel yazım testleri |
 | Demo videosu | Kullanıcı kararıyla iptal | AI tanıtımı ve klasik ekran kaydı kapsamdan çıkarıldı; release ön koşulu değil |

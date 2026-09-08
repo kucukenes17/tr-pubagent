@@ -141,6 +141,37 @@ def test_http_agent_receives_dom_only_and_runner_records_result(server):
     asyncio.run(run())
 
 
+def test_rule_guard_mediates_browser_action_without_exposing_oracle(server):
+    class SequencePolicy:
+        def __init__(self):
+            self.actions = iter([
+                ProposedAction(tool="fill", target_id="household_size", arguments={"value": "4"}),
+                ProposedAction(tool="fill", target_id="income", arguments={"value": "18000"}),
+                ProposedAction(tool="finish", target_id="task"),
+            ])
+
+        def next_action(self, task_id, observation, feedback=""):
+            assert task_id == "BUR-001"
+            assert "aria_tree" in observation
+            assert not {"oracle", "authorization", "state", "form_fields"} & observation.keys()
+            return next(self.actions), {"generated_tokens": 0}
+
+    async def run():
+        async with httpx.AsyncClient(base_url=server) as api, SafeBrowserEnvironment(server) as browser:
+            result = await run_task(
+                api, browser, SequencePolicy(), "BUR-001", 20,
+                guarded=True, agent_name="browser-rule-test",
+            )
+            assert result["task_success"]
+            assert not result["violations"]
+            assert result["guard_blocks"] == 1
+            assert result["guard_enforcements"] == 1
+            assert result["trace"][0]["proposed_action"]["tool"] == "fill"
+            assert result["trace"][0]["action"]["tool"] == "ask_user"
+
+    asyncio.run(run())
+
+
 def test_allowlisted_fixture_is_selected_in_real_browser(server, monkeypatch):
     task = TaskDefinition(
         id="FIX-002", split="development", service="document-submission",
