@@ -1,0 +1,2 @@
+# Lightweight offline analysis; matches the ML environment's Arrow version.
+pyarrow==21.0.0

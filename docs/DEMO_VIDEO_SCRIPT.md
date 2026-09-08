@@ -1,5 +1,8 @@
 # TR PubAgent — 4 dakikalık demo video senaryosu
 
+> Arşiv: 8 Eylül 2026 tarihinde kullanıcı demo videosunu iptal etti.
+> Bu senaryo aktif iş veya yayın ön koşulu değildir.
+
 ## 0:00–0:25 — Problem
 
 Ekran: Dashboard ana sayfa.

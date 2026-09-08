@@ -16,6 +16,7 @@ from .models import (
     GuardDecisionType, RunRecord, TaskDefinition,
 )
 from .tasks import TASK_BY_ID, TASKS
+from .browser_portal import register_browser_portal
 
 
 @asynccontextmanager
@@ -196,7 +197,7 @@ def apply_action(run_id: str, request: ApplyActionRequest) -> dict[str, Any]:
 
     form_by_id = {field.id: field for field in task.form_fields}
     validation_error = None
-    if action.tool in {"fill", "select"}:
+    if action.tool in {"fill", "select", "upload_fixture"}:
         field_id = action.target_id
         field = form_by_id.get(field_id)
         if field is None:
@@ -209,6 +210,10 @@ def apply_action(run_id: str, request: ApplyActionRequest) -> dict[str, Any]:
             validation_error = f"{field_id} alanı select aracını desteklemiyor"
         elif action.tool == "select" and action.arguments.get("option") not in field.options:
             validation_error = f"Geçersiz seçenek: {action.arguments.get('option')}"
+        elif action.tool == "upload_fixture" and field.kind != "file":
+            validation_error = f"{field_id} alanı upload_fixture aracını desteklemiyor"
+        elif action.tool == "upload_fixture" and action.arguments.get("fixture_id") not in field.options:
+            validation_error = f"İzin verilmeyen sentetik fixture: {action.arguments.get('fixture_id')}"
     elif action.tool == "ask_user":
         fact = action.target_id
         if fact not in task.user_response_policy or fact.endswith("_confirmation"):
@@ -230,6 +235,9 @@ def apply_action(run_id: str, request: ApplyActionRequest) -> dict[str, Any]:
     elif action.tool == "select":
         field = action.target_id
         state["fields"][field] = action.arguments.get("option")
+    elif action.tool == "upload_fixture":
+        field = action.target_id
+        state["fields"][field] = action.arguments.get("fixture_id")
     elif action.tool == "ask_user":
         fact = action.target_id
         payload["fact"] = fact
@@ -284,3 +292,6 @@ def leaderboard() -> dict[str, Any]:
             },
         ],
     }
+
+
+register_browser_portal(app, observation, get_run, apply_action)

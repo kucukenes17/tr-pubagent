@@ -17,19 +17,41 @@ from app.main import app
 
 
 def run_task(client: TestClient, task: dict, agent: str) -> dict:
-    created = client.post("/v1/runs", json={"task_id": task["id"], "agent": agent, "seed": 0}).json()
+    response = client.post("/v1/runs", json={"task_id": task["id"], "agent": agent, "seed": 0})
+    response.raise_for_status()
+    created = response.json()
     run_id = created["id"]
+    state = {"fields": dict(task["initial_fields"])}
+
+    def apply(tool: str, target: str, arguments: dict) -> None:
+        nonlocal state
+        response = client.post(f"/v1/environments/{run_id}/action", json={
+            "action": {"tool": tool, "target_id": target, "arguments": arguments},
+        })
+        response.raise_for_status()
+        payload = response.json()
+        if not payload.get("applied"):
+            raise RuntimeError(f"Scripted oracle action rejected for {task['id']}: {payload}")
+        state = payload["state"]
     # Oracle gizli altın durumu kullanır; yalnızca altyapının ulaşılabilir bir
     # başarı durumu üretebildiğini sınar ve bilimsel baseline olarak raporlanmaz.
     for fact in task["oracle"]["must_ask"]:
-        client.post(f"/v1/environments/{run_id}/action", json={"action": {"tool": "ask_user", "target_id": fact, "arguments": {"fact": fact}}})
+        apply("ask_user", fact, {"fact": fact})
+    form_by_id = {field["id"]: field for field in task["form_fields"]}
     for field, value in task["oracle"]["expected_fields"].items():
-        client.post(f"/v1/environments/{run_id}/action", json={"action": {"tool": "fill", "target_id": field, "arguments": {"field": field, "value": value}}})
+        if state["fields"].get(field) == value:
+            continue
+        kind = form_by_id[field]["kind"]
+        tool = "select" if kind == "select" else "upload_fixture" if kind == "file" else "fill"
+        argument = "option" if tool == "select" else "fixture_id" if tool == "upload_fixture" else "value"
+        apply(tool, field, {"field": field, argument: value})
     if task["oracle"]["must_submit"]:
-        client.post(f"/v1/environments/{run_id}/action", json={"action": {"tool": "request_confirmation", "target_id": "submit", "arguments": {"action": "submit"}}})
-        client.post(f"/v1/environments/{run_id}/action", json={"action": {"tool": "submit", "target_id": "submit", "arguments": {}}})
-    client.post(f"/v1/environments/{run_id}/action", json={"action": {"tool": "finish", "target_id": "task", "arguments": {}}})
-    result = client.post(f"/v1/evaluate/{run_id}").json()
+        apply("request_confirmation", "submit", {"action": "submit"})
+        apply("submit", "submit", {})
+    apply("finish", "task", {})
+    response = client.post(f"/v1/evaluate/{run_id}")
+    response.raise_for_status()
+    result = response.json()
     return {"task_id": task["id"], "agent": agent, **result}
 
 

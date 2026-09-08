@@ -22,6 +22,22 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.ml_guard import classifier_feature_text
+from ml.class_weights import balanced_class_weights
+
+
+class WeightedTrainer(Trainer):
+    def __init__(self, *args, class_weights: list[float], **kwargs):
+        super().__init__(*args, **kwargs)
+        self.class_weights = class_weights
+
+    def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+        import torch
+
+        labels = inputs.pop("labels")
+        outputs = model(**inputs)
+        weights = torch.tensor(self.class_weights, dtype=outputs.logits.dtype, device=outputs.logits.device)
+        loss = torch.nn.functional.cross_entropy(outputs.logits, labels, weight=weights)
+        return (loss, outputs) if return_outputs else loss
 
 
 def load_rows(path: Path) -> list[dict]:
@@ -33,6 +49,7 @@ def main() -> None:
     parser.add_argument("--data", type=Path, default=Path("outputs/risk_dataset.jsonl"))
     parser.add_argument("--output", type=Path, default=Path("outputs/xlmr-risk"))
     parser.add_argument("--epochs", type=int, default=5)
+    parser.add_argument("--class-weights", choices=["none", "balanced"], default="balanced")
     args = parser.parse_args()
 
     rows = load_rows(args.data)
@@ -57,6 +74,8 @@ def main() -> None:
         )
 
     dataset = DatasetDict({split: to_dataset(split) for split in ("train", "validation", "test")})
+    train_label_ids = [label2id[row["label"]] for row in rows if row["split"] == "train"]
+    class_weights = balanced_class_weights(train_label_ids, len(labels)) if args.class_weights == "balanced" else [1.0] * len(labels)
     model = AutoModelForSequenceClassification.from_pretrained(MODEL_ID, num_labels=len(labels), id2label={value: key for key, value in label2id.items()}, label2id=label2id)
 
     def metrics(prediction):
@@ -72,7 +91,9 @@ def main() -> None:
         save_only_model=True, save_total_limit=1,
         report_to="none", seed=42, fp16=True,
     )
-    trainer = Trainer(model=model, args=training, train_dataset=dataset["train"], eval_dataset=dataset["validation"], processing_class=tokenizer, data_collator=DataCollatorWithPadding(tokenizer), compute_metrics=metrics, callbacks=[EarlyStoppingCallback(early_stopping_patience=2)])
+    trainer_class = WeightedTrainer if args.class_weights == "balanced" else Trainer
+    trainer_kwargs = {"class_weights": class_weights} if args.class_weights == "balanced" else {}
+    trainer = trainer_class(model=model, args=training, train_dataset=dataset["train"], eval_dataset=dataset["validation"], processing_class=tokenizer, data_collator=DataCollatorWithPadding(tokenizer), compute_metrics=metrics, callbacks=[EarlyStoppingCallback(early_stopping_patience=2)], **trainer_kwargs)
     trainer.train()
     test_result = trainer.predict(dataset["test"])
     predicted = np.argmax(test_result.predictions, axis=1)
@@ -86,6 +107,8 @@ def main() -> None:
         "rows": len(rows),
         "data_sha256": hashlib.sha256(args.data.read_bytes()).hexdigest(),
         "recommended_runtime_threshold": 0.80,
+        "loss": "class_weighted_cross_entropy" if args.class_weights == "balanced" else "cross_entropy",
+        "class_weights": {label: class_weights[index] for label, index in label2id.items()},
     }
     (args.output / "training_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     trainer.save_model(args.output)

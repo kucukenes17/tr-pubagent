@@ -10,11 +10,13 @@ TR PubAgent, Türkçe kamu hizmeti benzeri çok adımlı web görevlerinde yapay
 - **Sentetik portal laboratuvarı:** Burs, ders kaydı, randevu, belediye, sosyal yardım ve belge teslimi için aynı guard motoruna bağlı altı erişilebilir, etkileşimli hizmet yüzeyi.
 - **TR-PubGuard v2.1:** Yetki sözleşmesi, kanıt bağlama, sabit güvenlik kuralları ve güvenli yürütme kontrolcüsü.
 - **Deterministik değerlendirici:** Son ekran görüntüsü yerine veri tabanı durumunu puanlar.
+- **Ek analiz ve Parquet:** [Soru P/R/F1, sözleşme alan-F1 hesaplayıcısı ve kayıpsız aktarım](docs/SUPPLEMENTARY_METRICS.md); tahmini kaydedilmemiş sözleşmeler puanlanmaz.
 - **Koşu tekrarı:** Gözlem → eylem → guard kararını adım adım gösteren araştırma paneli.
 - **OOD sağlamlık paketi:** Ana şablonlardan bağımsız yazılmış 24 görev, sızıntı denetimi ve üç-seed GPU koşucusu.
 - **ML paketi:** 3.000 sentetik eylem-risk örneği ve XLM-R eğitim betiği.
 - **Ablation altyapısı:** Rule-only, XLM-R ML-only ve Hybrid Guard için ortak OOD koşucu ve Holm düzeltmeli analiz.
 - **Kendi ajanını getir:** Sürümlü HTTP eylem sözleşmesiyle herhangi bir ajanı doğrudan veya TR-PubGuard arkasında değerlendiren yerel koşucu.
+- **Gerçek tarayıcı adaptörü:** Ayrı, yerel HTML portalında Playwright ile form işlemleri ve DOM gözlemi kullanan [browser-external-v1](docs/BROWSER_BENCHMARK.md). Dondurulmuş GPU sonuçları bu yeni yolla ölçülmedi.
 - **Çapraz-model doğrulama:** Aynı dondurulmuş guard'ın Phi-4 ve Qwen2.5-7B üzerindeki eşlenmiş karşılaştırması.
 - **Sıfır maliyet akışı:** Scripted kontrol ile yerel geliştirme; Phi-4, Qwen ve XLM-R için Kaggle veya Colab.
 
@@ -167,7 +169,7 @@ Temel deney protokolü ve gerçekleşen sapmalar [docs/RESEARCH_PROTOCOL.md](doc
 
 İnsan yazımı genelleme deneyi [docs/ROBUSTNESS_PROTOCOL.md](docs/ROBUSTNESS_PROTOCOL.md) içinde ön kayıtlıdır. 12 haftalık planın güncel kontrol tablosu [docs/PLAN_STATUS.md](docs/PLAN_STATUS.md) içindedir.
 
-English overview: [README.en.md](README.en.md). TÜBİTAK taslak metni ve video akışı sırasıyla [docs/TUBITAK_2209A_DRAFT.md](docs/TUBITAK_2209A_DRAFT.md) ve [docs/DEMO_VIDEO_SCRIPT.md](docs/DEMO_VIDEO_SCRIPT.md) içindedir.
+English overview: [README.en.md](README.en.md). İptal edilen başvuru ve video çalışmaları yalnızca tarihsel arşiv olarak `docs/` altında tutulur; güncel yol haritasının parçası değildir.
 
 ## Araştırma etiği
 

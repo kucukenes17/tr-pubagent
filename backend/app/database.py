@@ -54,6 +54,7 @@ def initialize() -> None:
             );
             CREATE INDEX IF NOT EXISTS idx_runs_task_agent ON runs(task_id, agent);
             CREATE INDEX IF NOT EXISTS idx_events_run_step ON events(run_id, step);
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_events_run_step_unique ON events(run_id, step);
             """
         )
         database.execute("PRAGMA optimize")
@@ -80,6 +81,9 @@ def list_events(run_id: str) -> list[dict[str, Any]]:
 
 def append_event(run_id: str, event_type: str, payload: dict[str, Any], state: dict[str, Any] | None = None) -> int:
     with connection() as database:
+        # Serialize step allocation across concurrent connections. Without an
+        # immediate write lock, two workers can read the same step_count.
+        database.execute("BEGIN IMMEDIATE")
         row = database.execute("SELECT step_count FROM runs WHERE id = ?", (run_id,)).fetchone()
         if row is None:
             raise KeyError(run_id)

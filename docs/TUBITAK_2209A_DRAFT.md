@@ -1,4 +1,13 @@
-# TÜBİTAK 2209-A proje önerisi taslağı
+# ARŞİV — TÜBİTAK 2209-A proje önerisi taslağı (kapsam dışı)
+
+> 8 Eylül 2026 kullanıcı kararı: TÜBİTAK başvurusu yapılmayacak. Bu tarihsel
+> taslak güncel çalışma planının veya release kapılarının parçası değildir.
+
+> Başvuruya hazır değildir. Aşağıdaki gelecek zamanlı yöntem ve takvim ilk
+> taslaktan kalmıştır; OOD, ML ablation ve ikinci-model deneyleri artık
+> tamamlanmış ön çalışmadır. Bunlar gelecekte yapılacak yeni çalışma gibi
+> sunulmamalıdır. Başvuru kapsamı ve güncel çağrı şartları danışmanla ayrıca
+> belirlenmelidir. Demo videosu kullanıcı kararıyla kapsamdan çıkarılmıştır.
 
 ## Proje başlığı
 
@@ -60,7 +69,7 @@ Görev başarısı ve ihlal oranları için Wilson aralığı; eşlenmiş başar
 | 3 | 288 GPU koşusu | Ham JSONL ve ortam bilgisi |
 | 4 | İstatistik, hata taksonomisi | Ablation tablosu ve grafikler |
 | 5 | Portal/replay iyileştirmesi, Docker doğrulama | Tek komut kurulum ve canlı demo |
-| 6 | Rapor, video ve açık veri paketi | Makale biçimli rapor ve v1.0.0 |
+| 6 | Rapor ve açık veri paketi | Makale biçimli rapor ve v1.0.0 |
 
 ## Riskler ve önlemler
 

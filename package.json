@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "vinext dev",
     "data:dashboard": "node scripts/build-dashboard-data.mjs",
+    "api:generate": "python scripts/generate_api_client.py",
+    "api:check": "python scripts/generate_api_client.py --check",
     "build": "npm run data:dashboard && vinext build",
     "start": "wrangler dev --config dist/server/wrangler.json",
     "lint": "oxlint",
