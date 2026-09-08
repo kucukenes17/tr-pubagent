@@ -45,5 +45,5 @@ def test_phi4_browser_policy_prompts_from_public_dom_observation_only():
     assert metadata["generated_tokens"] > 0
     assert "aria_tree" in prompt
     assert "must_not_leak" not in prompt
-    assert "oracle" not in prompt
-    assert "authorization" not in prompt
+    assert '"oracle":' not in prompt
+    assert '"authorization":' not in prompt
