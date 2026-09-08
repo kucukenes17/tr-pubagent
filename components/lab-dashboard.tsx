@@ -440,11 +440,12 @@ export function LabDashboard() {
           <div className="section-title">
             <div>
               <div className="eyebrow">02 / Rule · ML · Hybrid</div>
-              <h2>Öğrenilmiş guard ek başarı sağlamadı.</h2>
+              <h2>Sınıf-ağırlıklı XLM-R v3, Rule Guard’ı geçemedi.</h2>
               <p>
                 Aynı {ablation.summary.paired_runs_per_system} OOD koşusunda
-                karar guard’ı değiştirildi. Araç sözleşmesi ve güvenli yürütme
-                kontrolcüsü bütün guarded sistemlerde ortak tutuldu.
+                karar guard’ı değiştirildi. Eşik 0,80’de sabit tutuldu; araç
+                sözleşmesi ve güvenli yürütme kontrolcüsü bütün guarded
+                sistemlerde ortak kaldı.
               </p>
             </div>
             <Badge
@@ -484,8 +485,8 @@ export function LabDashboard() {
                           {
                             unguarded: 'Unguarded v1',
                             rule: 'Rule Guard v2.1',
-                            ml: 'ML decision guard',
-                            hybrid: 'Hybrid Rule + ML',
+                            ml: 'ML Guard · XLM-R v3',
+                            hybrid: 'Hybrid · Rule + XLM-R v3',
                           }[key]
                         }
                       </td>
@@ -512,9 +513,12 @@ export function LabDashboard() {
           </div>
           <div className="result-notes">
             <p>
-              <strong>Negatif sonuç da bulgudur.</strong> Hybrid, iki
-              bileşeninden kesin olarak üstün olma koşulunu karşılamadı. Üç
-              guarded sistemin Unguarded karşısında Holm-düzeltilmiş McNemar p
+              <strong>Negatif sonuç da bulgudur.</strong> Hybrid güvenlik
+              ihlallerini sıfırda tuttu ancak {ablation.summary.systems.hybrid.successes}/
+              {ablation.summary.systems.hybrid.runs} başarıyla Rule Guard’ın{' '}
+              {ablation.summary.systems.rule.successes}/
+              {ablation.summary.systems.rule.runs} sonucunun gerisinde kaldı.
+              Rule Guard’ın Unguarded karşısındaki Holm-düzeltilmiş McNemar p
               değeri:{' '}
               <code>
                 {ablation.summary.mcnemar_holm_adjusted_p.rule.toExponential(3)}
@@ -522,9 +526,12 @@ export function LabDashboard() {
               .
             </p>
             <p>
-              <strong>ML genelleme sınırı.</strong> XLM-R, 3.000 şablonlu
-              sentetik örneğin ayrılmış testinde macro-F1=1,0 aldı. Bu skor
-              gerçek dünya genellemesi değildir; OOD ajan sonucu esas ölçümdür.
+              <strong>ML genelleme sınırı.</strong> Sınıf-ağırlıklı XLM-R v3,
+              3.000 şablonlu sentetik örneğin 398 kayıtlık testinde
+              macro-F1=1,0 aldı; buna karşın OOD ML-only koşusunda{' '}
+              {ablation.summary.systems.ml.violation_count} dil yorumlama
+              ihlali gözlendi. Sınıflandırma skoru, uçtan uca ajan güvenliği
+              değildir.
             </p>
           </div>
         </section>

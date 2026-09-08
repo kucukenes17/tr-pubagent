@@ -90,6 +90,19 @@ Rule, ML ve Hybrid sistemlerin her biri Unguarded'a karşı 60 yalnız-guarded b
 
 ML karar katmanı 108 eylemi blokladı fakat güvenli alternatif eylem üretmedi. Hybrid'in müdahale profili ve uçtan uca sonucu Rule ile aynı kaldı. Bu bulgu, mevcut mimaride deterministik sözleşme ve kontrolcünün ana katkıyı sağladığını; şablonlu veriyle eğitilen sınıflandırıcının ek görev başarısı getirmediğini gösterir. “ML decision guard” koşusu da ortak public-contract doğrulamasını ve güvenli yürütme kontrolcüsünü kullanır; tamamen bağımsız bir ML ajanı değildir.
 
+### Sınıf-ağırlıklı XLM-R v3 takip deneyi
+
+Takip sürümünde aynı 3.000 kayıt, dengeli sınıf ağırlıklarıyla çapraz entropi kullanılarak yeniden eğitildi. Ayrılmış 398 sentetik test örneğinde macro-F1 yine `1,0` ölçüldü. Runtime eşiği OOD sonuçlarına göre ayarlanmadan `0,80` olarak sabit tutuldu; 24 görev × üç seed aynı Phi-4 üretici ajanıyla yeniden çalıştırıldı.
+
+| Sistem | Başarı | Wilson %95 GA | İhlal | Ort. adım |
+| --- | ---: | ---: | ---: | ---: |
+| Unguarded | 6/72 (%8,3) | %3,9–%17,0 | 12 | 8,25 |
+| Rule Guard | 66/72 (%91,7) | %83,0–%96,1 | 0 | 3,46 |
+| ML-only v3 | 57/72 (%79,2) | %68,4–%86,9 | 3 | 4,54 |
+| Hybrid v3 | 57/72 (%79,2) | %68,4–%86,9 | 0 | 4,79 |
+
+Hybrid, ML-only koşusundaki üç `LANGUAGE_INTERPRETATION_ERROR` olayını engelledi fakat yanlış-pozitif risk kararlarının yol açtığı görev kaybını geri kazanamadı. Rule Guard, Hybrid'den dokuz koşu daha başarılıydı. Unguarded karşısında Holm-düzeltilmiş exact McNemar değerleri Rule için `p=5,20×10⁻¹⁸`, ML ve Hybrid için `p=1,78×10⁻¹⁵` oldu; ihlal farkının Holm-düzeltilmiş Fisher değeri Rule ve Hybrid için `p=0,00898`, ML için `p=0,1289` ölçüldü. H3 desteklenmedi. Sonuçlar [`results/robustness/v3-weighted`](../results/robustness/v3-weighted) altında hash manifestiyle yayımlanır.
+
 ## Guard v2.2 post-hoc OOD sonucu
 
 Guarded v2.1 dondurulmuş OOD sonucundaki altı başarısız koşu incelendikten sonra, iki hata sınıfıyla sınırlı [ayrı bir post-hoc protokol](POSTHOC_V22_PROTOCOL.md) oluşturuldu. v2.2; görünür kullanıcı metnindeki tek, açık para değerini semantik olarak eşleşen tek zorunlu sayısal alana bağlar ve olumsuzlanan select seçeneklerini yalnız tek olumlu seçenek kaldığında eler. Gizli oracle, görev kimliği ve beklenen sonuç bu kurallara girdi değildir.

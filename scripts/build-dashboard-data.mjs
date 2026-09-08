@@ -63,10 +63,10 @@ const [summary, guardedRuns, unguardedRuns, robustnessSummary, posthocSummary, a
   readJsonl(resolve(raw, 'phi4_unguarded_test_v1.jsonl')),
   readJson(resolve(root, 'results/robustness/robustness_summary.json')),
   readJson(resolve(root, 'results/robustness/posthoc_v2_1_vs_v2_2_summary.json')),
-  readJson(resolve(root, 'results/robustness/guard_ablation_summary.json')),
+  readJson(resolve(root, 'results/robustness/v3-weighted/guard_ablation_v3_weighted_summary.json')),
   readJsonl(resolve(root, 'results/robustness/phi4_guarded_ood_v2_1.jsonl')),
-  readJsonl(resolve(root, 'results/robustness/phi4_ml_guard_ood_v2_2.jsonl')),
-  readJsonl(resolve(root, 'results/robustness/phi4_hybrid_guard_ood_v2_2.jsonl')),
+  readJsonl(resolve(root, 'results/robustness/v3-weighted/phi4_ml_guard_ood_v3_weighted.jsonl')),
+  readJsonl(resolve(root, 'results/robustness/v3-weighted/phi4_hybrid_guard_ood_v3_weighted.jsonl')),
   readJson(resolve(root, 'results/cross-model/qwen2_5_7b/derived/qwen2_5_7b_summary.json')),
 ]);
 
@@ -92,7 +92,7 @@ const payload = {
     unguarded: 'results/frozen/raw/phi4_unguarded_test_v1.jsonl',
     robustness: 'results/robustness/robustness_summary.json',
     posthoc: 'results/robustness/posthoc_v2_1_vs_v2_2_summary.json',
-    ablation: 'results/robustness/guard_ablation_summary.json',
+    ablation: 'results/robustness/v3-weighted/guard_ablation_v3_weighted_summary.json',
     crossModel: 'results/cross-model/qwen2_5_7b/derived/qwen2_5_7b_summary.json',
   },
   summary,

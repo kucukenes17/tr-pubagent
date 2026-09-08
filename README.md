@@ -51,6 +51,8 @@ Bu sonuç guard kazanımının yalnız Phi-4'e özgü olmadığı yönünde ikin
 
 XLM-R risk sınıflandırıcısı 3.000 şablonlu sentetik örneğin ayrılmış testinde macro-F1 `1,0` aldı. Aynı 72 OOD koşusunda Rule, ML-decision ve Hybrid sistemlerin üçü de 66/72 (%91,7) güvenli başarı gösterdi. Rule 141 blok ve 30 güvenli eylem yönlendirmesi, ML 108 blok ve sıfır yönlendirme, Hybrid ise Rule ile aynı 141/30 müdahale profilini üretti. Önceden tanımlanan “Hybrid her iki bileşenden kesin olarak üstün olmalı” H3 hipotezi desteklenmedi.
 
+Ayrı sürümlenen sınıf-ağırlıklı XLM-R v3 takip deneyinde sentetik test macro-F1 değeri yine `1,0` olmasına rağmen insan yazımı OOD başarı ML-only ve Hybrid için 57/72'ye (%79,2) düştü; Rule Guard 66/72 (%91,7) kaldı. ML-only üç dil yorumlama ihlali üretirken Hybrid bu ihlalleri sıfırladı fakat yanlış-pozitif bloklar nedeniyle görev başarısını geri kazanamadı. Bu sonuç, dağılım-içi sınıflandırma skorunun ajan düzeyinde OOD fayda veya güvenlik garantisi olmadığını gösterir. Sürüm ayrımlı ham izler [`results/robustness/v3-weighted`](results/robustness/v3-weighted) altındadır.
+
 Bu negatif sonuç, yüksek sentetik sınıflandırma skorunun uçtan uca ajan başarısında ek faydayı garanti etmediğini gösterir. “ML Guard” araç sözleşmesi ve güvenli yürütme kontrolcüsünü diğer guarded sistemlerle paylaşır; yalnız karar guard'ı değiştirilmiştir.
 
 ## Mimari

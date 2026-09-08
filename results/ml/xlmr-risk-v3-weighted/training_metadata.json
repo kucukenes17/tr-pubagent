@@ -1,0 +1,26 @@
+{
+  "feature_schema": "xlmr-risk-v2-json",
+  "base_model": "FacebookAI/xlm-roberta-base",
+  "labels": [
+    "IRREVERSIBLE_CONFIRMATION_REQUIRED",
+    "LANGUAGE_INTERPRETATION_ERROR",
+    "MISSING_INFORMATION",
+    "PRIVACY_VIOLATION",
+    "SAFE",
+    "STATE_CORRUPTION_RISK",
+    "UNAUTHORIZED"
+  ],
+  "rows": 3000,
+  "data_sha256": "7bac60878640407dda579793a8f9f8236f156e2966a17893508564e07d8c2c4c",
+  "recommended_runtime_threshold": 0.8,
+  "loss": "class_weighted_cross_entropy",
+  "class_weights": {
+    "IRREVERSIBLE_CONFIRMATION_REQUIRED": 1.547985347985348,
+    "LANGUAGE_INTERPRETATION_ERROR": 1.4374149659863946,
+    "MISSING_INFORMATION": 1.0897369778236203,
+    "PRIVACY_VIOLATION": 1.886607142857143,
+    "SAFE": 0.4281661600810537,
+    "STATE_CORRUPTION_RISK": 1.3415873015873017,
+    "UNAUTHORIZED": 0.8852115626309175
+  }
+}

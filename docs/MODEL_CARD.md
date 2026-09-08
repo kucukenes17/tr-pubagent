@@ -20,6 +20,8 @@ Depoda ayrıca XLM-RoBERTa risk sınıflandırıcısı için veri üretme ve eğ
 
 Tam eşlenmiş ablation sonucunda Rule, ML ve Hybrid sistemlerin üçü de 66/72 başarı verdi; önceden tanımlı Hybrid üstünlüğü hipotezi desteklenmedi. Model ağırlığı, eğitim metadata'sı ve ham izler `results/ml` ile `results/robustness` altında yayımlanır. Bu ablation, dondurulmuş v2.1 final skorunun yerine geçmez.
 
+Sınıf-ağırlıklı çapraz entropiyle yeniden eğitilen XLM-R v3, ayrı bir takip deneyi olarak `bc4e102` commit'inde değerlendirildi. Sentetik test macro-F1 değeri `1,0` kalırken 24 insan yazımı OOD görev × üç seed üzerinde ML-only ve Hybrid 57/72 (%79,2), Rule Guard 66/72 (%91,7) başarı verdi. ML-only üç dil yorumlama ihlali üretirken Hybrid sıfır ihlal verdi. Bu sürüm, yüksek dağılım-içi F1 ile uçtan uca OOD ajan davranışı arasındaki farkı belgeleyen negatif sonuçtur; v2 artefaktının yerine geçirilmez.
+
 ## Post-hoc Guard v2.2
 
 v2.1 OOD hataları görüldükten sonra, yalnız açık para kanıtı ve olumsuzlanan select tercihi sınıfları için ayrı bir post-hoc v2.2 geliştirildi. Aynı 72 OOD koşusunda başarı 66/72'den 72/72'ye çıktı; altı yalnız-v2.2 başarısı ve sıfır regresyon görüldü. Geçersiz eylem ve gözlenen ihlal sayısı her iki guarded sürümde de sıfırdı. Exact McNemar `p=0,03125`; görev-kümeli bootstrap aralığı kazanımlar iki görevde toplandığı için sıfırı içerir. v2.2, önceden dondurulmuş v2.1 kanıtı gibi sunulmamalıdır.

@@ -19,6 +19,7 @@ Bu metinler dondurulmuş sentetik test sonucuyla sınırlıdır. “Gerçek dün
 - Evaluated paired development, validation, and held-out synthetic test splits; final test success increased from 0/40 to 40/40 with no observed guarded violations and 92.7% fewer generated tokens.
 - Confirmed the frozen guard on a second producer model: Qwen2.5-7B improved from 8/24 to 24/24 on the pre-specified OOD suite, with invalid actions falling from 4 to 0 and observed violations from 2 to 0 (exact McNemar p=3.05×10⁻⁵).
 - Ran a separately labeled post-hoc error-correction study: Guard v2.2 recovered all six repeated v2.1 OOD failures (66/72 → 72/72) with no observed regressions, while explicitly reporting task-clustered uncertainty and post-hoc limitations.
+- Trained a class-weighted XLM-R v3 risk classifier and documented a meaningful negative result: despite 1.0 synthetic-test macro-F1, ML-only and Hybrid reached 57/72 OOD success versus Rule Guard's 66/72; Hybrid removed three observed ML-only violations but could not recover false-positive task loss.
 - Documented negative results, protocol deviations, confidence intervals, exact McNemar tests, limitations, and non-generalization claims.
 
 ## LinkedIn proje açıklaması

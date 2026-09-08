@@ -37,6 +37,8 @@ This is second-model evidence that the guarded gain is not unique to Phi-4. It r
 
 The XLM-R risk classifier reached macro-F1 `1.0` on the held-out portion of 3,000 templated synthetic examples. On the same 72 OOD runs, Rule, ML-decision, and Hybrid systems each achieved 66/72 (91.7%) safe success. Rule recorded 141 blocks and 30 safe-action enforcements, ML 108 blocks and no enforcements, while Hybrid reproduced Rule's 141/30 intervention profile. The pre-defined H3 hypothesis—strict Hybrid superiority over both components—was not supported.
 
+In a separately versioned follow-up with class-weighted XLM-R v3, in-distribution test macro-F1 remained `1.0`, but human-authored OOD success fell to 57/72 (79.2%) for both ML-only and Hybrid while Rule Guard remained at 66/72 (91.7%). ML-only produced three language-interpretation violations; Hybrid eliminated those violations but did not recover the task loss caused by false-positive blocks. The result demonstrates that an in-distribution classifier score is neither an OOD utility result nor an end-to-end agent-safety guarantee. Versioned traces are published under [`results/robustness/v3-weighted`](results/robustness/v3-weighted).
+
 This negative result shows that a perfect synthetic classification score does not guarantee additional end-to-end agent utility. “ML Guard” changes only the decision guard; the public action contract and safe execution controller are shared by all guarded systems.
 
 ## What is included
