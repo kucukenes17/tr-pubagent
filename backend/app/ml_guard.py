@@ -73,6 +73,21 @@ def prediction_to_decision(
     confirmed_actions: list[str],
     threshold: float,
 ) -> GuardDecision:
+    # ``finish`` yalnızca ajanın çalışmayı bıraktığını bildirir; portal durumunu
+    # değiştirmez. Sınıflandırıcı bunu riskli etiketlese bile yeni bir kullanıcı
+    # onayı üretmek anlamsızdır ve terminal adım döngüsüne yol açar.
+    if action.tool == "finish":
+        return GuardDecision(
+            decision=GuardDecisionType.ALLOW,
+            risk_labels=[RiskLabel.SAFE],
+            confidence=prediction.confidence,
+            explanation="Terminal bitirme eylemi dış durumu değiştirmez.",
+            evidence=[
+                f"ml:{prediction.label}:{prediction.confidence:.4f}",
+                "non_mutating:finish",
+            ],
+        )
+
     if prediction.confidence < threshold or prediction.label == RiskLabel.SAFE:
         return GuardDecision(
             decision=GuardDecisionType.ALLOW, risk_labels=[RiskLabel.SAFE],

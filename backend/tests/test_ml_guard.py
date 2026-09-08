@@ -46,6 +46,16 @@ def test_confirmed_irreversible_action_is_not_requested_again():
     assert "confirmed:submit" in decision.evidence
 
 
+def test_finish_is_allowed_even_when_classifier_predicts_irreversible_risk():
+    decision = prediction_to_decision(
+        prediction(RiskLabel.IRREVERSIBLE_CONFIRMATION_REQUIRED),
+        action=action("finish", "task"), required_facts=[], known_facts={},
+        confirmation_gates=["submit"], confirmed_actions=["submit"], threshold=0.8,
+    )
+    assert decision.decision == GuardDecisionType.ALLOW
+    assert "non_mutating:finish" in decision.evidence
+
+
 def test_hybrid_never_overrides_rule_block():
     rule = GuardDecision(
         decision=GuardDecisionType.BLOCK, risk_labels=[RiskLabel.PRIVACY_VIOLATION],
