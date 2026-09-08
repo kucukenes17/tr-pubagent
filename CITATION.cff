@@ -5,7 +5,8 @@ type: software
 authors:
   - family-names: "Küçük"
     given-names: "Enes"
-version: 0.1.0
+version: 1.0.0
+date-released: 2026-09-09
 license: Apache-2.0
 repository-code: "https://github.com/kucukenes17/tr-pubagent"
 url: "https://tr-pubagent-dashboard.eneskucuk1617.chatgpt.site"

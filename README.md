@@ -177,7 +177,10 @@ Temel deney protokolü ve gerçekleşen sapmalar [docs/RESEARCH_PROTOCOL.md](doc
 
 İnsan yazımı genelleme deneyi [docs/ROBUSTNESS_PROTOCOL.md](docs/ROBUSTNESS_PROTOCOL.md) içinde ön kayıtlıdır. 12 haftalık planın güncel kontrol tablosu [docs/PLAN_STATUS.md](docs/PLAN_STATUS.md) içindedir.
 
-English overview: [README.en.md](README.en.md). İptal edilen başvuru ve video çalışmaları yalnızca tarihsel arşiv olarak `docs/` altında tutulur; güncel yol haritasının parçası değildir.
+English overview: [README.en.md](README.en.md). CV ve LinkedIn için doğrulanmış,
+kopyalanabilir metinler [docs/CV_LINKEDIN_READY.md](docs/CV_LINKEDIN_READY.md)
+içindedir. İptal edilen başvuru ve video çalışmaları yalnızca tarihsel arşiv
+olarak `docs/` altında tutulur; güncel yol haritasının parçası değildir.
 
 ## Araştırma etiği
 

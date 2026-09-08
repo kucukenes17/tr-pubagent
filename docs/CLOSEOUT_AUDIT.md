@@ -31,12 +31,12 @@ silinmez ya da bu yeni sonuçlarla üzerine yazılmaz.
 | Yayın yeri / paketleme | npm/Vinext ve Sites; ilk planda pnpm/Next.js/HF Static Space vardı | Uygulanan mimariyi esas alan açık kapsam kaydı; erişimsiz oturumda demo görünürlüğü doğrulaması |
 | Veri / ağırlık dağıtımı | Tam Apache-2.0, NOTICE, CC BY 4.0 veri kapsamı, üçüncü taraf istisnaları ve `CITATION.cff` eklendi. Model ağırlıkları depoya dahil değil | Tamamlandı; upstream model koşulları yeniden lisanslanmaz |
 | Demo videosu | Kullanıcı tarafından iptal | Açık iş değildir; yayın engeli olmaktan çıkarıldı |
-| v1.0.0 | Paket sürümü 0.1.0; bu turda tag/release oluşturulmadı | Açık ölçütler için karar, sürüm notu, son CI ve açık yayın onayı |
+| v1.0.0 | Paket/CFF sürümü, changelog, sürüm notu, tag ve GitHub Release tamamlandı | Tamamlandı; yeni yöntemler ayrı sürüm ve protokolle yürütülür |
 
-## Öncelik sırası
+## Sürüm sonrası isteğe bağlı sıra
 
 1. İstenirse sözleşme çıkarımını insan yazımı, görülmemiş bir kümede doğrula; programatik baseline ölçümü tamamlandı.
-2. Kullanıcı onayıyla `v1.0.0` sürüm numarası, tag ve GitHub Release.
+2. Yeni model aileleri ve kötü niyetli DOM/prompt-injection senaryoları ekle.
 
 Soru metrikleri, Parquet, OpenAPI/TypeScript sözleşmesi ve eşzamanlı koşu
 izolasyonu teknik olarak kapatıldı. Dengeli sınıf-ağırlıklı eğitim yolu hazır,

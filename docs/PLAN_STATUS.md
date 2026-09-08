@@ -1,6 +1,6 @@
 # 12 haftalık plan — güncel durum
 
-Son güncelleme: 8 Eylül 2026
+Son güncelleme: 9 Eylül 2026
 
 Bu tablo mevcut araştırma prototipini özetler; ilk plandaki bütün kabul
 ölçütlerinin tamamlandığı anlamına gelmez. İlk planla farklar ve yayın
@@ -31,12 +31,13 @@ kapıları [kapanış denetiminde](CLOSEOUT_AUDIT.md) ayrı izlenir.
 | Eşzamanlı koşu izolasyonu | Tamamlandı | Atomik olay adımları, `(run_id, step)` benzersizliği; ayrı ve aynı run paralel yazım testleri |
 | Lisans ve atıf paketi | Tamamlandı | Tam Apache-2.0 metni, NOTICE, CC BY 4.0 veri kapsamı, üçüncü taraf istisnaları ve `CITATION.cff` |
 | Demo videosu | Kullanıcı kararıyla iptal | AI tanıtımı ve klasik ekran kaydı kapsamdan çıkarıldı; release ön koşulu değil |
-| Resmî v1.0.0 release | Bekliyor | Kapanış denetimi, lisans/kapsam kararları ve yayın onayı sonrası |
+| Resmî v1.0.0 release | Tamamlandı | Apache-2.0/CC BY 4.0 kapsamı, changelog, citation, başarılı CI, Git tag ve GitHub Release |
 
-## Sıradaki karar kapıları
+## Sürüm sonrası isteğe bağlı çalışmalar
 
-1. [Yayın kontrol listesindeki](RELEASE_CHECKLIST.md) kapsam değişikliğini ve sürüm notunu son kez gözden geçir.
-2. Kullanıcı onayı olmadan tag/release yayımlama.
+1. Sözleşme çıkarımını yeni, insan yazımı ve görülmemiş bir kümede doğrulamak.
+2. Daha fazla üretici model ve farklı web tasarımlarıyla dış geçerliliği genişletmek.
+3. Canlı kamu hizmetlerine bağlanmadan, kötü niyetli DOM ve prompt-injection dayanıklılığını ölçmek.
 
 TÜBİTAK başvurusu 8 Eylül 2026 tarihli kullanıcı kararıyla kapsamdan
 çıkarılmıştır; tarihsel taslak yalnız arşivdir ve açık iş sayılmaz.

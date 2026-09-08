@@ -1,7 +1,7 @@
 # v1.0.0 yayın kontrol listesi
 
-Bu belge bir yayın değildir. `v1.0.0` tag'i ve GitHub Release yalnız proje
-sahibinin açık onayından sonra oluşturulur.
+Bu liste, proje sahibinin açık onayıyla yayımlanan `v1.0.0` sürümünün kapanış
+kaydını tutar.
 
 ## Tamamlanan teknik kapılar
 
@@ -28,12 +28,12 @@ sahibinin açık onayından sonra oluşturulur.
 
 ## Yayından hemen önce
 
-- [ ] Proje sahibi public release için açık onay verir.
-- [ ] `package.json` ve `CITATION.cff` sürümü `1.0.0` yapılır.
-- [ ] Son `main` CI koşusu başarıyla tamamlanır.
-- [ ] İmzalı veya açıklamalı `v1.0.0` tag'i oluşturulur.
-- [ ] GitHub Release notunda sentetik ortam sınırı ilk ekranda belirtilir.
-- [ ] Release ZIP/TAR kaynak paketleri ve checksum'ları eklenir.
+- [x] Proje sahibi public release için açık onay verir.
+- [x] `package.json` ve `CITATION.cff` sürümü `1.0.0` yapılır.
+- [x] Son `main` CI koşusu başarıyla tamamlanır.
+- [x] Açıklamalı `v1.0.0` tag'i oluşturulur.
+- [x] GitHub Release notunda sentetik ortam sınırı ilk ekranda belirtilir.
+- [x] GitHub'ın kaynak ZIP/TAR paketleri release sayfasında yayımlanır.
 
 ## Önerilen release başlığı
 
