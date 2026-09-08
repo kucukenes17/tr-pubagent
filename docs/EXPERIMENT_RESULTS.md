@@ -129,13 +129,26 @@ On altı görev yalnız Guarded tarafından, sekiz görev iki sistem tarafından
 
 Bu doğrulama, guard kazanımının tek bir üretici modele özgü olduğu açıklamasını zayıflatır; gerçek portal genellemesi veya modelden bağımsız güvenlik garantisi oluşturmaz.
 
+## Gerçek Chromium aktarım sonucu
+
+Yapılandırılmış simülatör sonuçları tarayıcı performansı diye yeniden etiketlenmedi. Ayrı [Browser v2 protokolü](BROWSER_MODEL_PROTOCOL_V2.md), development pilotinden sonra donduruldu ve aynı Phi-4 üretici modelinin yerel sentetik HTML sayfalarını Playwright/Chromium üzerinden görmesini sağladı. Ajan yalnız görünür metni, ARIA erişilebilirlik ağacını ve herkese açık eylem sözleşmesini aldı; gold durum ve beklenen cevaplar modele verilmedi.
+
+| Sistem | Başarı | Wilson %95 GA | İhlalli koşu | Ort. adım | Token | Süre |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Browser Unguarded v2 | 0/40 (%0) | %0–%8,76 | 11 | 18,68 | 32.013 | 2.944,83 sn |
+| Browser Rule Guard v2 | 25/40 (%62,5) | %47,03–%75,78 | 0 | 8,20 | 14.751 | 1.224,97 sn |
+
+Eşlenmiş sonuçlarda 25 görev yalnız Rule Guard tarafından başarıldı, 15 görev iki sistemde de başarısız kaldı ve Unguarded lehine görev olmadı. Exact McNemar `p=5,9604645×10⁻⁸` verdi. Korumasız ajandaki 11 `STATE_CORRUPTION_RISK` ihlalinin Guard ile sıfıra düşmesi için Fisher exact `p=0,0004413` ölçüldü. Guard ortalama adımı %56,09, tokenı %53,92 ve toplam süreyi %58,40 azalttı; ölçülen hızlanma 2,40 kattır.
+
+Başarısız 15 Guard koşusu `BLD`, `SYD` ve `BLG` hizmet ailelerinde aynı beş görev deseninde kümelendi. Bu sonuç, guard'ın yapılandırılmış simülatörden gerçek DOM/Chromium yürütmesine kısmen aktarıldığını gösterir; canlı bir kamu sitesi testi değildir. Browser v1 pilotinde iki sistem de 0/5 kaldı; gözlem/eylem eşlemesi development üzerinde düzeltildikten sonra v2 smoke sonucu 0/5'e karşı 3/5 oldu ve test protokolü donduruldu.
+
 ## Sınırlılıklar
 
 - İki üretici model kullanıldı; Qwen çapraz-model doğrulaması tek deterministik seed ile sınırlıdır.
 - Ana görevler programatik ve şablon ilişkiliydi; ek OOD görevler insan yazımı olsa da sentetik kaldı.
 - Guard yapılandırılmış form şemasına ve önceden tanımlı yetki sözleşmesine erişti.
 - Test hizmet aileleri yeni olsa da risk kalıpları tamamen dağılım dışı değildir.
-- Gerçek tarayıcı gecikmesi, DOM değişimi, kötü niyetli sayfa içeriği ve insan katılımcılar ölçülmedi.
+- Gerçek Chromium yürütmesi ölçüldü; fakat sayfalar yerel ve sentetikti. Canlı kamu portalı, kötü niyetli DOM değişimi ve insan katılımcılar ölçülmedi.
 - İnsan yazımı OOD kümesi yalnız 24 görev ve altı hizmet ailesiyle sınırlıdır.
 
 ## Yeniden üretme ve ham veriler
@@ -146,10 +159,16 @@ Kanonik özet, ham JSONL dosyalarından şu komutla yeniden üretilir:
 python benchmark/generate_frozen_report.py
 ```
 
-Ana ham izler [`results/frozen`](../results/frozen), OOD artefaktları [`results/robustness`](../results/robustness), Qwen çapraz-model artefaktları ise [`results/cross-model/qwen2_5_7b`](../results/cross-model/qwen2_5_7b) altında SHA-256 manifestleriyle yayımlanır.
+Ana ham izler [`results/frozen`](../results/frozen), OOD artefaktları [`results/robustness`](../results/robustness), Qwen çapraz-model artefaktları [`results/cross-model/qwen2_5_7b`](../results/cross-model/qwen2_5_7b) ve Chromium aktarım artefaktları [`results/browser/phi4-v2`](../results/browser/phi4-v2) altında SHA-256 manifestleriyle yayımlanır.
 
 ## CV için doğrulanabilir ifade
 
 > Built TR-PubAgent, a reproducible Turkish benchmark and runtime guard for authorization-aware web agents; on a pre-frozen 24-task human-authored OOD suite across three seeds, improved Phi-4-mini-instruct success from 8.3% to 91.7%, reduced invalid actions from 45 to 0 and observed violations from 12 to 0 (72 paired runs; exact McNemar p<2×10⁻¹⁸).
 
 Bu ifade mutlaka insan yazımı görevlerin de sentetik portal ortamında çalıştığı bilgisiyle birlikte kullanılmalıdır.
+
+Gerçek tarayıcı çalışmasını ayrıca anlatmak için doğrulanabilir ek ifade:
+
+> Transferred the benchmark to Playwright/Chromium under a frozen protocol; Rule Guard improved Phi-4 completion from 0/40 to 25/40, eliminated 11 observed state-corruption violations, reduced generated tokens by 53.9%, and achieved a 2.40× measured speedup (exact McNemar p<6×10⁻⁸).
+
+Bu ifade, Chromium sayfalarının yerel ve sentetik olduğu bilgisiyle birlikte kullanılmalıdır.

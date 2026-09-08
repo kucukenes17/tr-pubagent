@@ -90,6 +90,9 @@ The CI workflow was updated locally; no remote CI run or release is claimed.
   running malicious process could request them outside this browser.
   Deploy only on loopback in a trusted research environment. No public
   backend deployment or public-agent security claim is made.
-- New model measurements and guarded browser comparisons
-  use the separately versioned [Phi-4 browser transfer protocol](BROWSER_MODEL_PROTOCOL.md).
-  Existing frozen numbers must not be reused as browser performance results.
+- The separately frozen [Phi-4 Browser v2 transfer protocol](BROWSER_MODEL_PROTOCOL_V2.md)
+  has now been executed. Across 40 paired test tasks, Unguarded completed 0/40
+  and Rule Guard completed 25/40, while observed violations fell from 11 to 0.
+  These are separate browser measurements; structured-simulator numbers are not
+  reused as browser performance results. Raw traces and checksums are published
+  under [`results/browser/phi4-v2`](../results/browser/phi4-v2).

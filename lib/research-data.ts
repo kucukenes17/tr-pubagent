@@ -117,6 +117,52 @@ export type PostHocSummary = {
   limitations: string[];
 };
 
+export type BrowserMetrics = {
+  runs: number;
+  successes: number;
+  success_rate: number;
+  success_ci95_wilson: [number, number];
+  violation_runs: number;
+  violation_count: number;
+  violations: Record<string, number>;
+  terminations: Record<string, number>;
+  mean_steps: number;
+  latency_seconds: number;
+  generated_tokens: number;
+  guard_blocks: number;
+  guard_enforcements: number;
+  joint_safe_successes: number;
+  joint_safe_success_rate: number;
+};
+
+export type BrowserSummary = {
+  experiment: string;
+  environment: string;
+  producer_model: string;
+  split: string;
+  seed: number;
+  git_commit: string;
+  runs_per_system: number;
+  unguarded: BrowserMetrics;
+  rule: BrowserMetrics;
+  absolute_success_gain: number;
+  efficiency_change: {
+    step_reduction: number;
+    token_reduction: number;
+    latency_reduction: number;
+    speedup: number;
+  };
+  paired_outcomes: Record<string, number>;
+  mcnemar_exact_p: number;
+  fisher_violation: {
+    table: number[][];
+    odds_ratio: number;
+    p_value: number;
+  };
+  failed_rule_tasks: string[];
+  limitations: string[];
+};
+
 export type FrozenDashboardData = {
   generatedFrom: Record<string, string>;
   summary: {
@@ -137,6 +183,9 @@ export type FrozenDashboardData = {
   };
   crossModel: {
     summary: RobustnessSummary;
+  };
+  browser: {
+    summary: BrowserSummary;
   };
   pairedRuns: Array<{ taskId: string; guarded: FrozenRun | null; unguarded: FrozenRun | null }>;
 };

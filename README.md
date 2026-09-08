@@ -16,7 +16,7 @@ TR PubAgent, Türkçe kamu hizmeti benzeri çok adımlı web görevlerinde yapay
 - **ML paketi:** 3.000 sentetik eylem-risk örneği ve XLM-R eğitim betiği.
 - **Ablation altyapısı:** Rule-only, XLM-R ML-only ve Hybrid Guard için ortak OOD koşucu ve Holm düzeltmeli analiz.
 - **Kendi ajanını getir:** Sürümlü HTTP eylem sözleşmesiyle herhangi bir ajanı doğrudan veya TR-PubGuard arkasında değerlendiren yerel koşucu.
-- **Gerçek tarayıcı adaptörü:** Ayrı, yerel HTML portalında Playwright ile form işlemleri ve DOM gözlemi kullanan [browser-external-v1](docs/BROWSER_BENCHMARK.md). Dondurulmuş GPU sonuçları bu yeni yolla ölçülmedi.
+- **Gerçek tarayıcı benchmarkı:** Yerel sentetik HTML portalında Playwright/Chromium, görünür metin ve erişilebilirlik ağacı kullanan [ayrı aktarım deneyi](docs/BROWSER_MODEL_PROTOCOL_V2.md); ham model izleri ve manifest yayımlanır.
 - **Çapraz-model doğrulama:** Aynı dondurulmuş guard'ın Phi-4 ve Qwen2.5-7B üzerindeki eşlenmiş karşılaştırması.
 - **Sıfır maliyet akışı:** Scripted kontrol ile yerel geliştirme; Phi-4, Qwen ve XLM-R için Kaggle veya Colab.
 
@@ -54,6 +54,12 @@ XLM-R risk sınıflandırıcısı 3.000 şablonlu sentetik örneğin ayrılmış
 Ayrı sürümlenen sınıf-ağırlıklı XLM-R v3 takip deneyinde sentetik test macro-F1 değeri yine `1,0` olmasına rağmen insan yazımı OOD başarı ML-only ve Hybrid için 57/72'ye (%79,2) düştü; Rule Guard 66/72 (%91,7) kaldı. ML-only üç dil yorumlama ihlali üretirken Hybrid bu ihlalleri sıfırladı fakat yanlış-pozitif bloklar nedeniyle görev başarısını geri kazanamadı. Bu sonuç, dağılım-içi sınıflandırma skorunun ajan düzeyinde OOD fayda veya güvenlik garantisi olmadığını gösterir. Sürüm ayrımlı ham izler [`results/robustness/v3-weighted`](results/robustness/v3-weighted) altındadır.
 
 Bu negatif sonuç, yüksek sentetik sınıflandırma skorunun uçtan uca ajan başarısında ek faydayı garanti etmediğini gösterir. “ML Guard” araç sözleşmesi ve güvenli yürütme kontrolcüsünü diğer guarded sistemlerle paylaşır; yalnız karar guard'ı değiştirilmiştir.
+
+## Gerçek Chromium aktarım sonucu
+
+Yapılandırılmış simülatörden ayrı ve önceden dondurulmuş Browser v2 protokolünde Phi-4, Playwright ile gerçek Chromium üzerinde yerel sentetik HTML formlarını kullandı. 40 eşlenmiş test görevinde korumasız ajan 0/40, Rule Guard 25/40 (%62,5) başarı elde etti. Gözlenen durum-bozulması ihlalleri 11'den 0'a indi; exact McNemar `p=5,96×10⁻⁸`, ihlal farkı için Fisher exact `p=4,41×10⁻⁴` bulundu.
+
+Guard ortalama adımı 18,68'den 8,20'ye, üretilen tokenı 32.013'ten 14.751'e ve toplam süreyi 2.944,83 saniyeden 1.224,97 saniyeye düşürdü; ölçülen hızlanma 2,40 kattır. Bu deney gerçek bir tarayıcı motoru ve DOM kullansa da sayfalar yerel ve sentetiktir. Canlı kamu portallarında başarı veya güvenlik iddiası değildir. Ham izler, görev karşılaştırması ve SHA-256 manifesti [`results/browser/phi4-v2`](results/browser/phi4-v2) altındadır.
 
 ## Mimari
 

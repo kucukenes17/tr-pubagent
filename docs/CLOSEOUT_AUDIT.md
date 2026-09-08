@@ -20,7 +20,7 @@ silinmez ya da bu yeni sonuçlarla üzerine yazılmaz.
 
 | Madde | Mevcut kanıt / durum | Kapanış için gereken |
 | --- | --- | --- |
-| Gerçek tarayıcı üzerinden ajan yürütme | Yerel HTML portalı + Playwright eylem adaptörü + DOM tabanlı harici ajan koşucusu eklendi; 80 ana görevin tamamı Chromium'da gold-aware altyapı testiyle geçti. Görev-izinli sentetik fixture seçimi tarayıcıda doğrulandı | Yeni model/guard karşılaştırması ayrı açık iş; mevcut deneyleri tarayıcı benchmarkı diye sunmamak. [Protokol](BROWSER_BENCHMARK.md) |
+| Gerçek tarayıcı üzerinden ajan yürütme | Tamamlandı: 80/80 gold-aware altyapı testine ek olarak frozen Browser v2 protokolünde 40 Unguarded + 40 Rule Guard Phi-4 koşusu yapıldı. Başarı 0/40→25/40, ihlal 11→0; ham iz ve manifest yayımlandı | Canlı kamu sitesi veya insan katılımcı sonucu değildir; yerel sentetik HTML kapsamını koru. [Protokol](BROWSER_MODEL_PROTOCOL_V2.md), [sonuçlar](../results/browser/phi4-v2) |
 | En az 3 sistem × 80 ana görev | Ana dondurulmuş karşılaştırma 20 development + 16 validation + 40 test; dört sistemli ablation ayrı 24 OOD görevinde | İlk 240 koşu kriteri karşılanmış sayılmaz. Kapsam kararı veya ayrı yeni protokol gerekir |
 | Şablon ayrışmış frozen split | Şablon ilişkisi/tekrar sınırlılığı raporlanmış; ayrı OOD paketi mevcut | İlk sızıntısız split beklentisinden sapmayı koru; eski test kümesini değiştirme |
 | Ek metrikler | Soru P/R/F1 ve tekrar ölçümü iki frozen sistemde raporlandı. Ayrı, gold görmeyen şeffaf kural çıkarıcısı 80 şablonlu görevde sözleşme exact-match 80/80 ve alan-micro F1 1,0 verdi | Şablon sonucu doğal dil/OOD çıkarım kanıtı değildir; daha güçlü iddia için görülmemiş insan yazımı sözleşme seti gerekir. [Tanımlar ve sonuçlar](SUPPLEMENTARY_METRICS.md) |
@@ -35,10 +35,9 @@ silinmez ya da bu yeni sonuçlarla üzerine yazılmaz.
 
 ## Öncelik sırası
 
-1. Tarayıcı adaptörünün yeni model/guard ölçümleri (yerel HTML E2E ve sentetik fixture altyapısı eklendi).
-2. İstenirse sözleşme çıkarımını insan yazımı, görülmemiş bir kümede doğrula; programatik baseline ölçümü tamamlandı.
-3. Lisans, ağırlık teslimi ve literatür/kapsam denetimi.
-4. 3 sistem × 80 görev kapsam kararından sonra onaylı release.
+1. İstenirse sözleşme çıkarımını insan yazımı, görülmemiş bir kümede doğrula; programatik baseline ölçümü tamamlandı.
+2. Lisans, ağırlık teslimi ve literatür/kapsam denetimi.
+3. 3 sistem × 80 görev kapsam kararından sonra onaylı release.
 
 Soru metrikleri, Parquet, OpenAPI/TypeScript sözleşmesi ve eşzamanlı koşu
 izolasyonu teknik olarak kapatıldı. Dengeli sınıf-ağırlıklı eğitim yolu hazır,

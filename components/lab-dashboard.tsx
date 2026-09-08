@@ -28,6 +28,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SiteHeader } from '@/components/site-header';
 import type {
+  BrowserMetrics,
   FrozenDashboardData,
   RobustnessMetrics,
 } from '@/lib/research-data';
@@ -54,16 +55,21 @@ function SystemLegend() {
 function SuccessMeasure({
   run,
   guarded,
+  label,
 }: {
-  run: RobustnessMetrics;
+  run: Pick<
+    RobustnessMetrics | BrowserMetrics,
+    'runs' | 'successes' | 'success_rate' | 'success_ci95_wilson'
+  >;
   guarded?: boolean;
+  label?: string;
 }) {
   return (
     <div className="system-line">
       <div className="system-line-title">
         <span>
           <i className={`system-marker ${guarded ? '' : 'unguarded'}`} />
-          {guarded ? 'Guarded v2.1' : 'Unguarded v1'}
+          {label ?? (guarded ? 'Guarded v2.1' : 'Unguarded v1')}
         </span>
         <strong className={guarded ? 'guarded-text' : 'unguarded-text'}>
           {percent(run.success_rate)}
@@ -96,17 +102,31 @@ function Experiment({
   p,
   gain,
   wide = false,
+  unguardedLabel,
+  guardedLabel,
 }: {
   index: string;
   eyebrow: string;
   title: string;
   subtitle: string;
-  unguarded: RobustnessMetrics;
-  guarded: RobustnessMetrics;
+  unguarded: RobustnessMetrics | BrowserMetrics;
+  guarded: RobustnessMetrics | BrowserMetrics;
   p: number;
   gain?: [number, number];
   wide?: boolean;
+  unguardedLabel?: string;
+  guardedLabel?: string;
 }) {
+  const comparisonRows: Array<[string, number, number]> = [
+    ['Gözlenen ihlal', unguarded.violation_count, guarded.violation_count],
+  ];
+  if ('invalid_actions' in unguarded && 'invalid_actions' in guarded) {
+    comparisonRows.unshift([
+      'Geçersiz eylem',
+      unguarded.invalid_actions,
+      guarded.invalid_actions,
+    ]);
+  }
   return (
     <article className={`experiment${wide ? ' experiment-wide' : ''}`}>
       <header className="experiment-header">
@@ -118,22 +138,11 @@ function Experiment({
         <span className="experiment-index">{index}</span>
       </header>
       <div className="experiment-body">
-        <SuccessMeasure run={unguarded} />
-        <SuccessMeasure run={guarded} guarded />
+        <SuccessMeasure run={unguarded} label={unguardedLabel} />
+        <SuccessMeasure run={guarded} guarded label={guardedLabel} />
       </div>
       <dl className="safety-comparison">
-        {[
-          [
-            'Geçersiz eylem',
-            unguarded.invalid_actions,
-            guarded.invalid_actions,
-          ],
-          [
-            'Gözlenen ihlal',
-            unguarded.violation_count,
-            guarded.violation_count,
-          ],
-        ].map(([label, before, after]) => (
+        {comparisonRows.map(([label, before, after]) => (
           <div key={label}>
             <dt>{label}</dt>
             <dd>
@@ -242,6 +251,7 @@ export function LabDashboard() {
   const posthoc = data.robustness.posthoc;
   const crossModel = data.crossModel.summary;
   const ablation = data.robustness.ablation;
+  const browser = data.browser.summary;
   const splitChart = [
     {
       split: 'Geliştirme',
@@ -285,7 +295,7 @@ export function LabDashboard() {
             <div className="eyebrow">
               <span className="research-kicker">Araştırma sonuçları</span>
               <span className="model-label">
-                Phi-4 + Qwen / Guard v2.1 · post-hoc v2.2
+                Phi-4 + Qwen / Guard v2.1 · post-hoc v2.2 · Chromium
               </span>
             </div>
             <h1>
@@ -324,7 +334,10 @@ export function LabDashboard() {
             {posthoc.guarded_v2_2_posthoc.runs} başarıya ulaştı.
             Qwen doğrulamasında {crossModel.unguarded.successes}/
             {crossModel.unguarded.runs} → {crossModel.guarded_v2_1.successes}/
-            {crossModel.guarded_v2_1.runs}.
+            {crossModel.guarded_v2_1.runs}. Gerçek Chromium testinde{' '}
+            {browser.unguarded.successes}/{browser.unguarded.runs} →{' '}
+            {browser.rule.successes}/{browser.rule.runs} ve gözlenen ihlal{' '}
+            {browser.unguarded.violation_count} → {browser.rule.violation_count}.
             Gerçek kamu portallarına genelleme iddiası değildir.
           </p>
         </div>
@@ -360,10 +373,67 @@ export function LabDashboard() {
             wide
           />
         </div>
+        <section id="browser" className="research-section">
+          <div className="section-title">
+            <div>
+              <div className="eyebrow">01 / Gerçek Chromium aktarımı</div>
+              <h2>Guard, gerçek tarayıcıda başarıyı %0’dan %62,5’e çıkardı.</h2>
+              <p>
+                Model aynı sentetik görevleri artık yalnızca durum nesneleriyle
+                değil, Playwright üzerinden açılan gerçek HTML sayfalarında;
+                görünür metin, form alanları ve erişilebilirlik ağacıyla çözdü.
+              </p>
+            </div>
+            <Badge
+              variant="outline"
+              className="border-emerald-300 bg-emerald-50 text-emerald-900"
+            >
+              FROZEN TEST
+            </Badge>
+          </div>
+          <Experiment
+            index="04"
+            eyebrow="Playwright Chromium"
+            title="Gerçek tarayıcı final testi"
+            subtitle={`${browser.runs_per_system} eşlenmiş görev · Seed ${browser.seed} · Yerel sentetik HTML portal`}
+            unguarded={browser.unguarded}
+            guarded={browser.rule}
+            p={browser.mcnemar_exact_p}
+            unguardedLabel="Browser Unguarded v2"
+            guardedLabel="Browser Rule Guard v2"
+            wide
+          />
+          <div className="result-notes">
+            <p>
+              <strong>Güvenlik ve başarı:</strong> Rule Guard{' '}
+              {browser.rule.successes}/{browser.rule.runs} görevi tamamladı;
+              korumasız ajan hiçbir görevi başarıyla tamamlayamadı. Gözlenen
+              ihlal {browser.unguarded.violation_count} →{' '}
+              {browser.rule.violation_count}; Fisher exact p ={' '}
+              <code>{browser.fisher_violation.p_value.toExponential(3)}</code>.
+            </p>
+            <p>
+              <strong>Verimlilik:</strong> Ortalama adım{' '}
+              {compact(browser.unguarded.mean_steps)} →{' '}
+              {compact(browser.rule.mean_steps)}, token{' '}
+              {compact(browser.unguarded.generated_tokens)} →{' '}
+              {compact(browser.rule.generated_tokens)}, süre{' '}
+              {compact(browser.unguarded.latency_seconds)} →{' '}
+              {compact(browser.rule.latency_seconds)} saniye; yaklaşık{' '}
+              {compact(browser.efficiency_change.speedup)} kat hızlanma.
+            </p>
+            <p>
+              <strong>Sınır:</strong> Başarısız kalan 15 koşu üç hizmet
+              ailesinde kümelendi. Sayfalar gerçek Chromium’da çalışsa da
+              portallar yerel ve sentetiktir; sonuç canlı kamu siteleri için
+              doğrudan başarı garantisi değildir.
+            </p>
+          </div>
+        </section>
         <section id="posthoc" className="research-section">
           <div className="section-title">
             <div>
-              <div className="eyebrow">Post-hoc hata düzeltmesi</div>
+              <div className="eyebrow">02 / Post-hoc hata düzeltmesi</div>
               <h2>İki tekrarlayan sınır, ayrı bir sürümde kapatıldı.</h2>
               <p>
                 v2.1 sonucu dondurulmuş halde korunuyor. v2.2; para kanıtı ve
@@ -430,16 +500,17 @@ export function LabDashboard() {
         </section>
         <nav className="section-nav" aria-label="Araştırma bölümleri">
           <span className="font-semibold text-slate-800">Bu görünümde</span>
-          <a href="#posthoc">01 / Post-hoc v2.2</a>
-          <a href="#ablation">02 / Ablation</a>
-          <a href="#analysis">03 / Metrikler</a>
-          <a href="#limits">04 / Sınırlar</a>
-          <a href="#byoa">05 / Kendi ajanını getir</a>
+          <a href="#browser">01 / Gerçek Chromium</a>
+          <a href="#posthoc">02 / Post-hoc v2.2</a>
+          <a href="#ablation">03 / Ablation</a>
+          <a href="#analysis">04 / Metrikler</a>
+          <a href="#limits">05 / Sınırlar</a>
+          <a href="#byoa">06 / Kendi ajanını getir</a>
         </nav>
         <section id="ablation">
           <div className="section-title">
             <div>
-              <div className="eyebrow">02 / Rule · ML · Hybrid</div>
+              <div className="eyebrow">03 / Rule · ML · Hybrid</div>
               <h2>Sınıf-ağırlıklı XLM-R v3, Rule Guard’ı geçemedi.</h2>
               <p>
                 Aynı {ablation.summary.paired_runs_per_system} OOD koşusunda
@@ -538,7 +609,7 @@ export function LabDashboard() {
         <section id="analysis" className="research-section">
           <div className="section-title">
             <div>
-              <div className="eyebrow">03 / Başarı · Güvenlik · Verimlilik</div>
+              <div className="eyebrow">04 / Başarı · Güvenlik · Verimlilik</div>
               <h2>Sonuçların ölçüm profili</h2>
             </div>
           </div>
@@ -724,7 +795,7 @@ export function LabDashboard() {
         <section id="limits" className="research-section">
           <div className="section-title">
             <div>
-              <div className="eyebrow">04 / Hata analizi</div>
+              <div className="eyebrow">05 / Hata analizi</div>
               <h2>Güçlü sonuç, açık sınırlar.</h2>
             </div>
             <Link
@@ -776,8 +847,9 @@ export function LabDashboard() {
                   vermez.
                 </li>
                 <li>
-                  Gerçek kamu portalı veya insan katılımcı değerlendirmesi
-                  yapılmadı.
+                  Gerçek Chromium aktarımı yerel sentetik HTML portallarıyla
+                  ölçüldü; canlı kamu portalı veya insan katılımcı
+                  değerlendirmesi yapılmadı.
                 </li>
               </ul>
             </aside>
@@ -786,7 +858,7 @@ export function LabDashboard() {
         <section id="byoa" className="research-section byoa-section">
           <div>
             <div className="eyebrow">
-              <PlugZap size={17} /> 05 / Kendi ajanını getir · HTTP v1
+              <PlugZap size={17} /> 06 / Kendi ajanını getir · HTTP v1
             </div>
             <h2>Aynı benchmark. Senin ajanın.</h2>
             <p>
@@ -862,6 +934,9 @@ export function LabDashboard() {
           </p>
           <p>
             Qwen exact McNemar p: <code>{crossModel.mcnemar_exact_p}</code>
+          </p>
+          <p>
+            Chromium exact McNemar p: <code>{browser.mcnemar_exact_p}</code>
           </p>
           <p>
             Değerlendirme harness:{' '}

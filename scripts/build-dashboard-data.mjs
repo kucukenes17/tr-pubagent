@@ -57,7 +57,7 @@ function compactRun(run) {
   };
 }
 
-const [summary, guardedRuns, unguardedRuns, robustnessSummary, posthocSummary, ablationSummary, guardedOodRuns, mlOodRuns, hybridOodRuns, crossModelSummary] = await Promise.all([
+const [summary, guardedRuns, unguardedRuns, robustnessSummary, posthocSummary, ablationSummary, guardedOodRuns, mlOodRuns, hybridOodRuns, crossModelSummary, browserSummary] = await Promise.all([
   readJson(resolve(derived, 'frozen_summary.json')),
   readJsonl(resolve(raw, 'phi4_guarded_test_v2_1.jsonl')),
   readJsonl(resolve(raw, 'phi4_unguarded_test_v1.jsonl')),
@@ -68,6 +68,7 @@ const [summary, guardedRuns, unguardedRuns, robustnessSummary, posthocSummary, a
   readJsonl(resolve(root, 'results/robustness/v3-weighted/phi4_ml_guard_ood_v3_weighted.jsonl')),
   readJsonl(resolve(root, 'results/robustness/v3-weighted/phi4_hybrid_guard_ood_v3_weighted.jsonl')),
   readJson(resolve(root, 'results/cross-model/qwen2_5_7b/derived/qwen2_5_7b_summary.json')),
+  readJson(resolve(root, 'results/browser/phi4-v2/browser_v2_final_summary.json')),
 ]);
 
 const guardedByTask = new Map(guardedRuns.map((run) => [run.task_id, compactRun(run)]));
@@ -94,6 +95,7 @@ const payload = {
     posthoc: 'results/robustness/posthoc_v2_1_vs_v2_2_summary.json',
     ablation: 'results/robustness/v3-weighted/guard_ablation_v3_weighted_summary.json',
     crossModel: 'results/cross-model/qwen2_5_7b/derived/qwen2_5_7b_summary.json',
+    browser: 'results/browser/phi4-v2/browser_v2_final_summary.json',
   },
   summary,
   robustness: {
@@ -107,6 +109,9 @@ const payload = {
   },
   crossModel: {
     summary: crossModelSummary,
+  },
+  browser: {
+    summary: browserSummary,
   },
   pairedRuns: taskIds.map((taskId) => ({
     taskId,

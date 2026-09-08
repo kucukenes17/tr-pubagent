@@ -41,6 +41,12 @@ In a separately versioned follow-up with class-weighted XLM-R v3, in-distributio
 
 This negative result shows that a perfect synthetic classification score does not guarantee additional end-to-end agent utility. “ML Guard” changes only the decision guard; the public action contract and safe execution controller are shared by all guarded systems.
 
+## Real Chromium transfer result
+
+Under a separately frozen Browser v2 protocol, Phi-4 operated local synthetic HTML forms through Playwright and actual Chromium instead of receiving structured simulator state. Across 40 paired test tasks, Unguarded completed 0/40 and Rule Guard 25/40 (62.5%). Observed state-corruption violations fell from 11 to 0; exact McNemar was `p=5.96×10⁻⁸` and Fisher's exact test for violation runs was `p=4.41×10⁻⁴`.
+
+The guard reduced mean steps from 18.68 to 8.20, generated tokens from 32,013 to 14,751, and total latency from 2,944.83 to 1,224.97 seconds—a measured 2.40× speedup. This uses a real browser engine and DOM, but the pages remain local and synthetic; it is not evidence of performance on live government portals. Raw traces, paired task data, and checksums are published under [`results/browser/phi4-v2`](results/browser/phi4-v2).
+
 ## What is included
 
 - TR-PubBench: 80 deterministic Turkish tasks across six service families.
@@ -51,6 +57,7 @@ This negative result shows that a perfect synthetic classification score does no
 - Versioned bring-your-own-agent HTTP protocol and local direct/guarded evaluator.
 - FastAPI + SQLite environment and evaluator.
 - A result-driven dashboard with paired JSONL trace replay.
+- A frozen Playwright/Chromium transfer benchmark with 80 model runs.
 - Frozen raw outputs, checksums, protocol deviations, data card, and system card.
 
 ## Quick start
@@ -81,6 +88,6 @@ python -m benchmark.check_task_leakage --strict
 
 ## Research status
 
-The main 80-task experiment, 144-run Phi-4 OOD comparison, Guard v2.2 post-hoc analysis, Rule/ML/Hybrid ablation, 48-run Qwen2.5-7B cross-model confirmation, and clean-runner Docker smoke test are complete. See [the current plan](docs/PLAN_STATUS.md), [experiment report](docs/EXPERIMENT_RESULTS.md), [OOD protocol](docs/ROBUSTNESS_PROTOCOL.md), and [post-hoc protocol](docs/POSTHOC_V22_PROTOCOL.md).
+The main 80-task experiment, 144-run Phi-4 OOD comparison, Guard v2.2 post-hoc analysis, Rule/ML/Hybrid ablation, 48-run Qwen2.5-7B cross-model confirmation, 80-run Chromium transfer comparison, and clean-runner Docker smoke test are complete. See [the current plan](docs/PLAN_STATUS.md), [experiment report](docs/EXPERIMENT_RESULTS.md), [browser protocol](docs/BROWSER_MODEL_PROTOCOL_V2.md), [OOD protocol](docs/ROBUSTNESS_PROTOCOL.md), and [post-hoc protocol](docs/POSTHOC_V22_PROTOCOL.md).
 
 Code is Apache-2.0. Dataset and result licensing remains subject to the repository's final data-license audit.
