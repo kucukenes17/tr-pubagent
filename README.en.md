@@ -90,4 +90,8 @@ python -m benchmark.check_task_leakage --strict
 
 The main 80-task experiment, 144-run Phi-4 OOD comparison, Guard v2.2 post-hoc analysis, Rule/ML/Hybrid ablation, 48-run Qwen2.5-7B cross-model confirmation, 80-run Chromium transfer comparison, and clean-runner Docker smoke test are complete. See [the current plan](docs/PLAN_STATUS.md), [experiment report](docs/EXPERIMENT_RESULTS.md), [browser protocol](docs/BROWSER_MODEL_PROTOCOL_V2.md), [OOD protocol](docs/ROBUSTNESS_PROTOCOL.md), and [post-hoc protocol](docs/POSTHOC_V22_PROTOCOL.md).
 
-Code is Apache-2.0. Dataset and result licensing remains subject to the repository's final data-license audit.
+Source code is [Apache-2.0](LICENSE). Benchmark tasks, synthetic data, and
+project-produced research artifacts are released under
+[CC BY 4.0](DATA_LICENSE.md) within the stated scope. Upstream model weights are
+not included and retain their own terms; see [third-party notices](THIRD_PARTY.md)
+and `CITATION.cff`.

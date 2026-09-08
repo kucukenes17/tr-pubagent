@@ -29,13 +29,14 @@ kapıları [kapanış denetiminde](CLOSEOUT_AUDIT.md) ayrı izlenir.
 | Yerel gerçek tarayıcı yürütme | Tamamlandı | Playwright/Chromium + gerçek HTML formları; 80/80 gold-aware erişilebilirlik kontrolüne ek olarak 80 model koşusu. Frozen testte Unguarded 0/40, Rule Guard 25/40; ihlal 11→0; `results/browser/phi4-v2` ve `docs/BROWSER_MODEL_PROTOCOL_V2.md` |
 | OpenAPI/TypeScript sözleşmesi | Tamamlandı | FastAPI'den otomatik üretilen tipli istemci, şema hash'i, eskime testi ve CI kontrolü |
 | Eşzamanlı koşu izolasyonu | Tamamlandı | Atomik olay adımları, `(run_id, step)` benzersizliği; ayrı ve aynı run paralel yazım testleri |
+| Lisans ve atıf paketi | Tamamlandı | Tam Apache-2.0 metni, NOTICE, CC BY 4.0 veri kapsamı, üçüncü taraf istisnaları ve `CITATION.cff` |
 | Demo videosu | Kullanıcı kararıyla iptal | AI tanıtımı ve klasik ekran kaydı kapsamdan çıkarıldı; release ön koşulu değil |
 | Resmî v1.0.0 release | Bekliyor | Kapanış denetimi, lisans/kapsam kararları ve yayın onayı sonrası |
 
 ## Sıradaki karar kapıları
 
-1. [Kapanış denetimindeki](CLOSEOUT_AUDIT.md) açık teknik kriterleri tamamla veya kapsam değişikliğini kullanıcıyla karara bağla.
-2. Lisans ve yayın kontrolünü tamamla; kullanıcı onayı olmadan tag/release yayımlama.
+1. [Yayın kontrol listesindeki](RELEASE_CHECKLIST.md) kapsam değişikliğini ve sürüm notunu son kez gözden geçir.
+2. Kullanıcı onayı olmadan tag/release yayımlama.
 
 TÜBİTAK başvurusu 8 Eylül 2026 tarihli kullanıcı kararıyla kapsamdan
 çıkarılmıştır; tarihsel taslak yalnız arşivdir ve açık iş sayılmaz.

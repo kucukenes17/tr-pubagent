@@ -21,7 +21,7 @@ silinmez ya da bu yeni sonuçlarla üzerine yazılmaz.
 | Madde | Mevcut kanıt / durum | Kapanış için gereken |
 | --- | --- | --- |
 | Gerçek tarayıcı üzerinden ajan yürütme | Tamamlandı: 80/80 gold-aware altyapı testine ek olarak frozen Browser v2 protokolünde 40 Unguarded + 40 Rule Guard Phi-4 koşusu yapıldı. Başarı 0/40→25/40, ihlal 11→0; ham iz ve manifest yayımlandı | Canlı kamu sitesi veya insan katılımcı sonucu değildir; yerel sentetik HTML kapsamını koru. [Protokol](BROWSER_MODEL_PROTOCOL_V2.md), [sonuçlar](../results/browser/phi4-v2) |
-| En az 3 sistem × 80 ana görev | Ana dondurulmuş karşılaştırma 20 development + 16 validation + 40 test; dört sistemli ablation ayrı 24 OOD görevinde | İlk 240 koşu kriteri karşılanmış sayılmaz. Kapsam kararı veya ayrı yeni protokol gerekir |
+| En az 3 sistem × 80 ana görev | Ana 80 görev iki sistemle; dört sistemli ablation daha zor, insan yazımı 24 OOD görev × üç seed ile yürütüldü | Bilinçli kapsam sapması: 240 koşu yapılmış sayılmaz. v1.0.0 önerisi mevcut OOD ablation'ını esas alır; yeni 240 koşu release kapısı değildir |
 | Şablon ayrışmış frozen split | Şablon ilişkisi/tekrar sınırlılığı raporlanmış; ayrı OOD paketi mevcut | İlk sızıntısız split beklentisinden sapmayı koru; eski test kümesini değiştirme |
 | Ek metrikler | Soru P/R/F1 ve tekrar ölçümü iki frozen sistemde raporlandı. Ayrı, gold görmeyen şeffaf kural çıkarıcısı 80 şablonlu görevde sözleşme exact-match 80/80 ve alan-micro F1 1,0 verdi | Şablon sonucu doğal dil/OOD çıkarım kanıtı değildir; daha güçlü iddia için görülmemiş insan yazımı sözleşme seti gerekir. [Tanımlar ve sonuçlar](SUPPLEMENTARY_METRICS.md) |
 | SQLAlchemy/Alembic, koşu başına ayrı DB | Bilinçli kapsam değişikliği: stdlib `sqlite3`, ortak DB ve run_id izolasyonu korunuyor. Adım tahsisi atomik, `(run_id, step)` benzersiz; ayrı ve aynı koşuya paralel yazım testleri var | Kabul edildi; üretim ölçeği iddiası yok |
@@ -29,15 +29,14 @@ silinmez ya da bu yeni sonuçlarla üzerine yazılmaz.
 | JSONL + Parquet | Kayıpsız JSON-kayıt sütunlu Parquet dışa aktarımı, geri okuma eşdeğerlik testi ve SHA-256 manifest eklendi; 80 frozen test kaydı aktarıldı | Tamamlandı; iç içe alanlar JSON metni olarak korunur, eski arşivlere yazılmaz |
 | ML eğitim ayrıntıları | Erken durdurma, ayrı test raporu ve varsayılan dengeli sınıf-ağırlıklı çapraz entropi kodu mevcut | Yeni kodla yeniden eğitim ayrı sürüm/artefakt ister; mevcut XLM-R v2 sonucu ağırlıklı eğitim diye yeniden etiketlenmez |
 | Yayın yeri / paketleme | npm/Vinext ve Sites; ilk planda pnpm/Next.js/HF Static Space vardı | Uygulanan mimariyi esas alan açık kapsam kaydı; erişimsiz oturumda demo görünürlüğü doğrulaması |
-| Veri / ağırlık dağıtımı | Veri kartı CC BY 4.0'ı hâlâ planlanan lisans olarak tanımlıyor; model metadata'sı mevcut | Fixture/türev hakları denetimi; ağırlıkların kalıcı teslimi ve erişim kontrolü |
+| Veri / ağırlık dağıtımı | Tam Apache-2.0, NOTICE, CC BY 4.0 veri kapsamı, üçüncü taraf istisnaları ve `CITATION.cff` eklendi. Model ağırlıkları depoya dahil değil | Tamamlandı; upstream model koşulları yeniden lisanslanmaz |
 | Demo videosu | Kullanıcı tarafından iptal | Açık iş değildir; yayın engeli olmaktan çıkarıldı |
 | v1.0.0 | Paket sürümü 0.1.0; bu turda tag/release oluşturulmadı | Açık ölçütler için karar, sürüm notu, son CI ve açık yayın onayı |
 
 ## Öncelik sırası
 
 1. İstenirse sözleşme çıkarımını insan yazımı, görülmemiş bir kümede doğrula; programatik baseline ölçümü tamamlandı.
-2. Lisans, ağırlık teslimi ve literatür/kapsam denetimi.
-3. 3 sistem × 80 görev kapsam kararından sonra onaylı release.
+2. Kullanıcı onayıyla `v1.0.0` sürüm numarası, tag ve GitHub Release.
 
 Soru metrikleri, Parquet, OpenAPI/TypeScript sözleşmesi ve eşzamanlı koşu
 izolasyonu teknik olarak kapatıldı. Dengeli sınıf-ağırlıklı eğitim yolu hazır,

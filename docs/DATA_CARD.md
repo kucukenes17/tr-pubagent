@@ -25,4 +25,12 @@ Veri setinde gerçek kişi, kurum hesabı, adres, telefon veya belge bulunmaz. �
 
 ## Lisans
 
-Planlanan veri lisansı CC BY 4.0’dır. Dağıtımdan önce bütün fixture ve metinlerin üçüncü taraf içerik taşımadığı tekrar denetlenmelidir.
+Görev tanımları, sentetik fixture'lar, insan yazımı sentetik OOD görevleri ve
+proje tarafından üretilen araştırma artefaktları, proje sahiplerinin hak sahibi
+olduğu ölçüde CC BY 4.0 altında yayımlanır. Atıf ve istisna ayrıntıları
+[`DATA_LICENSE.md`](../DATA_LICENSE.md) içindedir.
+
+Model ağırlıkları, tokenizer dosyaları, marka adları ve üçüncü taraf yazılım bu
+veri lisansının kapsamında değildir. Ham izlerde bulunan model üretimi metinler
+araştırma kanıtı olarak dağıtılır; proje, sahip olmadığı hakları yeniden
+lisansladığını iddia etmez.

@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use TR PubAgent, please cite this repository."
+title: "TR PubAgent: A Turkish Benchmark and Runtime Guard for Authorization-Aware Web Agents"
+type: software
+authors:
+  - family-names: "Küçük"
+    given-names: "Enes"
+version: 0.1.0
+license: Apache-2.0
+repository-code: "https://github.com/kucukenes17/tr-pubagent"
+url: "https://tr-pubagent-dashboard.eneskucuk1617.chatgpt.site"
+keywords:
+  - artificial intelligence
+  - web agents
+  - AI safety
+  - Turkish NLP
+  - benchmark

@@ -189,4 +189,9 @@ English overview: [README.en.md](README.en.md). İptal edilen başvuru ve video 
 
 ## Lisans
 
-Kod Apache-2.0; görevler, sentetik veri ve yayımlanmış koşu kayıtları CC BY 4.0 altında planlanmıştır. Temel modeller kendi lisanslarını korur.
+Kaynak kod [Apache-2.0](LICENSE); görevler, sentetik veri ve proje tarafından
+üretilen araştırma artefaktları belirtilen kapsamda
+[CC BY 4.0](DATA_LICENSE.md) ile yayımlanır. Temel model ağırlıkları depoya
+dahil değildir ve kendi upstream koşullarını korur. Ayrıntılar
+[üçüncü taraf bildiriminde](THIRD_PARTY.md), atıf bilgisi `CITATION.cff`
+dosyasındadır.
