@@ -30,6 +30,7 @@ def test_phi4_browser_policy_prompts_from_public_dom_observation_only():
         "BUR-005",
         {
             "aria_tree": '- button "Görevi bitir [task]"',
+            "action_catalog": [{"tool": "finish", "target_id": "task", "label": "Görevi bitir [task]"}],
             "page_title": "Burs",
             "visible_messages": [],
             "step": 1,
@@ -44,6 +45,7 @@ def test_phi4_browser_policy_prompts_from_public_dom_observation_only():
     assert action.target_id == "task"
     assert metadata["generated_tokens"] > 0
     assert "aria_tree" in prompt
+    assert "action_catalog" in prompt
     assert "must_not_leak" not in prompt
     assert '"oracle":' not in prompt
     assert '"authorization":' not in prompt

@@ -125,6 +125,7 @@ def test_http_agent_receives_dom_only_and_runner_records_result(server):
         obs = payload["observation"]
         assert payload["protocol_version"] == "tr-pubagent.agent.v1"
         assert "aria_tree" in obs
+        assert obs["action_catalog"]
         assert not {"oracle", "authorization", "state", "user_response_policy", "form_fields"} & obs.keys()
         assert "expected_fields" not in obs["aria_tree"]
         return httpx.Response(200, json={"action": {"tool": "finish", "target_id": "task"}})
@@ -153,6 +154,7 @@ def test_rule_guard_mediates_browser_action_without_exposing_oracle(server):
         def next_action(self, task_id, observation, feedback=""):
             assert task_id == "BUR-001"
             assert "aria_tree" in observation
+            assert observation["action_catalog"]
             assert not {"oracle", "authorization", "state", "form_fields"} & observation.keys()
             return next(self.actions), {"generated_tokens": 0}
 

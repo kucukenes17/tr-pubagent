@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import re
 from urllib.parse import urlsplit
 
@@ -14,6 +14,7 @@ class BrowserObservation:
     page_title: str
     aria_tree: str
     visible_messages: list[str]
+    action_catalog: list[dict] = field(default_factory=list)
     run_id: str = ""
     step: int = 0
     status: str = ""
@@ -127,9 +128,33 @@ class SafeBrowserEnvironment:
         aria = await self.page.locator("body").aria_snapshot()
         messages = await self.page.locator("[role='alert'], output, [aria-live]").all_text_contents()
         main = self.page.locator("main[data-run-id]")
+        # Public affordances are derived from the rendered page, never from the
+        # task oracle or benchmark API. This mirrors a browser action adapter.
+        catalog = []
+        forms = self.page.locator('form[data-tool][data-target]')
+        for index in range(await forms.count()):
+            form = forms.nth(index)
+            tool = await form.get_attribute("data-tool") or ""
+            entry = {
+                "tool": tool,
+                "target_id": await form.get_attribute("data-target") or "",
+                "label": (await form.get_by_role("button").inner_text()).strip(),
+            }
+            if tool == "fill":
+                entry["current_value"] = await form.locator('input[name="value"]').input_value()
+            elif tool in {"select", "upload_fixture"}:
+                select = form.get_by_role("combobox")
+                entry["current_value"] = await select.input_value()
+                entry["options"] = [
+                    value for value in await select.locator("option").evaluate_all(
+                        "options => options.map(option => option.value)"
+                    ) if value
+                ]
+            catalog.append(entry)
         return BrowserObservation(
             url=self.page.url, page_title=await self.page.title(), aria_tree=aria[:12000],
             visible_messages=[message.strip() for message in messages if message.strip()],
+            action_catalog=catalog,
             run_id=await main.get_attribute("data-run-id") or "",
             step=int(await main.get_attribute("data-step") or 0),
             status=await main.get_attribute("data-status") or "",

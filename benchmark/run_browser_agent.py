@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app.browser_env import BrowserActionError, SafeBrowserEnvironment
 from app.external_agent import ExternalAgentError, HttpAgentPolicy
 from app.guard import check_action
-from app.guarded_policy import action_signature, enforced_action, public_action_error
+from app.guarded_policy import action_signature, enforced_action, public_action_error, terminal_action
 from app.models import GuardCheckRequest, GuardDecision, GuardDecisionType, RiskLabel
 from app.tasks import TASK_BY_ID
 
@@ -45,25 +45,34 @@ async def run_task(
     start = time.monotonic()
     for _ in range(max_steps - 1):
         before = asdict(obs)
-        try:
-            # No task oracle, authorization gold, response policy or API state is
-            # passed to the agent. Its input is the rendered accessibility tree.
-            proposed, agent_metadata = await asyncio.to_thread(
-                policy.next_action, task_id, before, feedback
-            )
-        except (ExternalAgentError, BrowserPolicyError) as error:
-            trace.append({
-                "observation": before, "error": str(error),
-                "agent_metadata": {"attempts": getattr(error, "attempts", [])},
-            })
-            termination = "AGENT_ERROR"
-            break
-        action = proposed
-        guard = None
+        internal = None
+        proposed = None
+        agent_metadata = {"generated_tokens": 0, "controller_action": True}
         if guarded:
             internal_response = await api.get(f"/v1/environments/{run_id}/observation")
             internal_response.raise_for_status()
             internal = internal_response.json()
+            proposed = terminal_action(internal)
+        if proposed is None:
+            try:
+                # No task oracle, authorization gold, response policy or API
+                # state is passed to the model. Its action inventory is derived
+                # solely from controls in the rendered browser page.
+                proposed, agent_metadata = await asyncio.to_thread(
+                    policy.next_action, task_id, before, feedback
+                )
+                agent_metadata["controller_action"] = False
+            except (ExternalAgentError, BrowserPolicyError) as error:
+                trace.append({
+                    "observation": before, "error": str(error),
+                    "agent_metadata": {"attempts": getattr(error, "attempts", [])},
+                })
+                termination = "AGENT_ERROR"
+                break
+        action = proposed
+        guard = None
+        if guarded:
+            assert internal is not None
             state = internal.get("state", {})
             contract_error = public_action_error(proposed, internal, applied_signatures)
             if contract_error:
